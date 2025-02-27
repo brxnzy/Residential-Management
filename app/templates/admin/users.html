@@ -1,0 +1,635 @@
+<div class="flex px-4 items-center mt-2 justify-between mb-8">
+  <h1
+    class="text-4xl font-normal bold sm:text-2xl md:text-4xl lg:text-5xl text-left"
+  >
+    Usuarios
+  </h1>
+  <button
+    class="px-2 py-2 bgverde text-white rounded-full"
+    data-modal-target="authentication-modal"
+    data-modal-toggle="authentication-modal"
+  >
+    <img src="{{ url_for('static', filename='icons/plus.svg')}}" class="h-9 w-9" />
+  </button>
+</div>
+
+<h2
+  class="text-2xl mb-8 px-4 sm:text-2xl md:text-4xl lg:text-4xl semibold text-left"
+>
+  Personal Administrativo
+</h2>
+
+<div class="overflow-x-auto">
+  <table class="table">
+    <thead>
+      <tr>
+        <th class="verde text-xl">Imagen</th>
+        <th class="verde text-xl">Nombre</th>
+        <th class="verde text-xl">Cédula</th>
+        <th class="verde text-xl">Email</th>
+        <th class="verde text-xl">Fecha de Registro</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for admin in admins %}
+      <tr>
+        <td class="text-md medium lg:text-lg">
+          <div class="avatar h-20 w-20 rounded-full">
+            {% if admin.photo %}
+            <img
+              src="{{ url_for('static', filename='uploads/' + admin.photo) }}"
+              class="rounded-full p-1"
+              alt="User Photo"
+            />
+            {% else %}
+            <img
+              src="{{ url_for('static', filename='uploads/default.png') }}"
+              alt="Default Photo"
+            />
+            {% endif %}
+          </div>
+        </td>
+        <td class="text-md medium lg:text-lg font-bold">
+          {{ admin.name }} {{ admin.last_name }}
+        </td>
+        <td class="text-md medium lg:text-lg">{{ admin.id_card }}</td>
+        <td class="text-md medium lg:text-lg">{{ admin.email }}</td>
+        <td class="text-md medium lg:text-lg">{{ admin.registration_date }}</td>
+        <td class="">
+          <div class="flex gap-3 justify-end">
+            {% if admin.id != user.id %}
+            <form
+              action="{{ url_for('disable_user', user_id=admin.id) }}"
+              method="post"
+            >
+            <button
+            class="bg-gray-100 text-gray-700 border normal text-md border-gray-300 px-5 py-2.5 rounded-lg hover:bg-gray-200"
+          >
+            Deshabilitar
+          </button>
+            </form>
+            <button
+              class="edit-user-btn bgverde w-11 h-11 flex items-center justify-center rounded-full hover:border-2 hover:border-gray-700 hover:shadow-lg transition-all duration-300"
+            >
+              <a href="/admin/user_info/{{admin.id}}">
+                <img
+                  src="{{ url_for('static', filename='icons/info.svg') }}"
+                  class="h-14 w-14"
+                  alt="Edit"
+                />
+              </a>
+            </button>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="flex items-center justify-between mt-10">
+  <h2
+    class="text-2xl mb-8 px-4 sm:text-2xl md:text-4xl lg:text-5xl font-semibold text-left mt-8"
+  >
+    Residentes
+  </h2>
+
+  <select name="" id=""></select>
+</div>
+
+<div class="overflow-x-auto">
+  <table class="table">
+    <thead>
+      <tr>
+        <th class="verde text-xl">Imagen</th>
+        <th class="verde text-xl">Nombre</th>
+        <th class="verde text-xl">Cédula</th>
+        <th class="verde text-xl">Email</th>
+        <th class="verde text-xl">Fecha de Registro</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for resident in residents %}
+      <tr>
+        <td class="text-md medium lg:text-lg">
+          <div class="avatar h-20 w-20 rounded-full">
+            {% if resident.photo %}
+            <img
+              src="{{ url_for('static', filename='uploads/' + resident.photo) }}"
+              class="rounded-full p-1"
+              alt="User Photo"
+            />
+            {% else %}
+            <img
+              src="{{ url_for('static', filename='uploads/default.png') }}"
+              alt="Default Photo"
+            />
+            {% endif %}
+          </div>
+        </td>
+        <td class="text-md medium lg:text-lg font-bold">
+          {{ resident.name }} {{ resident.last_name }}
+        </td>
+        <td class="text-md medium lg:text-lg">{{ resident.id_card }}</td>
+        <td class="text-md medium lg:text-lg">{{ resident.email }}</td>
+        <td class="text-md medium lg:text-lg">
+          {{ resident.registration_date }}
+        </td>
+        <td class="">
+          {% if resident.id != user.id %}
+          <div class="flex gap-3 justify-end">
+            <form
+              action="/admin/disable_user/{{resident.id}}"
+              method="post"
+            >
+              <button
+                class="bg-gray-100 text-gray-700 border normal text-md border-gray-300 px-5 py-2.5 rounded-lg hover:bg-gray-200"
+              >
+                Deshabilitar
+              </button>
+            </form>
+
+            {% endif %}
+            <button
+              class="edit-user-btn bgverde w-11 h-11 flex items-center justify-center rounded-full hover:border-2 hover:border-gray-700 hover:shadow-lg transition-all duration-300"
+            >
+              <a href="/admin/user_info/{{resident.id}}">
+                <img
+                  src="{{ url_for('static', filename='icons/info.svg') }}"
+                  class="h-14 w-14"
+                  alt="Edit"
+                />
+              </a>
+            </button>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="flex items-center justify-between mt-10">
+  <h2
+    class="text-2xl  sm:text-2xl md:text-4xl lg:text-5xl font-semibold text-left"
+  >
+    Usuarios Deshabilitados
+  </h2>
+</div>
+
+<div id="disabled_users" class="mt-6">
+  {% if disabled %}
+
+  <div class="overflow-x-auto">
+    <table class="table">
+      <thead>
+        <tr>
+          <th class="verde text-xl">Imagen</th>
+          <th class="verde text-xl">Nombre</th>
+          <th class="verde text-xl">Cédula</th>
+          <th class="verde text-xl">Email</th>
+          <th class="verde text-xl">Rol/es</th>
+          <th class="verde text-xl">Fecha de Registro</th>
+          <th class="verde text-xl">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in disabled %}
+        <tr>
+          <td class="text-md medium lg:text-lg">
+            <div class="avatar h-20 w-20 rounded-full">
+              {% if d.photo %}
+              <img
+                src="{{ url_for('static', filename='uploads/' + d.photo) }}"
+                class="rounded-full p-1"
+                alt="User Photo"
+              />
+              {% else %}
+              <img src="{{ url_for('static', filename='uploads/default.png')}}" alt="Default Photo" />
+              {% endif %}
+            </div>
+          </td>
+          <td class="text-md medium lg:text-lg font-bold">
+            {{ d.name }} {{ d.last_name }}
+          </td>
+          <td class="text-md medium lg:text-lg">{{ d.id_card }}</td>
+          <td class="text-md medium lg:text-lg">{{ d.email }}</td>
+          <td class="text-md medium lg:text-lg">{{ d.roles }}</td>
+          <td class="text-md medium lg:text-lg">{{ d.registration_date }}</td>
+          <td class="">
+            <div class="flex gap-3 justify-end">
+              <!-- Si el usuario tiene el rol de residente, mostrar el modal -->
+              {% if 'resident' in d.roles %}
+              <button
+                class="bgverde text-white border normal text-md px-5 py-2.5 rounded-lg enable-user-btn"
+                data-modal-target="assign-property-modal" 
+                data-modal-toggle="assign-property-modal"
+                data-user-id="{{ d.id }}"
+              >
+                Habilitar
+              </button>
+              {% else %}
+              <form action="/admin/enable_user/{{ d.id }}" method="post">
+                <button class="bgverde text-white border normal text-md px-5 py-2.5 rounded-lg">
+                  Habilitar
+                </button>
+              </form>
+              {% endif %}
+  
+              <!-- Botón para eliminar usuario -->
+              <button
+                class="bgred text-white border normal text-md px-5 py-2.5 rounded-lg delete-user-btn"
+                data-user-id="{{ d.id }}"
+                data-user-name="{{ d.name }}"
+                data-user-lastname="{{ d.last_name }}"
+                data-user-img="{% if d.photo %}{{ d.photo }}{% else %}default.png{% endif %}"
+                data-modal-target="popup-modal"
+                data-modal-toggle="popup-modal"
+              >
+                Eliminar
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  
+{% else %}
+<div class="mt-8 flex flex-col items-center text-center gap-4">
+  <img
+    src="{{url_for('static', filename='icons/no_data.svg')}}"
+    alt="No Data"
+    class="w-3/4 md:w-2/3 lg:w-1/2 max-w-md scale-x-[-1]"
+  />
+  <h2
+    class="text-xl sm:text-2xl md:text-4xl lg:text-4xl medium text-black text-left"
+  >
+    No hay usuarios deshabilitados...
+  </h2>
+</div>
+
+
+
+
+
+
+<!-- Contenedor para los dropdowns -->
+
+
+{% endif %}
+
+  
+<div id="popup-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+  <div class="relative p-4 w-full max-w-md max-h-full">
+      <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+          <button type="button" class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="popup-modal">
+              <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+              </svg>
+              <span class="sr-only">Close modal</span>
+          </button>
+          <div class="p-4 md:p-5 text-center">
+              <!-- Imagen centrada -->
+              <img src="{{ url_for('static', filename='icons/trash.svg') }}" class="w-16 h-16 mx-auto mb-4" alt="Trash Icon">
+              
+              <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+                  Seguro que quieres borrar este usuario?
+              </h3>
+
+              <div class="flex items-center gap-3">
+                <img id="modal-user-img" class="w-12 h-12 rounded-full " src="" alt="Foto de usuario">
+                <h1 id="modal-user-name" class="text-lg font-semibold text-gray-700 dark:text-white"></h1>
+            </div>
+            
+              
+              <!-- Contenedor flex para los botones -->
+              <div class="flex justify-center gap-3">
+                  <form action="/admin/dashboard/delete_user/" method="post" id="deleteForm">
+                      <button data-modal-hide="popup-modal" type="submit" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                          Yes, I'm sure
+                      </button>
+                  </form>
+                  
+                  <button data-modal-hide="popup-modal" type="button" class="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-green-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                      No, cancel
+                  </button>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+
+
+<div id="assign-property-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+  <div class="relative p-4 w-full max-w-2xl max-h-full">
+      <!-- Modal content -->
+      <div class="relative bg-white rounded-lg shadow-sm">
+          <!-- Modal header -->
+          <div class="flex items-center justify-between p-2 md:p-5 border-b rounded-t border-gray-200">
+              <h3 class="text-xl font-semibold text-gray-900">
+                  Asignar Propiedad
+              </h3>
+              <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="assign-property-modal">
+                  <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                  </svg>
+                  <span class="sr-only">Close modal</span>
+              </button>
+          </div>
+          <!-- Modal body -->
+          <div class="p-4 md:p-5 space-y-4">
+              <form action="/admin/assign_property/" method="POST" id="assignForm">
+                  
+                  <div id="dropdownContainer" class="space-x-2 px-1.5 w-full my-3">
+                      <div class="flex w-full space-x-2">
+                          <!-- Primer Dropdown -->
+                          <select name="propertyType" id="propertyType" class="w-1/2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 appearance-none">
+                              <option value="" disabled selected>Seleccione tipo de propiedad</option>
+                              <option value="casas">Casas</option>
+                              <option value="apartamentos">Apartamentos</option>
+                          </select>
+                          
+                          <!-- Segundo Dropdown -->
+                          <select name="propertyList" id="propertyList" class="w-1/2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 appearance-none hidden">
+                              <option value="" disabled selected>Residencias Disponibles</option>
+                              {% for a in apartments %}
+                              {% if a.occupied == 0 %}
+                                  <option value="{{ a.id }}" class="apartamentos hidden">{{ a.building }}: {{ a.apartment_number }} </option>
+                              {% endif %}
+                              {% endfor %}
+                              
+                              {% for c in houses %}
+                              {% if c.occupied == 0 %}
+                                  <option value="{{ c.id }}" class="casas hidden">{{ c.address }}</option>
+                              {% endif %}
+                              {% endfor %}
+                          </select>
+                      </div>
+                  </div>
+
+                  <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b">
+                      <button type="submit" class="text-white bgverde focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Asignar Propiedad</button>
+                      <button data-modal-hide="assign-property-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700">Cancelar</button>
+                  </div>
+              </form>
+          </div>
+      </div>
+  </div>
+</div> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div
+id="authentication-modal"
+tabindex="-1"
+aria-hidden="true"
+class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
+>
+<div class="relative p-6 w-full max-w-2xl max-h-full">
+  <!-- Modal content -->
+  <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+    <!-- Modal header -->
+    <div
+      class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200"
+    >
+      <h3 class="text-2xl bold text-gray-900 dark:text-white">
+        Formulario para Crear Usuario
+      </h3>
+      <button
+        type="button"
+        class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+        data-modal-hide="authentication-modal"
+      >
+        <svg
+          class="w-3 h-3"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 14 14"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+          />
+        </svg>
+        <span class="sr-only">Close modal</span>
+      </button>
+    </div>
+    <!-- Modal body -->
+    <div class="p-4 md:p-5">
+      <form
+        action="/admin/add_user"
+        method="post"
+        class="flex flex-wrap -mx-4"
+      >
+        <!-- <h1 class="text-3xl font-semib">Agregar Usuarios</h1> -->
+        <!-- Campos de texto -->
+        <div class="p-1 w-full">
+          <div class="relative">
+            <label
+              for="id_card"
+              class="leading-7 text-l bold text-gray-800"
+              >Cédula:</label
+            >
+            <input
+              type="text"
+              autocomplete="off"
+              min="13"
+              max="13"
+              placeholder="xxx-xxxxxxx-x"
+              id="id_card"
+              name="id_card"
+              class="w-full bg-gray-100 bg-opacity-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-base outline-none text-gray-800 py-2 px-4 leading-8"
+              required
+            />
+          </div>
+        </div>
+        <div class="p-1 w-full sm:w-1/2">
+          <div class="relative">
+            <label for="name" class="leading-7 text-l bold text-gray-800"
+              >Nombre:</label
+            >
+            <input
+              type="text"
+              autocomplete="off"
+              id="name"
+              name="name"
+              class="w-full bg-gray-100 bg-opacity-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-base outline-none text-gray-800 py-2 px-4 leading-8"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="p-1 w-full sm:w-1/2">
+          <div class="relative">
+            <label
+              for="last_name"
+              class="leading-7 text-l bold text-gray-800"
+              >Apellido:</label
+            >
+            <input
+              type="text"
+              autocomplete="off"
+              id="last_name"
+              name="last_name"
+              class="w-full bg-gray-100 bg-opacity-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-base outline-none text-gray-800 py-2 px-4 leading-8"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="p-1 w-full sm:w-1/2">
+          <div class="relative">
+            <label for="phone" class="leading-7 text-l bold text-gray-800"
+              >Teléfono:</label
+            >
+            <input
+              type="text"
+              autocomplete="off"
+              placeholder="123-4567-890"
+              id="phone"
+              name="phone"
+              class="w-full bg-gray-100 bg-opacity-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-base outline-none text-gray-800 py-2 px-4 leading-8"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="p-1 w-full sm:w-1/2">
+          <div class="relative">
+            <label for="email" class="leading-7 text-l bold text-gray-800"
+              >Email:</label
+            >
+            <input
+              type="email"
+              autocomplete="off"
+              placeholder="varon@gmail.com"
+              id="email"
+              name="email"
+              class="w-full bg-gray-100 bg-opacity-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500 text-base outline-none text-gray-800 py-2 px-4 leading-8"
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Checkboxes en columna -->
+        <div class="p-2 w-full flex flex-col gap-2">
+          <div class="flex items-center">
+            <input
+              id="admin-checkbox"
+              type="checkbox"
+              name="is_admin"
+              value="1"
+              class="w-5 h-5 checkbox-option text-green-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+            />
+            <label
+              for="admin-checkbox"
+              class="ml-2 text-l bold text-gray-900 dark:text-gray-300"
+              >Admin</label
+            >
+          </div>
+          <div class="flex items-center">
+            <input
+              id="residente-checkbox"
+              type="checkbox"
+              name="is_resident"
+              value="1"
+              class="checkbox-option w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+            />
+            <label
+              for="residente-checkbox"
+              class="ml-2 text-l bold text-gray-900 dark:text-gray-300"
+              >Residente</label
+            >
+          </div>
+          
+          <div id="Container" class="space-x-2 px-1.5 w-full my-3 hidden ">
+            <div class="flex w-full space-x-2">
+              <!-- Primer Dropdown -->
+              <select
+                name="propertyType"
+                id="Type"
+                
+                class="w-1/2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 appearance-none"
+              >
+                <option value="" disabled selected>Seleccione tipo de propiedad</option>
+                <option value="casas">Casas</option>
+                <option value="apartamentos">Apartamentos</option>
+              </select>
+          
+              <!-- Segundo Dropdown -->
+              <select
+                name="List"
+              
+                id="List"
+                class="w-1/2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 appearance-none hidden"
+              >
+                <option value="" disabled selected>Residencias Disponibles</option>
+                {% for a in apartments %}
+                {% if a.occupied == 0 %}
+                  <option value="{{ a.id }}" class="apartamentos hidden">{{ a.building }}: {{ a.apartment_number }} </option>
+                {% endif %}
+              {% endfor %}
+              
+              {% for c in houses %}
+                {% if c.occupied == 0 %}
+                  <option value="{{ c.id }}" class="casas hidden">{{ c.address }}</option>
+                {% endif %}
+              {% endfor %}
+              
+              </select>
+            </div>
+          </div>
+          
+
+
+        
+          
+
+        <div class="py-2 w-full">
+          <button
+            type="submit"
+            id="btn"
+            disabled
+            class="flex mx-auto cursor-not-allowed text-white bgverde border-0 px-6 py-3 focus:outline-none rounded-lg text-lg transition-all duration-300"
+          >
+            Agregar Usuario
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+
+
+
+
+
+
+
+

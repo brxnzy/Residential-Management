@@ -1,0 +1,108 @@
+<div class="flex flex-col items-center justify-center ">
+    {% if usuario.photo %}
+    <img src="{{url_for('static', filename='uploads/' + usuario.photo)}}" alt="" class="rounded-full object-cover w-72 h-72 mb-7">
+    {% else %}
+    <img src="{{url_for('static', filename='uploads/default.png')}}" alt="" class="w-64 h-64 rounded-full">
+    {% endif %}
+    <div class="flex items-center justify-between">
+        <h1 class="text-4xl font-bold text-center flex-1 mr-2">{{ usuario.name }} {{ usuario.last_name }}</h1>
+        <!-- <button data-modal-target="role-modal" data-modal-toggle="role-modal"  class="text-white bgverde font-medium rounded-full text-sm p-1 text-center shadow-lg" type="button">
+            <img src="{{url_for('static', filename='icons/edit.svg')}}" alt="" class="w-6 h-6">
+        </button> -->
+
+        <button data-modal-toggle="role-modal" id="edit-btn" data-modal-target="role-modal" data-roles="{{usuario.role}}" class="text-white bgverde font-medium rounded-full text-sm p-1 text-center shadow-lg">
+            <img src="{{ url_for('static', filename='icons/edit.svg') }}" alt="" class="w-6 h-6">
+        </button>
+        
+    </div>
+
+    <h2 class="text-2xl text-gray-600 semibold mb-2">{{usuario.role}}</h2>
+    <h2 class="text-2xl mb-2  text-gray-800">Cedula: {{usuario.id_card}} </h2>
+    <h2 class="text-2xl mb-2 text-gray-800">email: {{usuario.email}}</h2>
+    <h2 class="text-2xl mb-2 text-gray-800">Numero de telefono: {{usuario.Phone}}</h2>
+    {%if 'resident' in usuario.role%}
+        {% if usuario.building and usuario.apartment_number %}
+        <h2 class="text-2xl mb-2 text-gray-800 text-left">Vivienda: {{usuario.building}} - {{usuario.apartment_number}} </h2>
+        {% else %}
+        <h2 class="text-2xl mb-2 text-gray-800 text-left">Vivienda: Casa: {{usuario.house}} </h2>
+        {% endif %}
+
+    {%endif%}
+    <h2 class="text-2xl text-gray-800">Fecha de Registro: {{usuario.registration_date}}</h2>
+</div>
+
+
+
+
+<div id="role-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-2xl max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow-sm">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-2 md:p-5 border-b rounded-t border-gray-200">
+                <h3 class="text-xl font-semibold text-gray-900">
+                    Actualizar Roles
+                </h3>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="role-modal">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <div class="p-4 md:p-5 space-y-4">
+                <form action="/admin/update_roles/{{usuario.id}}" method="POST">
+                    <div class="flex items-center mb-4">
+                        <input id="role-admin" type="checkbox" name="roles" value="admin" 
+                            class="checkbox-option w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-green-500"
+                            {% if 'admin' in usuario.role %} checked {% endif %}>
+                        <label for="role-admin" class="ml-2 text-l font-bold text-gray-900">Admin</label>
+                    </div>
+                    
+                    <div class="flex items-center mb-4">
+                        <input id="role-resident" type="checkbox" name="roles" value="resident" 
+                            class="checkbox-option w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-green-500"
+                            {% if 'resident' in usuario.role %} checked {% endif %}
+                            data-original-resident="{% if 'resident' in usuario.role %}true{% else %}false{% endif %}">
+                        <label for="role-resident" class="ml-2 text-l font-bold text-gray-900">Resident</label>
+                    </div>
+                    
+                    <div id="dropdownContainer" class="space-x-2 px-1.5 w-full my-3 hidden">
+                        <div class="flex w-full space-x-2">
+                            <select name="propertyType" id="propertyType" class="w-1/2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 appearance-none">
+                                <option value="" disabled selected>Seleccione tipo de propiedad</option>
+                                <option value="casas">Casas</option>
+                                <option value="apartamentos">Apartamentos</option>
+                            </select>
+                            
+                            <select name="propertyList" id="propertyList" class="w-1/2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 appearance-none hidden">
+                                <option value="" disabled selected>Residencias Disponibles</option>
+                                {% for a in apartments %}
+                                {% if a.occupied == 0 %}
+                                    <option value="{{ a.id }}" class="apartamentos hidden">{{ a.building }}: {{ a.apartment_number }} </option>
+                                {% endif %}
+                                {% endfor %}
+                                
+                                {% for c in houses %}
+                                {% if c.occupied == 0 %}
+                                    <option value="{{ c.id }}" class="casas hidden">{{ c.address }}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                
+                    <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b">
+                        <button id="submitButton" type="submit" class="text-white bgverde focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Actualizar roles</button>
+                        <button data-modal-hide="role-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="{{url_for('static', filename='js/modals.js')}}"></script>
+

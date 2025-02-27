@@ -1,0 +1,368 @@
+from flask import Flask, render_template, redirect, url_for, request, session, flash, make_response, abort
+import bcrypt
+from auth.login import Auth
+from controllers.users_controller import Users
+from controllers.apartments_controller import Apartments
+from functools import wraps
+import os
+
+
+class App:
+    def __init__(self):
+        self.app = Flask(
+            __name__, 
+            static_folder=os.path.join(os.path.dirname(__file__), 'static'), 
+            static_url_path='/static'
+        )
+        self.principal_routes()
+        self.error_handler()
+        self.auth = Auth()
+        self.user = Users(self.app)
+        self.apartment = Apartments()
+        self.app.config['SECRET_KEY'] = 'secretkey'
+        UPLOAD_FOLDER = r'C:\Users\Crist\OneDrive\Documents\Desktop\Final Proyect\app\static\uploads'
+        self.app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+    def error_handler(self):
+
+
+        @self.app.errorhandler(403)
+        def forbidden_error(e):
+            return render_template('errors/403.html'), 403 
+
+        @self.app.errorhandler(404)
+        def page_not_found(e):
+            return render_template('errors/404.html'), 404 
+
+    def login_required(self, f):
+        """
+        Middleware para proteger rutas segun el prefijo de la URL.
+        /admin → Requiere rol 'admin'
+        /resident → Requiere rol 'resident'
+        """
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if 'user_id' not in session:
+                flash('Debes iniciar sesion para acceder','warning')
+                return redirect(url_for('login'))
+
+            path = request.path  
+            required_role = None  
+
+            if path.startswith('/admin'):
+                required_role = 'admin'
+            elif path.startswith('/resident'):
+                required_role = 'resident'
+
+            if required_role and required_role not in session.get('roles', []):
+                abort(403)  
+
+            return f(*args, **kwargs)
+
+        return decorated_function
+
+
+    def nocache(self, f):
+        """
+        Decorador para deshabilitar la caché de una página.
+        """
+        @wraps(f)
+        def nocache_wrapper(*args, **kwargs):
+            response = make_response(f(*args, **kwargs))
+            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
+            return response
+        return nocache_wrapper
+
+    def principal_routes(self):
+        """
+        Rutas principales de la app, incluidas las del dashboard.
+        """
+        @self.app.route('/login', methods=['GET', 'POST'])
+        @self.nocache 
+        def login():
+            if request.method == 'POST':
+                cedula = request.form['id_card']
+                password = request.form['password']
+                authz = self.auth.Login(cedula, password)
+                status = session.get('status')
+                if status == 'disabled':
+                    return redirect(url_for('disabled'))
+
+                if authz == 'admin':
+                    return redirect(url_for('dashboard'))
+                elif authz == 'resident':
+                    return redirect(url_for('home'))
+                else:
+                    return redirect(url_for('login'))
+                    
+           
+            return render_template('login.html')
+
+
+        @self.app.route('/disabled')
+        def disabled():
+            return render_template('disabled.html')
+
+        @self.app.route('/logout')
+        def logout():
+            session.clear()
+            flash('Has cerrado sesión exitosamente.', 'success')
+            return redirect(url_for('login'))
+
+        @self.app.route('/resident/home')
+        @self.login_required
+        @self.nocache  
+        def home():
+            user = session.get('user')
+            return render_template('resident/home.html', user=user)
+
+
+
+        @self.app.route('/admin/add_user', methods=['POST'])
+        @self.login_required
+        def add_user():
+            if request.method == 'POST':
+                cedula = request.form['id_card']
+                name = request.form['name']
+                last = request.form['last_name']
+                email = request.form['email']
+                phone = request.form['phone']
+                
+                is_admin = 'is_admin' in request.form and request.form['is_admin'] == '1'
+                is_resident = 'is_resident' in request.form and request.form['is_resident'] == '1'
+           
+                property_type = request.form.get('propertyType') if is_resident else None
+                property_id = request.form.get('propertyList') if is_resident else None
+                print(property_type)
+                print(property_id)
+
+                try:
+                    self.user.add_user(cedula, name, last, email, phone, is_admin, is_resident, property_type, property_id)
+                    return redirect(url_for('dashboard', section='users'))  
+                except Exception as e:
+                    flash(f"Error al agregar usuario: {e}", "danger")
+                    return redirect(url_for('dashboard', section='users')) 
+
+            return redirect(url_for('dashboard', section='users'))
+
+
+
+        @self.app.route('/admin/delete_user/<int:user_id>', methods=['POST'])
+        def delete_user(user_id):
+            try:
+                self.user.delete_user(user_id)
+            except Exception as e:
+                print(f"Error al eliminar usuario: {e}")
+            return redirect(url_for('dashboard', section='users'))
+
+                
+
+
+        @self.app.route('/admin/disable_user/<int:user_id>', methods=['POST'])
+        def disable_user(user_id):
+            try:
+                self.user.disable_user(user_id)
+            except Exception as e:
+                print(f"Error al deshabilitar usuario: {e}")
+            return redirect(url_for('dashboard', section='users'))
+
+
+        @self.app.route('/admin/enable_user/<int:user_id>', methods=['POST'])
+        def enable_user(user_id):
+            try:
+                self.user.enable_user(user_id)
+            except Exception as e:
+                print(f"Error al habilitar usuario: {e}")
+            return redirect(url_for('dashboard', section='users'))
+
+        @self.app.route('/admin/update_roles/<int:user_id>', methods=['POST'])
+        def update_user_roles(user_id):
+            try:
+                selected_roles = request.form.getlist("roles")
+                property_type = request.form.get("propertyType")
+                property_id = request.form.get("propertyList")
+
+                is_admin = 'admin' in selected_roles
+                is_resident = 'resident' in selected_roles
+
+
+                update = self.user.update_user_roles(user_id, is_admin, is_resident, property_type, property_id)
+
+                if update:
+                    flash("Roles actualizados correctamente", "success")
+                else:
+                    flash("No se realizaron cambios en los roles", "info")
+
+            except Exception as e:
+                print(f"Error al editar usuario: {e}")
+                flash("Hubo un problema al actualizar los roles", "error")
+
+            return redirect(url_for('dashboard', section='users'))
+
+
+        @self.app.route('/admin/assign_property/<int:user_id>', methods=['POST'])
+        def assign_property(user_id):
+            try:
+                # Obtenemos los valores del formulario de la propiedad
+                property_type = request.form.get("propertyType")
+                property_id = request.form.get("propertyList")
+                print(property_type)
+                print(property_id)
+
+                # Verificamos si el tipo de propiedad es válido y si se ha seleccionado una propiedad
+                if property_type and property_id:
+                    # Asignamos la propiedad al usuario
+                    assign = self.user.assign_property(user_id, property_type, property_id)
+                    
+                    if assign:
+                        flash("Propiedad asignada correctamente", "success")
+                    else:
+                        flash("No se pudo asignar la propiedad", "danger")
+                else:
+                    flash("Debe seleccionar un tipo de propiedad y una residencia", "warning")
+                
+            except Exception as e:
+                print(f"Error al asignar propiedad: {e}")
+                flash("Hubo un problema al asignar la propiedad", "danger")
+
+            return redirect(url_for('dashboard', section='users'))
+
+        @self.app.route('/prueba')
+        def prueba():
+            return render_template('prueba.html')
+
+
+
+
+
+
+        @self.nocache 
+        @self.app.route('/activate_account/<int:user_id>', methods=['GET', 'POST'])
+        def activate_account(user_id):
+            user = self.user.get_user_by_id(user_id)
+
+            if not user:
+                flash("Usuario no encontrado.", "error")
+                return redirect(url_for('login'))
+
+          
+            if user.get('password'):
+                flash("Tu cuenta ya está activada. Inicia sesión.", "info")
+                return redirect(url_for('login'))
+
+
+
+            if request.method == 'POST':
+                passw = request.form['password']
+                photo = request.files.get('photo')
+                
+                if not passw:
+                    flash("Debes proporcionar una contraseña.", "error")
+                    return render_template("activate_acc.html", user=user)
+
+                try:
+                    self.user.activate_account(user_id, photo, passw)
+                    # flash("Cuenta activada exitosamente. Ahora puedes iniciar sesión.", "success")
+                    return redirect(url_for('login'))
+                except Exception as e:
+                    flash(f"Error al habilitar usuario: {e}", "error")
+
+            return render_template("activate_acc.html", user=user)
+
+
+        @self.app.route('/admin/user_info/<int:user_id>')
+        def user_info(user_id):
+            try:
+                # Intentar obtener la información del usuario
+                user = self.user.get_user_by_id(user_id)
+
+                # Verificar si se encontró el usuario
+                if user:
+                    
+                    # Si el usuario se encuentra, redirige a la vista con la información del usuario
+                    return redirect(url_for('dashboard', section='user_info', user_id=user_id))
+                else:
+                    # Si el usuario no se encuentra, muestra un mensaje y redirige a la lista de usuarios
+                    flash('Usuario no encontrado', 'error')
+                    return redirect(url_for('dashboard', section='users'))
+
+            except Exception as e:
+                # Manejo de excepciones si algo sale mal
+                print(f"Error al obtener usuario: {e}")  # Para depuración
+                flash('Ocurrió un error al obtener la información del usuario', 'error')
+                return redirect(url_for('dashboard', section='users'))  # Siempre redirige en caso de error
+
+            # En caso de que ningún bloque de código se ejecute correctamente, también redirige por defecto
+            return redirect(url_for('dashboard', section='users'))
+
+
+           
+
+        """ Rutas para el Dashboard """
+                
+        @self.app.route('/admin', defaults={'section': 'main', 'sub_section': None})
+        @self.app.route('/admin/<section>/', defaults={'sub_section': None})
+        @self.app.route('/admin/<section>/<sub_section>')
+        @self.login_required
+        @self.nocache
+        def dashboard(section, sub_section):
+            sections = {
+            'main': 'admin/main.html',
+            'users': 'admin/users.html',
+            'my_info': 'admin/my_info.html',
+            'user_info': 'admin/user_info.html',
+            'residences': 'admin/residences.html',
+            'residences/buildings': 'admin/residences/buildings.html'  
+        }
+ 
+
+            residents, admins, disabled, selected_user = {}, {}, {}, {}
+            apartments = self.apartment.get_apartments() 
+           
+         
+            # 📌 Si la sección es "users", obtenemos los datos de usuarios
+            if section == 'users':
+                residents['residents'] = self.user.get_residents()
+                admins['admins'] = self.user.get_admins()
+                disabled['disabled'] = self.user.get_disabled_users()
+
+            # 📌 Si la sección es "user_info" y se pasa un user_id, obtenemos la información del usuario
+            user_id = request.args.get('user_id', type=int)
+            if section == 'user_info' and user_id:
+                selected_user = self.user.get_user_by_id(user_id)
+                print(selected_user)
+
+            # 📌 Mapeo correcto de la plantilla según la sección y subsección
+            key = f"{section}/{sub_section}" if sub_section else section
+            if key not in sections:
+                return render_template('errors/404.html'), 404
+            template = sections[key]  
+
+            # Obtener el usuario de la sesión
+            session_user = session.get('user')
+
+            return render_template(
+                'admin/dashboard.html',
+                content_template=template,
+                user=session_user,
+                section=section,
+                sub_section=sub_section,
+                **residents,
+                **admins,
+                **disabled,
+                apartments=apartments,
+                usuario=selected_user
+            )
+
+
+
+
+        @self.app.route('/')
+        def redirect_to_dashboard():
+            return redirect(url_for('dashboard', section='main'))
+
+
+    def run(self):
+        self.app.run(debug=True, port=5000)

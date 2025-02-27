@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loader Animado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+/* HTML: <div class="loader"></div> */
+#loading-spinner {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.1); /* Fondo semi-transparente */
+  backdrop-filter: blur(10px); /* Desenfoque de fondo */
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* HTML: <div class="loader"></div> */
+.spinner {
+  width: 100px;
+  padding: 16px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #157f3d;
+  --_m: 
+    conic-gradient(#0000 10%,#000),
+    linear-gradient(#000 0 0) content-box;
+  -webkit-mask: var(--_m);
+          mask: var(--_m);
+  -webkit-mask-composite: source-out;
+          mask-composite: subtract;
+  animation: l3 1s infinite linear;
+}
+@keyframes l3 {to{transform: rotate(1turn)}}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.disable-interaction {
+  pointer-events: none; /* Deshabilitar interacciones */
+  overflow: hidden; /* Evitar desplazamiento mientras se muestra el loader */
+}
+
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen ">
+
+  <div class="form-container">
+    <form id="test-form">
+      <label for="test-input">Escribe algo:</label>
+      <input type="text" id="test-input" placeholder="Escribe aquí..." required>
+      <button type="submit">Enviar</button>
+    </form>
+
+  </div>
+  <div id="loading-spinner" class="loading-spinner">
+    <div class="spinner"></div>
+</div>
+
+</body>
+
+<script>
+  function showLoader() {
+    document.getElementById('loading-spinner').style.display = 'flex';
+    document.body.classList.add('disable-interaction'); // Bloquea interacciones
+}
+
+function hideLoader() {
+    setTimeout(() => {
+        document.getElementById('loading-spinner').style.display = 'none';
+        document.body.classList.remove('disable-interaction'); // Restaura interacciones
+    }, 500);
+}
+
+// Ocultar el loader solo si la página se ha cargado completamente
+window.addEventListener("load", function () {
+    setTimeout(hideLoader, 1000); // Agregar un pequeño retraso para evitar que se oculte demasiado rápido
+});
+
+// Mostrar el loader al enviar formularios
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function () {
+        showLoader();
+    });
+});
+
+</script>
+</html>

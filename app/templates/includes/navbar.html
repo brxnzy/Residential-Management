@@ -1,0 +1,70 @@
+{% include 'includes/links.html' %}
+<nav class="border-gray-200 gris">
+    <div class="max-w-screen-lg px-4 flex items-center justify-between mx-auto">
+        <!-- Logo a la izquierda -->
+        <a href="#" class="flex items-center space-x-2 mr-4"> 
+            <img src="../../static/img/logo2.png" class="pt-2  h-16" alt="Logo">
+            <h1 class="text-2xl  font-semibold verde">Pinares del Norte</h1>
+        </a>
+
+        <!-- Dropdown con foto del usuario -->
+        <div x-data="{ open: false }" class="relative">
+            <button 
+                @click="open = !open" 
+                class="h-16 pt-2 rounded-full overflow-hidden ">
+                <img 
+                    src="url_for('static', filename='img/user_photo.png')" 
+                    alt="Foto de usuario" 
+                    class="w-full h-full object-cover">
+            </button>
+
+            <!-- Dropdown -->
+            <div 
+                x-show="open" 
+                @click.away="open = false" 
+                x-transition 
+                class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg dark:bg-gray-800 z-20">
+                <div class="px-4 py-3">
+                    {% if user %}
+                        <span class="block text-sm text-gray-900 dark:text-white">
+                            {{ user['name'] }} {{ user['last_name'] }}
+                        </span>
+                        <span class="block text-sm text-gray-500 truncate dark:text-gray-400">
+                            {{ user['email'] }}
+                        </span>
+                    {% else %}
+                        <span class="block text-sm text-gray-900 dark:text-white">
+                            Invitado
+                        </span>
+                        <span class="block text-sm text-gray-500 truncate dark:text-gray-400">
+                            Sin correo electrónico
+                        </span>
+                    {% endif %}
+                </div>
+                <ul class="py-2">
+                    <li>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                            Personal info
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                            Settings
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                            Earnings
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/logout" class="block px-4 py-2 text-sm text-red-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                            Sign out
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+

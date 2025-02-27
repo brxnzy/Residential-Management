@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+
+@font-face {
+    font-family: "SF Pro Text";
+    src: url("../fonts/SF-Pro.ttf") format("truetype");
+    font-weight: 600;
+    font-style: normal;
+}
+
+
+@font-face {
+    font-family: "SF Pro Regular";
+    src: url("../fonts/SF-Pro-Display-Regular.otf") format("opentype");
+    font-weight: 800;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "SF Pro Bold";
+    src: url("../fonts/SF-Pro-Display-Bold.otf") format("opentype");
+    font-weight: bold;
+    font-style: normal;
+}
+@font-face {
+    font-family: "SF Pro Semibold";
+    src: url("../fonts/SF-Pro-Display-Semibold.otf") format("opentype");
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "SF Pro Medium";
+    src: url("../fonts/SF-Pro-Display-Medium.otf") format("opentype");
+    font-weight: 700;
+    font-style: normal;
+}
+
+
+
+
+
+/* Aplicar la fuente a todo el sitio */
+body {
+    font-family: "SF Pro Text", sans-serif;
+}
+
+
+.normal{
+    font-family:"SF Pro Text", sans-serif; ;
+}
+
+.bold{
+    font-family: "SF Pro Bold", sans-serif;
+}
+
+.regular{
+    font-family: "SF Pro Regular", sans-serif;
+}
+
+.medium{
+    font-family: "SF Pro Medium", sans-serif;
+}
+
+.semibold{
+    font-family: "SF Pro Semibold", sans-serif;
+}
+
+.gris{
+    background-color: #212529;
+}
+
+.verde{
+    color: #157F3D;
+}
+
+.bgverde{
+    background-color: #157F3D !important; 
+}
+
+.bgverde:hover {
+    background-color: #156d37 !important; 
+}
+.bgred{
+    background-color: #d62828;
+}
+
+.bgred:hover {
+    background-color:#b91c1c ; 
+}
+
+
+*{
+    font-family: "SF Pro Text", serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+}
+
+/* 
+Carrusel en resident/home */
+
+@media (min-width: 1100px) {
+    .custom-lg\:flex-row {
+        display: flex;
+        flex-direction: row;
+    }
+}
+
+.error{
+    color:red
+}
+.success{
+    color:rgb(11, 172, 11)
+}
+.warning{
+    color:rgb(255, 238, 0)
+}
+
+#sideBar{
+    z-index: 1;
+}
+
+input{
+    z-index: 2;
+}

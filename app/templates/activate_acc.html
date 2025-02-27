@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Password</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <link rel="stylesheet" href="../static/css/global.css">
+</head>
+<body class="h-screen flex items-center justify-center bg-gray-100">
+
+<div class="flex min-h-full flex-col justify-center px-4 py lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-xl">
+        <form class="py-8 px-5 rounded-lg shadow-xl bg-white" enctype="multipart/form-data" action="/activate_account/{{user.id}}" method="POST" x-data="passwordValidation()">
+            <!-- Imagen de usuario -->
+            <div class="flex items-center justify-center w-full">  
+                <label for="dropzone-file" class="flex flex-col items-center justify-center w-56  h-56 rounded-full cursor-pointer relative group">
+                    <!-- Imagen con efecto de transparencia en hover -->
+                    <img id="user-photo" src="{{url_for('static', filename='uploads/default.png')}}" alt="User Photo" 
+                        class="w-full h-full rounded-full  object-cover transition-opacity duration-300 group-hover:opacity-30" />
+            
+                    <!-- Ícono de cámara centrado -->
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                        <img src="../static/icons/camera.svg" alt="" class="w-12 h-12">
+                    </div>
+            
+                    <!-- Input file oculto -->
+                    <input id="dropzone-file" type="file" name="photo" class="hidden" accept="image/*"/>
+                </label>
+            </div>
+            
+            
+            
+                
+
+      
+            <h1 class="text-center bold mb-8 text-4xl  tracking-tight text-gray-900">
+                Crea tu Contraseña usuario
+            </h1>
+
+            <!-- Input de contraseña -->
+            <div class="mb-4">
+                <label for="password" class="block text-lg medium text-black">Contraseña</label>
+                <input type="password" id="password" name="password" required
+                    x-model="password" x-on:input="validate()"
+                    class="block w-full rounded-md bg-white px-3 py-1.5 text-lg normal text-gray-900 border border-gray-200 outline-gray-300 placeholder:text-gray-400 focus:outline-green-600 sm:text-sm/6">
+            </div>
+
+            <!-- Lista de requisitos -->
+            <h2 class="mb-2 text-lg font-semibold text-gray-900">Requisitos de la contraseña:</h2>
+            <ul class="max-w-md space-y-1 text-gray-500 list-inside">
+                <li class="flex items-center">
+                    <svg class="w-4 h-4 me-2 shrink-0" 
+                         :class="lengthValid ? 'verde' : 'text-gray-500'" 
+                         aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
+                    </svg>
+                    Mínimo 10 caracteres
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-4 h-4 me-2 shrink-0" 
+                         :class="uppercaseValid ? 'verde' : 'text-gray-500'" 
+                         aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
+                    </svg>
+                    Al menos una letra mayúscula
+                </li>
+                <li class="flex items-center">
+                    <svg class="w-4 h-4 me-2 shrink-0" 
+                         :class="specialCharValid ? 'verde' : 'text-gray-500'" 
+                         aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
+                    </svg>
+                    Al menos un carácter especial (!@#?()&$*)
+                </li>
+            </ul>
+
+            <!-- Botón de enviar -->
+            <button type="submit" id="btn" :disabled="!isValid"
+                class="w-full rounded-md mt-4 px-3 py-1.5 text-white font-semibold shadow-xs 
+                       bgverde transition-colors   disabled:cursor-not-allowed">
+                Guardar contraseña
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+
+document.getElementById("dropzone-file").addEventListener("change", function(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById("user-photo").src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+
+function passwordValidation() {
+    return {
+        password: '',
+        lengthValid: false,
+        uppercaseValid: false,
+        specialCharValid: false,
+        isValid: false,
+        validate() {
+            this.lengthValid = this.password.length >= 10;
+            this.uppercaseValid = /[A-Z]/.test(this.password);
+            this.specialCharValid = /[!@#?()&$*]/.test(this.password);
+            this.isValid = this.lengthValid && this.uppercaseValid && this.specialCharValid;
+        }
+    }
+}
+</script>
+
+</body>
+</html>

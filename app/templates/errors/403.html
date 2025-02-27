@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 Forbidden</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../static/css/global.css">
+</head>
+<body>
+    <section class="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4">
+        <!-- SVG grande y responsivo -->
+        <img src="../static/icons/403.svg" alt="" class="w-[80%] h-auto max-w-[600px]">
+    
+        <!-- Texto debajo del SVG -->
+        <h1 class="text-3xl bold mt-6 text-center">Acceso Denegado</h1>
+        <p class="semibold text-gray-700 text-lg mt-2 text-center">No tienes permiso para acceder a esta página.</p>
+    
+        <!-- Enlace al login -->
+        <button onclick="goBack()" class="mt-6 px-6 py-3 bgverde text-white rounded-lg text-lg font-semibold shadow-md transition">
+           Regresar
+        </button>
+    </section>
+</body>
+<script src="../../static/js/goback.js"></script>
+</html>
