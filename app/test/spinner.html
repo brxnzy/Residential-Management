@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loader en Submit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Contenedor del loader */
+        #loading-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4); /* Oscurece el fondo */
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        /* Estilo del spinner */
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #ffffff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Animación del spinner */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Clase para deshabilitar interacciones */
+        .disable-interaction {
+            pointer-events: none;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen bg-gray-200">
+
+    <form id="test-form" class="bg-white p-6 rounded-lg shadow-lg">
+        <label for="test-input" class="block text-gray-700">Escribe algo:</label>
+        <input type="text" id="test-input" class="border p-2 rounded w-full mb-4" placeholder="Escribe aquí..." required>
+        <button type="submit" class="bg-blue-500 text-white px-5 py-2 rounded-lg">Enviar</button>
+    </form>
+
+    <!-- Contenedor del Loader -->
+    <div id="loading-container">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        function showLoader() {
+            const loader = document.getElementById('loading-container');
+
+            if (loader.style.display === 'flex') {
+                console.log('⚠️ Loader ya está activo.');
+                return;
+            }
+
+            console.log('✅ Mostrando Loader...');
+            loader.style.display = 'flex';
+            document.body.classList.add('disable-interaction'); // Bloquear interacciones
+        }
+
+        function hideLoader() {
+            console.log('⏳ Ocultando Loader...');
+            document.getElementById('loading-container').style.display = 'none';
+            document.body.classList.remove('disable-interaction');
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault(); // Evitar envío inmediato
+                    showLoader();
+
+                    setTimeout(() => {
+                        console.log('✅ Enviando formulario...');
+                        form.submit(); // Enviar el formulario después de 5 segundos
+                    }, 5000);
+                });
+            });
+        });
+
+        window.addEventListener("load", function () {
+            setTimeout(hideLoader, 3000);
+        });
+    </script>
+
+</body>
+</html>

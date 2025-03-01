@@ -110,7 +110,6 @@ class Users:
                 apartment = cursor.fetchone()
 
                 if apartment:
-                   
                     user["building"] = apartment["building"] 
                     user["apartment_number"] = apartment["apartment_number"]
                 else:
@@ -125,7 +124,7 @@ class Users:
 
                     if house:
                         # Si el usuario tiene una casa asignada, agregar la información
-                        user["house_number"] = house["house_number"]
+                        user["house"] = house["house_number"]
 
                 return user
 
@@ -320,10 +319,9 @@ class Users:
             self.db.commit()
             flash("Propiedad asignada exitosamente", "success")
 
-        except Exception as e:
+        except Exception as e:  # <- El except ahora está alineado correctamente
             print(f"Error asignando propiedad: {e}")
             flash(f"Error al asignar propiedad: {e}", "danger")
-
 
 
 

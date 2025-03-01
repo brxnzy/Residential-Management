@@ -1,38 +1,36 @@
-<div class="flex flex-col items-center justify-center ">
+{% if usuario %}
+
+<div class="flex flex-col items-center justify-center">
     {% if usuario.photo %}
-    <img src="{{url_for('static', filename='uploads/' + usuario.photo)}}" alt="" class="rounded-full object-cover w-72 h-72 mb-7">
+    <img src="{{ url_for('static', filename='uploads/' + usuario.photo) }}" alt="Foto de perfil" class="rounded-full object-cover w-72 h-72 mb-7">
     {% else %}
-    <img src="{{url_for('static', filename='uploads/default.png')}}" alt="" class="w-64 h-64 rounded-full">
+    <img src="{{ url_for('static', filename='uploads/default.png') }}" alt="Foto por defecto" class="w-64 h-64 rounded-full">
     {% endif %}
+
     <div class="flex items-center justify-between">
         <h1 class="text-4xl font-bold text-center flex-1 mr-2">{{ usuario.name }} {{ usuario.last_name }}</h1>
-        <!-- <button data-modal-target="role-modal" data-modal-toggle="role-modal"  class="text-white bgverde font-medium rounded-full text-sm p-1 text-center shadow-lg" type="button">
-            <img src="{{url_for('static', filename='icons/edit.svg')}}" alt="" class="w-6 h-6">
-        </button> -->
-
-        <button data-modal-toggle="role-modal" id="edit-btn" data-modal-target="role-modal" data-roles="{{usuario.role}}" class="text-white bgverde font-medium rounded-full text-sm p-1 text-center shadow-lg">
-            <img src="{{ url_for('static', filename='icons/edit.svg') }}" alt="" class="w-6 h-6">
+        <button data-modal-toggle="role-modal" id="edit-btn" data-modal-target="role-modal" data-roles="{{ usuario.role }}" class="text-white bgverde font-medium rounded-full text-sm p-1 text-center shadow-lg">
+            <img src="{{ url_for('static', filename='icons/edit.svg') }}" alt="Editar" class="w-6 h-6">
         </button>
-        
     </div>
 
-    <h2 class="text-2xl text-gray-600 semibold mb-2">{{usuario.role}}</h2>
-    <h2 class="text-2xl mb-2  text-gray-800">Cedula: {{usuario.id_card}} </h2>
-    <h2 class="text-2xl mb-2 text-gray-800">email: {{usuario.email}}</h2>
-    <h2 class="text-2xl mb-2 text-gray-800">Numero de telefono: {{usuario.Phone}}</h2>
-    {%if 'resident' in usuario.role%}
+    <h2 class="text-2xl text-gray-600 semibold mb-2">{{ usuario.role }}</h2>
+    <h2 class="text-2xl mb-2 text-gray-800">Cédula: {{ usuario.id_card }}</h2>
+    <h2 class="text-2xl mb-2 text-gray-800">Email: {{ usuario.email }}</h2>
+    <h2 class="text-2xl mb-2 text-gray-800">Número de teléfono: {{ usuario.Phone }}</h2>
+    
+    {% if 'resident' in usuario.role %}
         {% if usuario.building and usuario.apartment_number %}
-        <h2 class="text-2xl mb-2 text-gray-800 text-left">Vivienda: {{usuario.building}} - {{usuario.apartment_number}} </h2>
+            <h2 class="text-2xl mb-2 text-gray-800 text-left">Residencia: {{ usuario.building }} - {{ usuario.apartment_number }}</h2>
         {% else %}
-        <h2 class="text-2xl mb-2 text-gray-800 text-left">Vivienda: Casa: {{usuario.house}} </h2>
+            <h2 class="text-2xl mb-2 text-gray-800 text-left">Residencia: Casa {{ usuario.house }}</h2>
         {% endif %}
+    {% endif %}
 
-    {%endif%}
-    <h2 class="text-2xl text-gray-800">Fecha de Registro: {{usuario.registration_date}}</h2>
+    <h2 class="text-2xl text-gray-800">Fecha de Registro: {{ usuario.registration_date }}</h2>
 </div>
 
-
-
+<!-- Modal para actualizar roles -->
 
 <div id="role-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
     <div class="relative p-4 w-full max-w-2xl max-h-full">
@@ -55,14 +53,14 @@
                 <form action="/admin/update_roles/{{usuario.id}}" method="POST">
                     <div class="flex items-center mb-4">
                         <input id="role-admin" type="checkbox" name="roles" value="admin" 
-                            class="checkbox-option w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-green-500"
+                            class="checkbox-opt w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-green-500"
                             {% if 'admin' in usuario.role %} checked {% endif %}>
                         <label for="role-admin" class="ml-2 text-l font-bold text-gray-900">Admin</label>
                     </div>
                     
                     <div class="flex items-center mb-4">
                         <input id="role-resident" type="checkbox" name="roles" value="resident" 
-                            class="checkbox-option w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-green-500"
+                            class="checkbox-opt w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-green-500"
                             {% if 'resident' in usuario.role %} checked {% endif %}
                             data-original-resident="{% if 'resident' in usuario.role %}true{% else %}false{% endif %}">
                         <label for="role-resident" class="ml-2 text-l font-bold text-gray-900">Resident</label>
@@ -86,7 +84,7 @@
                                 
                                 {% for c in houses %}
                                 {% if c.occupied == 0 %}
-                                    <option value="{{ c.id }}" class="casas hidden">{{ c.address }}</option>
+                                    <option value="{{ c.id }}" class="casas hidden text-black">{{ c.address }}</option>
                                 {% endif %}
                                 {% endfor %}
                             </select>
@@ -103,6 +101,11 @@
     </div>
 </div>
 
-
-<script src="{{url_for('static', filename='js/modals.js')}}"></script>
-
+{% else %}
+<div class="flex flex-col items-center justify-center h-[82vh]">
+    <img src="{{url_for('static', filename='icons/search_user.svg')}}" 
+    alt="" 
+    class="max-h-[450px] w-auto">
+   <h2 class="text-3xl bold mt-4">Usuario no disponible</h2>
+</div>
+{% endif %}

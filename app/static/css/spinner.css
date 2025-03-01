@@ -1,4 +1,4 @@
-#loading-spinner {
+#loading-container {
   display: none;
   position: fixed;
   top: 0;
@@ -12,7 +12,7 @@
   z-index: 9999;
 }
 
-/* HTML: <div class="loader"></div> */
+/* Estilo del spinner */
 .spinner {
   width: 100px;
   padding: 16px;
@@ -26,16 +26,18 @@
           mask: var(--_m);
   -webkit-mask-composite: source-out;
           mask-composite: subtract;
-  animation: l3 1s infinite linear;
+  animation: spin 1s infinite linear;
 }
-@keyframes l3 {to{transform: rotate(1turn)}}
 
+
+/* Animación del spinner */
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
+/* Clase para deshabilitar interacciones */
 .disable-interaction {
-  pointer-events: none; /* Deshabilitar interacciones */
-  overflow: hidden; /* Evitar desplazamiento mientras se muestra el loader */
+  pointer-events: none;
+  overflow: hidden;
 }

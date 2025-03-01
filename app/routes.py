@@ -2,7 +2,7 @@ from flask import Flask, render_template, redirect, url_for, request, session, f
 import bcrypt
 from auth.login import Auth
 from controllers.users_controller import Users
-from controllers.apartments_controller import Apartments
+from controllers.residences_controller import  Residences
 from functools import wraps
 import os
 
@@ -18,7 +18,7 @@ class App:
         self.error_handler()
         self.auth = Auth()
         self.user = Users(self.app)
-        self.apartment = Apartments()
+        self.residences = Residences()
         self.app.config['SECRET_KEY'] = 'secretkey'
         UPLOAD_FOLDER = r'C:\Users\Crist\OneDrive\Documents\Desktop\Final Proyect\app\static\uploads'
         self.app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -35,31 +35,37 @@ class App:
             return render_template('errors/404.html'), 404 
 
     def login_required(self, f):
-        """
-        Middleware para proteger rutas segun el prefijo de la URL.
-        /admin → Requiere rol 'admin'
-        /resident → Requiere rol 'resident'
-        """
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if 'user_id' not in session:
-                flash('Debes iniciar sesion para acceder','warning')
-                return redirect(url_for('login'))
+            """
+            Middleware para proteger rutas según el prefijo de la URL.
+            /admin → Requiere rol 'admin'
+            /resident → Requiere rol 'resident'
+            """
+            @wraps(f)
+            def decorated_function(*args, **kwargs):
+                if 'user_id' not in session:
+                    flash('Debes iniciar sesión para acceder', 'warning')
+                    return redirect(url_for('login'))
 
-            path = request.path  
-            required_role = None  
+                # Obtener el usuario desde la base de datos
+                user = self.user.get_user_by_id(session['user_id'])
+                if not user or user['status'] == 'disabled':  # Verificar si el usuario está deshabilitado
+                    flash('Tu cuenta está deshabilitada', 'danger')
+                    return redirect(url_for('disabled'))  # Ruta que muestra el mensaje de usuario deshabilitado
 
-            if path.startswith('/admin'):
-                required_role = 'admin'
-            elif path.startswith('/resident'):
-                required_role = 'resident'
+                path = request.path  
+                required_role = None  
 
-            if required_role and required_role not in session.get('roles', []):
-                abort(403)  
+                if path.startswith('/admin'):
+                    required_role = 'admin'
+                elif path.startswith('/resident'):
+                    required_role = 'resident'
 
-            return f(*args, **kwargs)
+                if required_role and required_role not in session.get('roles', []):
+                    abort(403)  
 
-        return decorated_function
+                return f(*args, **kwargs)
+
+            return decorated_function
 
 
     def nocache(self, f):
@@ -103,7 +109,7 @@ class App:
 
         @self.app.route('/disabled')
         def disabled():
-            return render_template('disabled.html')
+            return render_template('errors/disabled.html')
 
         @self.app.route('/logout')
         def logout():
@@ -215,11 +221,8 @@ class App:
                 if property_type and property_id:
                     # Asignamos la propiedad al usuario
                     assign = self.user.assign_property(user_id, property_type, property_id)
-                    
                     if assign:
                         flash("Propiedad asignada correctamente", "success")
-                    else:
-                        flash("No se pudo asignar la propiedad", "danger")
                 else:
                     flash("Debe seleccionar un tipo de propiedad y una residencia", "warning")
                 
@@ -274,19 +277,15 @@ class App:
 
         @self.app.route('/admin/user_info/<int:user_id>')
         def user_info(user_id):
-            try:
-                # Intentar obtener la información del usuario
+            try:               
                 user = self.user.get_user_by_id(user_id)
 
-                # Verificar si se encontró el usuario
-                if user:
-                    
-                    # Si el usuario se encuentra, redirige a la vista con la información del usuario
-                    return redirect(url_for('dashboard', section='user_info', user_id=user_id))
+                if user['status'] == 'disabled':
+                    flash('Usuario deshabilitado, no se encontró información', 'error')
+                    return redirect(url_for('dashboard', section='users')) 
                 else:
-                    # Si el usuario no se encuentra, muestra un mensaje y redirige a la lista de usuarios
-                    flash('Usuario no encontrado', 'error')
-                    return redirect(url_for('dashboard', section='users'))
+                    print(user)
+                    return redirect(url_for('dashboard', section='user_info', user_id=user_id))
 
             except Exception as e:
                 # Manejo de excepciones si algo sale mal
@@ -318,8 +317,10 @@ class App:
         }
  
 
-            residents, admins, disabled, selected_user = {}, {}, {}, {}
-            apartments = self.apartment.get_apartments() 
+            residents, admins, disabled, selected_user, houses = {}, {}, {}, {},{}
+            apartments = self.residences.get_apartments() 
+            houses = self.residences.get_houses() 
+            print(houses)
            
          
             # 📌 Si la sección es "users", obtenemos los datos de usuarios
@@ -352,6 +353,7 @@ class App:
                 **residents,
                 **admins,
                 **disabled,
+                houses=houses,
                 apartments=apartments,
                 usuario=selected_user
             )

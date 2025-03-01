@@ -33,39 +33,17 @@
         <td class="text-md medium lg:text-lg font-bold">
          {{a.apartment_number}}
         </td>
-        <td class="text-md medium lg:text-lg">{% if occupied == 1 %}
+        <td class="text-md medium lg:text-lg">{% if a.occupied == 1 %}
           Ocupado
 
           {% else %}
           Libre
         {% endif %}</td>
-        <td class="text-md medium lg:text-lg">{{ admin.email }}</td>
-        <td class="text-md medium lg:text-lg">{{ admin.registration_date }}</td>
+        <td class="text-md medium lg:text-lg"></td>
+        <td class="text-md medium lg:text-lg"></td>
         <td class="">
           <div class="flex gap-3 justify-end">
-            {% if admin.id != user.id %}
-            <form
-              action="{{ url_for('disable_user', user_id=admin.id) }}"
-              method="post"
-            >
-              <button
-                class="bg-gray-100 text-gray-700 border normal text-md border-gray-300 px-4 py-2 rounded hover:bg-gray-200"
-              >
-                Deshabilitar
-              </button>
-            </form>
-            <button
-              class="edit-user-btn bgverde w-11 h-11 flex items-center justify-center rounded-full hover:border-2 hover:border-gray-700 hover:shadow-lg transition-all duration-300"
-            >
-              <a href="/admin/dashboard/user_info/{{admin.id}}">
-                <img
-                  src="{{ url_for('static', filename='icons/info.svg') }}"
-                  class="h-14 w-14"
-                  alt="Edit"
-                />
-              </a>
-            </button>
-            {% endif %}
+
           </div>
         </td>
       </tr>

@@ -169,9 +169,15 @@
 
 
     
+    <div id="loading-container">
+        <div class="spinner"></div>
+    </div>
 
 
-       <div id="alert-container" class="fixed bottom-4 right-4 space-y-2 z-50"></div>
+
+
+
+    <div id="alert-container" class="fixed bottom-4 right-4 space-y-2 z-50"></div>
 
 
        {% with messages = get_flashed_messages(with_categories=true) %}
@@ -194,5 +200,9 @@
 </body>
 <script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
 <script src="{{ url_for('static', filename='js/modals.js') }}"></script>
+<script src="{{ url_for('static', filename='js/spinner.js') }}"></script>
+
+
+
 
 </html>

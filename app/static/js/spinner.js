@@ -1,29 +1,36 @@
 function showLoader() {
-    const spinner = document.getElementById('loading-spinner');
-    if (spinner.style.display === 'none') {
-        spinner.style.display = 'flex';
-        document.body.classList.add('disable-interaction'); // Bloquea interacciones
+    const loader = document.getElementById('loading-container');
+
+    if (loader.style.display === 'flex') {
+        console.log('⚠️ Loader ya está activo.');
+        return;
     }
+
+    console.log('✅ Mostrando Loader...');
+    loader.style.display = 'flex';
+    document.body.classList.add('disable-interaction'); // Bloquear interacciones
 }
 
 function hideLoader() {
-    setTimeout(() => {
-        const spinner = document.getElementById('loading-spinner');
-        if (spinner.style.display !== 'none') {
-            spinner.style.display = 'none';
-            document.body.classList.remove('disable-interaction'); // Restaura interacciones
-        }
-    }, 500); // Agregar retraso de 500ms para no quitarlo tan rápido
+    console.log('⏳ Ocultando Loader...');
+    document.getElementById('loading-container').style.display = 'none';
+    document.body.classList.remove('disable-interaction');
 }
 
-// Mostrar el loader al cargar la página
-window.addEventListener("load", function () {
-    setTimeout(hideLoader, 1000); // Agregar retraso para evitar ocultarlo demasiado rápido
+document.addEventListener("DOMContentLoaded", function() { 
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Evitar envío inmediato
+            showLoader();
+
+            setTimeout(() => {
+                console.log('✅ Enviando formulario...');
+                form.submit(); // Enviar el formulario después de 5 segundos
+            }, 500);
+        });
+    });
 });
 
-// Mostrar el loader al enviar formularios
-document.querySelectorAll('form').forEach(form => {
-    form.addEventListener('submit', function () {
-        showLoader();
-    });
+window.addEventListener("load", function () {
+    setTimeout(hideLoader, 1000);
 });

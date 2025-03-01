@@ -95,7 +95,7 @@
     Residentes
   </h2>
 
-  <select name="" id=""></select>
+  
 </div>
 
 <div class="overflow-x-auto">
@@ -270,6 +270,8 @@
     No hay usuarios deshabilitados...
   </h2>
 </div>
+{% endif %}
+
 
 
 
@@ -279,7 +281,6 @@
 <!-- Contenedor para los dropdowns -->
 
 
-{% endif %}
 
   
 <div id="popup-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
@@ -364,7 +365,7 @@
                               
                               {% for c in houses %}
                               {% if c.occupied == 0 %}
-                                  <option value="{{ c.id }}" class="casas hidden">{{ c.address }}</option>
+                                  <option value="{{ c.id }}" class="casas hidden">{{ c.house_number }}</option>
                               {% endif %}
                               {% endfor %}
                           </select>
@@ -625,8 +626,6 @@ class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 
   </div>
 </div>
 </div>
-
-
 
 
 

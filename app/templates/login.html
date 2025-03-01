@@ -48,7 +48,7 @@
               <button type="button" class="absolute right-0 top-0 py-2 px-2 h-full  rounded-r-md     focus:outline-none" onclick="togglePassword()">
                   <!-- SVG Icon (open eye) -->
                   <img src="{{url_for('static',filename='icons/eye.svg')}}" alt="Show password" class="h-6 w-6" id="eye-open">
-                  <img src="{{url_for('static',filename='icons/eye_closed.png')}}" alt="Hide password" class="h-6 w-6 hidden" id="eye-closed">
+                  <img src="{{url_for('static',filename='icons/eye_closed.svg')}}" alt="Hide password" class="h-6 w-6 hidden" id="eye-closed">
               </button>
           </div>
       </div>
@@ -66,9 +66,10 @@
   
     </div>
   </div>
-  <div id="loading-spinner" class="loading-spinner">
+
+  <div id="loading-container">
     <div class="spinner"></div>
- </div>
+</div>
 
   <div id="alert-container" class="fixed bottom-4 right-4 space-y-2 z-50"></div>
 
