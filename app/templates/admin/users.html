@@ -363,9 +363,9 @@
                               {% endif %}
                               {% endfor %}
                               
-                              {% for c in houses %}
-                              {% if c.occupied == 0 %}
-                                  <option value="{{ c.id }}" class="casas hidden">{{ c.house_number }}</option>
+                              {% for h in houses %}
+                              {% if h.occupied == 0 %}
+                                  <option value="{{ h.id }}" class="casas hidden">{{ h.house_number }}</option>
                               {% endif %}
                               {% endfor %}
                           </select>
@@ -584,7 +584,7 @@ class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 
           
               <!-- Segundo Dropdown -->
               <select
-                name="List"
+                name="propertyList"
               
                 id="List"
                 class="w-1/2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 appearance-none hidden"
@@ -596,9 +596,9 @@ class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 
                 {% endif %}
               {% endfor %}
               
-              {% for c in houses %}
-                {% if c.occupied == 0 %}
-                  <option value="{{ c.id }}" class="casas hidden">{{ c.address }}</option>
+              {% for h in houses %}
+                {% if h.occupied == 0 %}
+                  <option value="{{ h.id }}" class="casas hidden">{{ h.house_number }}</option>
                 {% endif %}
               {% endfor %}
               

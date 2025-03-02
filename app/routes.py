@@ -126,6 +126,70 @@ class App:
 
 
 
+        """ Rutas para el Dashboard """
+                
+        @self.app.route('/admin', defaults={'section': 'main', 'sub_section': None})
+        @self.app.route('/admin/<section>/', defaults={'sub_section': None})
+        @self.app.route('/admin/<section>/<sub_section>')
+        @self.login_required
+        @self.nocache
+        def dashboard(section, sub_section):
+            sections = {
+            'main': 'admin/main.html',
+            'users': 'admin/users.html',
+            'my_info': 'admin/my_info.html',
+            'user_info': 'admin/user_info.html',
+            'residences': 'admin/residences.html',
+            'residences/apartments': 'admin/residences/apartments.html',
+            'residences/houses': 'admin/residences/houses.html'
+        }
+ 
+
+            residents, admins, disabled, selected_user, houses = {}, {}, {}, {},{}
+            apartments = self.residences.get_apartments() 
+            houses = self.residences.get_houses() 
+
+           
+         
+            # 📌 Si la sección es "users", obtenemos los datos de usuarios
+            if section == 'users':
+                residents['residents'] = self.user.get_residents()
+                admins['admins'] = self.user.get_admins()
+                disabled['disabled'] = self.user.get_disabled_users()
+
+            # 📌 Si la sección es "user_info" y se pasa un user_id, obtenemos la información del usuario
+            user_id = request.args.get('user_id', type=int)
+            if section == 'user_info' and user_id:
+                selected_user = self.user.get_user_by_id(user_id)
+                print(selected_user)
+
+            # 📌 Mapeo correcto de la plantilla según la sección y subsección
+            key = f"{section}/{sub_section}" if sub_section else section
+            if key not in sections:
+                return render_template('errors/404.html'), 404
+            template = sections[key]  
+
+            # Obtener el usuario de la sesión
+            session_user = session.get('user')
+
+            return render_template(
+                'admin/dashboard.html',
+                content_template=template,
+                user=session_user,
+                section=section,
+                sub_section=sub_section,
+                **residents,
+                **admins,
+                **disabled,
+                houses=houses,
+                apartments=apartments,
+                usuario=selected_user
+            )
+
+
+        """ Rutas para el manejo de usuarios """
+        
+
         @self.app.route('/admin/add_user', methods=['POST'])
         @self.login_required
         def add_user():
@@ -141,7 +205,7 @@ class App:
            
                 property_type = request.form.get('propertyType') if is_resident else None
                 property_id = request.form.get('propertyList') if is_resident else None
-                print(property_type)
+                print(f"Tipo de Propiedad:{property_type}")
                 print(property_id)
 
                 try:
@@ -297,66 +361,29 @@ class App:
             return redirect(url_for('dashboard', section='users'))
 
 
+        """ Rutas para el manejo de residencias """
+
+
+        @self.app.route('/admin/residences/vacate_residence', methods=['POST'])
+        def vacate_residence():
+            try:
+                resident_id = request.form.get("residentId")
+                residence_id = request.form.get("residenceId")
+                residence_type = request.form.get("residenceType")
+
+
+                self.residences.vacate_residence(residence_type, residence_id,resident_id)
+                flash("Residencia desocupada correctamente", "success")
+
+            except Exception as e:
+                print(f"Error al desocupar residencia: {e}")
+                flash("Hubo un problema al desocupar la residencia", "danger")
+
+            return redirect(url_for('dashboard', section='residences', refresh=1))
+
+
+
            
-
-        """ Rutas para el Dashboard """
-                
-        @self.app.route('/admin', defaults={'section': 'main', 'sub_section': None})
-        @self.app.route('/admin/<section>/', defaults={'sub_section': None})
-        @self.app.route('/admin/<section>/<sub_section>')
-        @self.login_required
-        @self.nocache
-        def dashboard(section, sub_section):
-            sections = {
-            'main': 'admin/main.html',
-            'users': 'admin/users.html',
-            'my_info': 'admin/my_info.html',
-            'user_info': 'admin/user_info.html',
-            'residences': 'admin/residences.html',
-            'residences/buildings': 'admin/residences/buildings.html'  
-        }
- 
-
-            residents, admins, disabled, selected_user, houses = {}, {}, {}, {},{}
-            apartments = self.residences.get_apartments() 
-            houses = self.residences.get_houses() 
-            print(houses)
-           
-         
-            # 📌 Si la sección es "users", obtenemos los datos de usuarios
-            if section == 'users':
-                residents['residents'] = self.user.get_residents()
-                admins['admins'] = self.user.get_admins()
-                disabled['disabled'] = self.user.get_disabled_users()
-
-            # 📌 Si la sección es "user_info" y se pasa un user_id, obtenemos la información del usuario
-            user_id = request.args.get('user_id', type=int)
-            if section == 'user_info' and user_id:
-                selected_user = self.user.get_user_by_id(user_id)
-                print(selected_user)
-
-            # 📌 Mapeo correcto de la plantilla según la sección y subsección
-            key = f"{section}/{sub_section}" if sub_section else section
-            if key not in sections:
-                return render_template('errors/404.html'), 404
-            template = sections[key]  
-
-            # Obtener el usuario de la sesión
-            session_user = session.get('user')
-
-            return render_template(
-                'admin/dashboard.html',
-                content_template=template,
-                user=session_user,
-                section=section,
-                sub_section=sub_section,
-                **residents,
-                **admins,
-                **disabled,
-                houses=houses,
-                apartments=apartments,
-                usuario=selected_user
-            )
 
 
 
@@ -368,3 +395,4 @@ class App:
 
     def run(self):
         self.app.run(debug=True, port=5000)
+

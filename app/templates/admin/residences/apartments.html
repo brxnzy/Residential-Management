@@ -1,0 +1,116 @@
+<div class="flex px-4 items-center mt-2 justify-between mb-8">
+  <h1
+    class="text-4xl font-normal bold sm:text-2xl md:text-4xl lg:text-5xl text-left"
+  >
+    Apartamentos
+  </h1>
+  <button
+    class="px-2 py-2 bgverde text-white rounded-full"
+    data-modal-target="authentication-modal"
+    data-modal-toggle="authentication-modal"
+  >
+    <img src="{{ url_for('static', filename='icons/plus.svg')}}" class="h-9 w-9" />
+  </button>
+</div>
+
+<div class="overflow-x-auto">
+  <table class="table">
+    <thead>
+      <tr>
+        <th class="verde text-xl">Edificio</th>
+        <th class="verde text-xl">#</th>
+        <th class="verde text-xl">Estado</th>
+        <th class="verde text-xl">Residente</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in apartments %}
+      <tr>
+        <td class="text-md medium lg:text-lg">
+          {{ a.building }}
+        </td>
+        <td class="text-md medium lg:text-lg font-bold">
+         {{a.apartment_number}}
+        </td>
+        <td class="text-md medium lg:text-lg">{% if a.occupied == 1 %}
+          Ocupado
+
+          {% else %}
+          Libre
+        {% endif %}</td>
+        <td class="text-md medium lg:text-lg">
+          {% if a.resident %}
+          <a href="/admin/user_info/{{a.resident_id}}" class="text-md medium lg:text-lg hover:underline verde">{{a.resident}}</a>
+          {% else %}
+          Sin Residente
+          {% endif %}
+          </td>
+        <td class="text-md medium lg:text-lg"></td>
+        <td class="">
+          <div class="flex gap-3 justify-end">
+            {% if a.resident%}
+            <button
+            class="bgred vacate-btn text-white border normal text-md px-5 py-2.5 rounded-lg "
+            data-residence-id = {{a.id}}
+            data-resident-id = {{a.resident_id}}
+            data-modal-target="vacate-modal"
+            data-modal-toggle="vacate-modal"
+            >
+            Desalojar
+          </button>
+
+          <button class="bgverde text-white border normal text-md px-5 py-2.5 rounded-lg">
+           Ver Historial
+          </button>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+
+
+
+
+
+<div id="vacate-modal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+  <div class="relative p-4 w-full max-w-md max-h-full">
+      <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+          <button type="button" class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="vacate-modal">
+              <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+              </svg>
+              <span class="sr-only">Close modal</span>
+          </button>
+          <div class="p-4 md:p-5 text-center">
+              <!-- Imagen centrada -->
+              <img src="{{ url_for('static', filename='icons/residence.svg') }}" class="w-16 h-16 mx-auto mb-4" alt="Trash Icon">
+              
+              <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+                  Seguro que quieres desalojar esta residencia?
+              </h3>
+
+              
+              <!-- Contenedor flex para los botones -->
+              <div class="flex justify-center gap-3">
+                  <form action="/admin/residences/vacate_residence" method="post" id="vacateForm">
+                      <input type="hidden" name="residenceType" id="residenceType" value="apartments">
+                      <input type="hidden" name="residenceId" id="residenceId">
+                      <input type="hidden" name="residentId" id="residentId">
+                      <button data-modal-hide="vacate-modal" type="submit" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                         Si, estoy seguro
+                      </button>
+                  </form>
+                  
+                  <button data-modal-hide="vacate-modal" type="button" class="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-green-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                      No, cancelar 
+                  </button>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>

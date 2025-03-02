@@ -82,9 +82,9 @@
                                 {% endif %}
                                 {% endfor %}
                                 
-                                {% for c in houses %}
-                                {% if c.occupied == 0 %}
-                                    <option value="{{ c.id }}" class="casas hidden text-black">{{ c.address }}</option>
+                                {% for h in houses %}
+                                {% if h.occupied == 0 %}
+                                    <option value="{{ h.id }}" class="casas hidden text-black">{{ h.house_number }}</option>
                                 {% endif %}
                                 {% endfor %}
                             </select>

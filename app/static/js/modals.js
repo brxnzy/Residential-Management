@@ -269,3 +269,21 @@ document.addEventListener("DOMContentLoaded", function () {
       }
   });
 });
+
+
+
+document.querySelectorAll(".vacate-btn").forEach((button) => {
+  button.addEventListener("click", function () {
+      const residenceId = this.getAttribute("data-residence-id");
+      const residentId = this.getAttribute("data-resident-id");
+
+      console.log("ID Capturado:", residenceId); 
+      console.log("ID Capturado:", residentId); 
+
+     
+      document.getElementById("residenceId").value = residenceId;
+      document.getElementById("residentId").value = residentId;
+  });
+});
+
+

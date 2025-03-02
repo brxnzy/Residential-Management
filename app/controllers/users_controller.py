@@ -11,6 +11,7 @@ class Users:
     def __init__(self,app):
         self.app =  app
         self.db = connection_db()
+        self.db.autocommit = True
         self.auth = Auth()
         self.smtp = EmailSender()
 
@@ -284,7 +285,7 @@ class Users:
                 SELECT id FROM houses WHERE id_usuario = %s
             """, (user_id, user_id))
             existing_property = cursor.fetchone()
-            print(f"Propiedad: {existing_property}")
+
 
             if existing_property:
                 print(f"Error: El usuario {user_id} ya tiene una propiedad asignada.")
@@ -428,8 +429,7 @@ class Users:
             print(f"Error eliminando usuario: {e}")
             flash(f"Error eliminando usuario: {e}", "danger")
 
-    def edit_user(self,id,is_admin,is_resident):
-        pass
+
 
 
 
