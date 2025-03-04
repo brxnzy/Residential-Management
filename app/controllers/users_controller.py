@@ -111,7 +111,7 @@ class Users:
                 apartment = cursor.fetchone()
 
                 if apartment:
-                    user["building"] = apartment["building"] 
+                    user["residence"] = apartment["building"] + apartment['apartment_number']
                     user["apartment_number"] = apartment["apartment_number"]
                 else:
                     # Si no tiene apartamento, buscar en la tabla de casas
@@ -125,7 +125,7 @@ class Users:
 
                     if house:
                         # Si el usuario tiene una casa asignada, agregar la información
-                        user["house"] = house["house_number"]
+                        user["residence"] = house["house_number"]
 
                 return user
 

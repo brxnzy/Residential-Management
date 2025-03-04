@@ -3,98 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loader en Submit</title>
+    <title>App Gestión Residencial - Residente</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Contenedor del loader */
-        #loading-container {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4); /* Oscurece el fondo */
-            backdrop-filter: blur(5px);
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-
-        /* Estilo del spinner */
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 6px solid #ffffff;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        /* Animación del spinner */
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Clase para deshabilitar interacciones */
-        .disable-interaction {
-            pointer-events: none;
-            overflow: hidden;
-        }
-    </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen bg-gray-200">
+<body class="bg-gray-100 min-h-screen font-sans">
+    <div class="container mx-auto p-6">
+        <!-- Header -->
+        <header class="bg-blue-600 text-white p-4 rounded-lg shadow-md mb-6">
+            <h1 class="text-2xl font-bold">Portal del Residente</h1>
+            <p class="text-sm">Bienvenido, [Nombre del Residente]</p>
+        </header>
 
-    <form id="test-form" class="bg-white p-6 rounded-lg shadow-lg">
-        <label for="test-input" class="block text-gray-700">Escribe algo:</label>
-        <input type="text" id="test-input" class="border p-2 rounded w-full mb-4" placeholder="Escribe aquí..." required>
-        <button type="submit" class="bg-blue-500 text-white px-5 py-2 rounded-lg">Enviar</button>
-    </form>
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Sección de Enviar Reclamo -->
+            <section class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4">Enviar Reclamo</h2>
+                <form>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2" for="tipo-reclamo">Tipo de Reclamo</label>
+                        <select id="tipo-reclamo" class="w-full p-2 border rounded-lg">
+                            <option value="">Selecciona una opción</option>
+                            <option value="mantenimiento">Mantenimiento</option>
+                            <option value="seguridad">Seguridad</option>
+                            <option value="ruido">Ruido</option>
+                            <option value="otros">Otros</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 mb-2" for="descripcion">Descripción</label>
+                        <textarea id="descripcion" class="w-full p-2 border rounded-lg" rows="4" placeholder="Describe tu reclamo aquí..."></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">Enviar Reclamo</button>
+                </form>
+            </section>
 
-    <!-- Contenedor del Loader -->
-    <div id="loading-container">
-        <div class="spinner"></div>
+            <!-- Sección de Historial de Reclamos -->
+            <section class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4">Historial de Reclamos</h2>
+                <div class="space-y-4 max-h-96 overflow-y-auto">
+                    <div class="border p-4 rounded-lg">
+                        <p class="text-sm text-gray-500">02/03/2025</p>
+                        <p class="font-medium">Mantenimiento - Fuga de agua</p>
+                        <p class="text-sm text-gray-600">Estado: Resuelto</p>
+                    </div>
+                    <div class="border p-4 rounded-lg">
+                        <p class="text-sm text-gray-500">01/03/2025</p>
+                        <p class="font-medium">Ruido - Vecino</p>
+                        <p class="text-sm text-gray-600">Estado: En proceso</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección de Pagos -->
+            <section class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-semibold mb-4">Consultar Pagos</h2>
+                <div class="space-y-4">
+                    <div>
+                        <p class="font-medium">Cuota Mensual - Marzo 2025</p>
+                        <p class="text-sm text-gray-600">Monto: $150.00</p>
+                        <p class="text-sm text-green-600">Estado: Pagado</p>
+                    </div>
+                    <div>
+                        <p class="font-medium">Cuota Mensual - Abril 2025</p>
+                        <p class="text-sm text-gray-600">Monto: $150.00</p>
+                        <p class="text-sm text-red-600">Estado: Pendiente</p>
+                        <button class="mt-2 bg-green-600 text-white p-2 rounded-lg hover:bg-green-700">Pagar Ahora</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Sección Adicional: Información Residencial -->
+        <section class="mt-6 bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Información Residencial</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <p class="font-medium">Próxima Reunión de Vecinos</p>
+                    <p class="text-sm text-gray-600">Fecha: 10/03/2025 - 18:00</p>
+                </div>
+                <div>
+                    <p class="font-medium">Contacto de Emergencia</p>
+                    <p class="text-sm text-gray-600">Administración: +123-456-7890</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="mt-6 text-center text-gray-600">
+            <p class="text-sm">© 2025 Residencial - Todos los derechos reservados</p>
+        </footer>
     </div>
-
-    <script>
-        function showLoader() {
-            const loader = document.getElementById('loading-container');
-
-            if (loader.style.display === 'flex') {
-                console.log('⚠️ Loader ya está activo.');
-                return;
-            }
-
-            console.log('✅ Mostrando Loader...');
-            loader.style.display = 'flex';
-            document.body.classList.add('disable-interaction'); // Bloquear interacciones
-        }
-
-        function hideLoader() {
-            console.log('⏳ Ocultando Loader...');
-            document.getElementById('loading-container').style.display = 'none';
-            document.body.classList.remove('disable-interaction');
-        }
-
-        document.addEventListener("DOMContentLoaded", function() {
-            document.querySelectorAll('form').forEach(form => {
-                form.addEventListener('submit', function(event) {
-                    event.preventDefault(); // Evitar envío inmediato
-                    showLoader();
-
-                    setTimeout(() => {
-                        console.log('✅ Enviando formulario...');
-                        form.submit(); // Enviar el formulario después de 5 segundos
-                    }, 5000);
-                });
-            });
-        });
-
-        window.addEventListener("load", function () {
-            setTimeout(hideLoader, 3000);
-        });
-    </script>
-
 </body>
 </html>

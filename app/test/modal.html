@@ -1,96 +1,450 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loader Animado</title>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portal Residencial</title>
     <style>
-/* HTML: <div class="loader"></div> */
-#loading-spinner {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.1); /* Fondo semi-transparente */
-  backdrop-filter: blur(10px); /* Desenfoque de fondo */
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-/* HTML: <div class="loader"></div> */
-.spinner {
-  width: 100px;
-  padding: 16px;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: #157f3d;
-  --_m: 
-    conic-gradient(#0000 10%,#000),
-    linear-gradient(#000 0 0) content-box;
-  -webkit-mask: var(--_m);
-          mask: var(--_m);
-  -webkit-mask-composite: source-out;
-          mask-composite: subtract;
-  animation: l3 1s infinite linear;
-}
-@keyframes l3 {to{transform: rotate(1turn)}}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.disable-interaction {
-  pointer-events: none; /* Deshabilitar interacciones */
-  overflow: hidden; /* Evitar desplazamiento mientras se muestra el loader */
-}
-
+      .tab-content {
+        display: none;
+      }
+      
+      .tab-content.active {
+        display: block;
+      }
+      
+      .tab-button.active {
+        background-color: #4f46e5;
+        color: white;
+      }
     </style>
-</head>
-<body class="flex items-center justify-center min-h-screen ">
+  </head>
+  <body class="bg-gray-100">
+    <div id="app">
+      <div class="min-h-screen bg-gray-100">
+        <!-- Header -->
+        <header class="bg-indigo-600 text-white shadow-lg">
+          <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Portal Residencial</h1>
+            <div class="flex items-center space-x-4">
+              <span class="font-medium">Juan Pérez</span>
+              <div class="w-10 h-10 rounded-full bg-indigo-400 flex items-center justify-center">
+                <span class="text-lg font-bold">JP</span>
+              </div>
+            </div>
+          </div>
+        </header>
+    
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-8">
+          <!-- Dashboard Summary -->
+          <!-- <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Resumen</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h3 class="font-medium text-blue-800">Próximo pago</h3>
+                <p class="text-2xl font-bold text-blue-600">$150.00</p>
+                <p class="text-sm text-blue-500">Vence: 15/10/2025</p>
+              </div>
+              <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                <h3 class="font-medium text-green-800">Reclamos activos</h3>
+                <p class="text-2xl font-bold text-green-600">2</p>
+                <p class="text-sm text-green-500">1 en proceso</p>
+              </div>
+              <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                <h3 class="font-medium text-purple-800">Notificaciones</h3>
+                <p class="text-2xl font-bold text-purple-600">3</p>
+                <p class="text-sm text-purple-500">2 sin leer</p>
+              </div>
+            </div>
+          </div>
+     -->
+          <!-- Tabs -->
+          <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+            <div class="flex border-b" id="tabs">
+              <button class="tab-button active flex-1 py-3 px-4 text-center font-medium hover:bg-gray-100 " data-tab="reclamos">Reclamos</button>
+              <button class="tab-button flex-1 py-3 px-4 text-center font-medium hover:bg-gray-100 " data-tab="pagos">Pagos</button>
+              <button class="tab-button flex-1 py-3 px-4 text-center font-medium hover:bg-gray-100 " data-tab="notificaciones">Notificaciones</button>
+              <button class="tab-button flex-1 py-3 px-4 text-center font-medium hover:bg-gray-100 " data-tab="perfil">Mi Perfil</button>
+            </div>
+    
+            <!-- Reclamos Tab -->
+            <div id="reclamos" class="tab-content active p-6">
+              <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-gray-800">Mis Reclamos</h2>
+                <button id="new-complaint-btn" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Nuevo Reclamo</button>
+              </div>
+    
+              <!-- New Complaint Form (Hidden by default) -->
+              <div id="complaint-form" class="hidden bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
+                <h3 class="font-bold text-gray-700 mb-3">Nuevo Reclamo</h3>
+                <form>
+                  <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="complaint-type">
+                      Tipo de Reclamo
+                    </label>
+                    <select class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="complaint-type">
+                      <option>Mantenimiento</option>
+                      <option>Seguridad</option>
+                      <option>Ruido</option>
+                      <option>Limpieza</option>
+                      <option>Otro</option>
+                    </select>
+                  </div>
+                  <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="complaint-description">
+                      Descripción
+                    </label>
+                    <textarea class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="complaint-description" rows="4" placeholder="Describa su reclamo en detalle..."></textarea>
+                  </div>
+                  <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="complaint-photo">
+                      Adjuntar Foto (opcional)
+                    </label>
+                    <input class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="complaint-photo" type="file" accept="image/*">
+                  </div>
+                  <div class="flex justify-end">
+                    <button id="cancel-complaint-btn" type="button" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition mr-2">Cancelar</button>
+                    <button type="button" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar Reclamo</button>
+                  </div>
+                </form>
+              </div>
+    
+              <!-- Complaints List -->
+              <div class="space-y-4">
+                <div class="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition">
+                  <div class="flex justify-between">
+                    <h3 class="font-bold text-gray-800">Fuga de agua en baño</h3>
+                    <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded">En proceso</span>
+                  </div>
+                  <p class="text-gray-600 text-sm mt-2">Hay una fuga de agua en el baño principal que está causando humedad en la pared.</p>
+                  <div class="flex justify-between items-center mt-3">
+                    <span class="text-xs text-gray-500">Creado: 05/10/2025</span>
+                    <button class="text-indigo-600 text-sm hover:underline">Ver detalles</button>
+                  </div>
+                </div>
+    
+                <div class="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition">
+                  <div class="flex justify-between">
+                    <h3 class="font-bold text-gray-800">Ruido excesivo del vecino</h3>
+                    <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Resuelto</span>
+                  </div>
+                  <p class="text-gray-600 text-sm mt-2">El vecino del apartamento 302 hace ruido excesivo durante la noche.</p>
+                  <div class="flex justify-between items-center mt-3">
+                    <span class="text-xs text-gray-500">Creado: 28/09/2025</span>
+                    <button class="text-indigo-600 text-sm hover:underline">Ver detalles</button>
+                  </div>
+                </div>
+    
+                <div class="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition">
+                  <div class="flex justify-between">
+                    <h3 class="font-bold text-gray-800">Problema con la iluminación</h3>
+                    <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">Pendiente</span>
+                  </div>
+                  <p class="text-gray-600 text-sm mt-2">Las luces del pasillo común no funcionan correctamente.</p>
+                  <div class="flex justify-between items-center mt-3">
+                    <span class="text-xs text-gray-500">Creado: 20/09/2025</span>
+                    <button class="text-indigo-600 text-sm hover:underline">Ver detalles</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+    
+            <!-- Pagos Tab -->
+            <div id="pagos" class="tab-content p-6">
+              <h2 class="text-xl font-bold text-gray-800 mb-6">Historial de Pagos</h2>
+              
+              <!-- Payment Summary -->
+              <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-6">
+                <div class="flex justify-between items-center">
+                  <div>
+                    <h3 class="font-medium text-blue-800">Próximo pago</h3>
+                    <p class="text-2xl font-bold text-blue-600">$150.00</p>
+                    <p class="text-sm text-blue-500">Vence: 15/10/2025</p>
+                  </div>
+                  <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">Pagar ahora</button>
+                </div>
+              </div>
+    
+              <!-- Payment History Table -->
+              <div class="overflow-x-auto">
+                <table class="min-w-full bg-white">
+                  <thead class="bg-gray-100">
+                    <tr>
+                      <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                      <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Concepto</th>
+                      <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+                      <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                      <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comprobante</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-200">
+                    <tr>
+                      <td class="py-3 px-4 text-sm text-gray-500">15/09/2025</td>
+                      <td class="py-3 px-4 text-sm text-gray-500">Cuota de mantenimiento</td>
+                      <td class="py-3 px-4 text-sm text-gray-500">$150.00</td>
+                      <td class="py-3 px-4 text-sm">
+                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Pagado</span>
+                      </td>
+                      <td class="py-3 px-4 text-sm text-gray-500">
+                        <button class="text-indigo-600 hover:underline">Descargar</button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="py-3 px-4 text-sm text-gray-500">15/08/2025</td>
+                      <td class="py-3 px-4 text-sm text-gray-500">Cuota de mantenimiento</td>
+                      <td class="py-3 px-4 text-sm text-gray-500">$150.00</td>
+                      <td class="py-3 px-4 text-sm">
+                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Pagado</span>
+                      </td>
+                      <td class="py-3 px-4 text-sm text-gray-500">
+                        <button class="text-indigo-600 hover:underline">Descargar</button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="py-3 px-4 text-sm text-gray-500">15/07/2025</td>
+                      <td class="py-3 px-4 text-sm text-gray-500">Cuota de mantenimiento</td>
+                      <td class="py-3 px-4 text-sm text-gray-500">$150.00</td>
+                      <td class="py-3 px-4 text-sm">
+                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Pagado</span>
+                      </td>
+                      <td class="py-3 px-4 text-sm text-gray-500">
+                        <button class="text-indigo-600 hover:underline">Descargar</button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="py-3 px-4 text-sm text-gray-500">15/06/2025</td>
+                      <td class="py-3 px-4 text-sm text-gray-500">Cuota de mantenimiento</td>
+                      <td class="py-3 px-4 text-sm text-gray-500">$150.00</td>
+                      <td class="py-3 px-4 text-sm">
+                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Pagado</span>
+                      </td>
+                      <td class="py-3 px-4 text-sm text-gray-500">
+                        <button class="text-indigo-600 hover:underline">Descargar</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+    
+            <!-- Notificaciones Tab -->
+            <div id="notificaciones" class="tab-content p-6">
+              <h2 class="text-xl font-bold text-gray-800 mb-6">Notificaciones</h2>
+              
+              <div class="space-y-4">
+                <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 hover:shadow-md transition">
+                  <div class="flex justify-between">
+                    <h3 class="font-bold text-gray-800">Corte de agua programado</h3>
+                    <span class="text-xs text-gray-500">Hoy, 10:30 AM</span>
+                  </div>
+                  <p class="text-gray-600 text-sm mt-2">Se realizará un corte de agua programado mañana de 9:00 AM a 12:00 PM por mantenimiento.</p>
+                  <div class="flex justify-end mt-3">
+                    <button class="text-indigo-600 text-sm hover:underline">Marcar como leído</button>
+                  </div>
+                </div>
+    
+                <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 hover:shadow-md transition">
+                  <div class="flex justify-between">
+                    <h3 class="font-bold text-gray-800">Reunión de propietarios</h3>
+                    <span class="text-xs text-gray-500">Ayer, 15:45 PM</span>
+                  </div>
+                  <p class="text-gray-600 text-sm mt-2">Se convoca a todos los propietarios a una reunión el próximo sábado a las 18:00 en el salón comunal.</p>
+                  <div class="flex justify-end mt-3">
+                    <button class="text-indigo-600 text-sm hover:underline">Marcar como leído</button>
+                  </div>
+                </div>
+    
+                <div class="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition">
+                  <div class="flex justify-between">
+                    <h3 class="font-bold text-gray-800">Actualización de su reclamo</h3>
+                    <span class="text-xs text-gray-500">02/10/2025, 09:15 AM</span>
+                  </div>
+                  <p class="text-gray-600 text-sm mt-2">Su reclamo sobre la fuga de agua ha sido asignado a un técnico. Será atendido en las próximas 24 horas.</p>
+                  <div class="flex justify-end mt-3">
+                    <button class="text-gray-500 text-sm hover:underline">Ya leído</button>
+                  </div>
+                </div>
+    
+                <div class="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition">
+                  <div class="flex justify-between">
+                    <h3 class="font-bold text-gray-800">Pago recibido</h3>
+                    <span class="text-xs text-gray-500">15/09/2025, 14:20 PM</span>
+                  </div>
+                  <p class="text-gray-600 text-sm mt-2">Hemos recibido su pago de $150.00 correspondiente a la cuota de mantenimiento de septiembre.</p>
+                  <div class="flex justify-end mt-3">
+                    <button class="text-gray-500 text-sm hover:underline">Ya leído</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+    
+            <!-- Perfil Tab -->
+            <div id="perfil" class="tab-content p-6">
+              <h2 class="text-xl font-bold text-gray-800 mb-6">Mi Perfil</h2>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-1">
+                  <div class="bg-white p-6 rounded-lg border border-gray-200">
+                    <div class="flex flex-col items-center">
+                      <div class="w-24 h-24 rounded-full bg-indigo-400 flex items-center justify-center mb-4">
+                        <span class="text-3xl font-bold text-white">JP</span>
+                      </div>
+                      <h3 class="text-xl font-bold">Juan Pérez</h3>
+                      <p class="text-gray-600">Apartamento 201</p>
+                      <button class="mt-4 text-indigo-600 text-sm hover:underline">Cambiar foto</button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="md:col-span-2">
+                  <div class="bg-white p-6 rounded-lg border border-gray-200">
+                    <h3 class="font-bold text-gray-700 mb-4">Información Personal</h3>
+                    <form>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label class="block text-gray-700 text-sm font-bold mb-2" for="nombre">
+                            Nombre
+                          </label>
+                          <input class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="nombre" type="text" value="Juan">
+                        </div>
+                        <div>
+                          <label class="block text-gray-700 text-sm font-bold mb-2" for="apellido">
+                            Apellido
+                          </label>
+                          <input class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="apellido" type="text" value="Pérez">
+                        </div>
+                      </div>
+                      
+                      <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
+                          Correo Electrónico
+                        </label>
+                        <input class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" type="email" value="juan.perez@email.com">
+                      </div>
+                      
+                      <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="telefono">
+                          Teléfono
+                        </label>
+                        <input class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="telefono" type="tel" value="+1234567890">
+                      </div>
+                      
+                      <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="notificaciones">
+                          Preferencias de Notificación
+                        </label>
+                        <div class="mt-2">
+                          <label class="inline-flex items-center">
+                            <input type="checkbox" class="form-checkbox" checked>
+                            <span class="ml-2">Correo electrónico</span>
+                          </label>
+                        </div>
+                        <div class="mt-2">
+                          <label class="inline-flex items-center">
+                            <input type="checkbox" class="form-checkbox" checked>
+                            <span class="ml-2">SMS</span>
+                          </label>
+                        </div>
+                      </div>
+                      
+                      <div class="flex justify-end">
+                        <button type="button" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Guardar Cambios</button>
+                      </div>
+                    </form>
+                  </div>
+                  
+                  <div class="bg-white p-6 rounded-lg border border-gray-200 mt-6">
+                    <h3 class="font-bold text-gray-700 mb-4">Cambiar Contraseña</h3>
+                    <form>
+                      <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="current-password">
+                          Contraseña Actual
+                        </label>
+                        <input class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="current-password" type="password">
+                      </div>
+                      
+                      <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="new-password">
+                          Nueva Contraseña
+                        </label>
+                        <input class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="new-password" type="password">
+                      </div>
+                      
+                      <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="confirm-password">
+                          Confirmar Nueva Contraseña
+                        </label>
+                        <input class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="confirm-password" type="password">
+                      </div>
+                      
+                      <div class="flex justify-end">
+                        <button type="button" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Actualizar Contraseña</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+    
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white py-6">
+          <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+              <div class="mb-4 md:mb-0">
+                <h2 class="text-xl font-bold">Portal Residencial</h2>
+                <p class="text-gray-400">© 2025 Todos los derechos reservados</p>
+              </div>
+              <div>
+                <h3 class="font-bold mb-2">Contacto</h3>
+                <p class="text-gray-400">administracion@residencial.com</p>
+                <p class="text-gray-400">+1234567890</p>
+              </div>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </body>
+  <script>
+ 
 
-  <div class="form-container">
-    <form id="test-form">
-      <label for="test-input">Escribe algo:</label>
-      <input type="text" id="test-input" placeholder="Escribe aquí..." required>
-      <button type="submit">Enviar</button>
-    </form>
+// Tab switching functionality
+document.addEventListener('DOMContentLoaded', () => {
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
 
-  </div>
-  <div id="loading-spinner" class="loading-spinner">
-    <div class="spinner"></div>
-</div>
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Remove active class from all buttons and contents
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      tabContents.forEach(content => content.classList.remove('active'));
 
-</body>
-
-<script>
-  function showLoader() {
-    document.getElementById('loading-spinner').style.display = 'flex';
-    document.body.classList.add('disable-interaction'); // Bloquea interacciones
-}
-
-function hideLoader() {
-    setTimeout(() => {
-        document.getElementById('loading-spinner').style.display = 'none';
-        document.body.classList.remove('disable-interaction'); // Restaura interacciones
-    }, 500);
-}
-
-// Ocultar el loader solo si la página se ha cargado completamente
-window.addEventListener("load", function () {
-    setTimeout(hideLoader, 1000); // Agregar un pequeño retraso para evitar que se oculte demasiado rápido
-});
-
-// Mostrar el loader al enviar formularios
-document.querySelectorAll('form').forEach(form => {
-    form.addEventListener('submit', function () {
-        showLoader();
+      // Add active class to clicked button and corresponding content
+      button.classList.add('active');
+      const tabId = button.getAttribute('data-tab');
+      document.getElementById(tabId).classList.add('active');
     });
-});
+  });
 
-</script>
+  // New complaint form toggle
+  const newComplaintBtn = document.getElementById('new-complaint-btn');
+  const complaintForm = document.getElementById('complaint-form');
+  const cancelComplaintBtn = document.getElementById('cancel-complaint-btn');
+
+  if (newComplaintBtn && complaintForm && cancelComplaintBtn) {
+    newComplaintBtn.addEventListener('click', () => {
+      complaintForm.classList.remove('hidden');
+    });
+
+    cancelComplaintBtn.addEventListener('click', () => {
+      complaintForm.classList.add('hidden');
+    });
+  }
+});
+  </script>
 </html>

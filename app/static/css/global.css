@@ -90,6 +90,11 @@ body {
 }
 
 
+.cursor-not-allowed{
+    cursor: not-allowed;
+}
+
+
 *{
     font-family: "SF Pro Text", serif;
     font-optical-sizing: auto;

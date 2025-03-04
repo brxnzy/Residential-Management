@@ -56,7 +56,27 @@ class Auth:
             session['status'] = user['status']
             session['user'] = user
 
-            # Cerrar cursor y conexión
+            # Si el usuario es residente, obtener su residencia
+            if 'resident' in role_names:
+                session['user']['residence'] = "No residence assigned"  # Inicializa para evitar KeyError
+                cursor.execute("""
+                    SELECT a.apartment_number, a.building, h.house_number
+                    FROM users u
+                    LEFT JOIN apartments a ON u.id = a.id_usuario
+                    LEFT JOIN houses h ON u.id = h.id_usuario
+                    WHERE u.id = %s;
+                """, (user['id'],))
+
+                result = cursor.fetchone()
+
+                if result:
+                    if result['apartment_number'] and result['building']:
+                        session['user']['residence'] = f"{result['building']} - Apartamento {result['apartment_number']}"
+                    elif result['house_number']:
+                        session['user']['residence'] = f"Casa {result['house_number']}"
+
+                print(f"Residencia del usuario: {session['user']['residence']}")
+
             cursor.close()
             db.close()
 
@@ -72,3 +92,4 @@ class Auth:
             print(f"Error en Login: {e}")  
             flash("Error al iniciar sesión. Intenta nuevamente.", 'error')
             return redirect(url_for('login'))
+

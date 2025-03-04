@@ -3,6 +3,7 @@ import bcrypt
 from auth.login import Auth
 from controllers.users_controller import Users
 from controllers.residences_controller import  Residences
+from controllers.resident_controller import  Resident
 from functools import wraps
 import os
 
@@ -18,6 +19,7 @@ class App:
         self.error_handler()
         self.auth = Auth()
         self.user = Users(self.app)
+        self.resident = Resident(self.app)
         self.residences = Residences()
         self.app.config['SECRET_KEY'] = 'secretkey'
         UPLOAD_FOLDER = r'C:\Users\Crist\OneDrive\Documents\Desktop\Final Proyect\app\static\uploads'
@@ -117,12 +119,6 @@ class App:
             flash('Has cerrado sesión exitosamente.', 'success')
             return redirect(url_for('login'))
 
-        @self.app.route('/resident/home')
-        @self.login_required
-        @self.nocache  
-        def home():
-            user = session.get('user')
-            return render_template('resident/home.html', user=user)
 
 
 
@@ -139,9 +135,7 @@ class App:
             'users': 'admin/users.html',
             'my_info': 'admin/my_info.html',
             'user_info': 'admin/user_info.html',
-            'residences': 'admin/residences.html',
-            'residences/apartments': 'admin/residences/apartments.html',
-            'residences/houses': 'admin/residences/houses.html'
+            'residences': 'admin/residences.html'
         }
  
 
@@ -187,7 +181,7 @@ class App:
             )
 
 
-        """ Rutas para el manejo de usuarios """
+        """ Rutas de administracion """
         
 
         @self.app.route('/admin/add_user', methods=['POST'])
@@ -379,7 +373,63 @@ class App:
                 print(f"Error al desocupar residencia: {e}")
                 flash("Hubo un problema al desocupar la residencia", "danger")
 
-            return redirect(url_for('dashboard', section='residences', refresh=1))
+            return redirect(url_for('dashboard', section='residences'))
+
+
+
+
+
+        """ Rutas para el manejo del residente """
+        
+        @self.app.route('/resident')
+        @self.login_required
+        @self.nocache  
+        def home():
+            id = session.get('user_id')
+            user = self.user.get_user_by_id(id)
+            return render_template('resident/home.html', user=user)
+
+
+        @self.app.route('/resident/update_photo/<int:user_id>', methods=['POST'])
+        def update_photo(user_id):
+            try:
+                photo = request.files.get('photo')
+                
+                if not photo or photo.filename == '':
+                    flash('No se seleccionó ninguna foto', 'error')
+                    print('[ERROR] No se seleccionó ninguna foto')
+                    return redirect(request.referrer)
+
+                if self.resident.update_photo(user_id, photo):
+                    flash('Foto actualizada correctamente', 'success')
+                    print(f'[INFO] Foto actualizada para el usuario {user_id}')
+                else:
+                    flash('Error al actualizar la foto', 'error')
+                    print(f'[ERROR] No se pudo actualizar la foto para el usuario {user_id}')
+
+                return redirect(url_for('home'))
+            
+            except Exception as e:
+                print(f'[EXCEPTION] Error en update_photo: {e}')
+                flash('Ocurrió un error inesperado', 'error')
+                return redirect(request.referrer)
+
+
+
+        @self.app.route('/resident/delete_photo/<int:user_id>', methods=['POST'])
+        def delete_photo(user_id):
+            try:
+                if self.resident.delete_photo(user_id):
+                    flash('Foto eliminada correctamente', 'success')
+                    print('foto eliminada correctamente')
+                return redirect(url_for('home'))  # Redirigir al usuario a su perfil después de borrar la foto.
+            except Exception as e:
+                print('Error', e)
+                flash('Error al eliminar la foto', 'danger')
+                return redirect(url_for('home'))
+
+
+
 
 
 

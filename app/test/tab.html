@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("myForm");
+            const inputs = form.querySelectorAll("input, textarea, select");
+            const submitButton = document.getElementById("submitButton");
+
+
+            const originalValues = {};
+            inputs.forEach(input => {
+                originalValues[input.name] = input.value;
+            });
+
+            function checkChanges() {
+                let changed = false;
+                inputs.forEach(input => {
+                    if (input.value !== originalValues[input.name]) {
+                        changed = true;
+                    }
+                });
+
+                submitButton.disabled = !changed;
+            }
+
+            // Agrega eventos de escucha a cada input
+            inputs.forEach(input => {
+                input.addEventListener("input", checkChanges);
+            });
+
+            // Al cargar la página, el botón está deshabilitado
+            submitButton.disabled = true;
+        });
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Formulario con botón deshabilitado</title>
+</head>
+<body class="p-6 bg-gray-100 flex items-center justify-center h-screen">
+
+    <form id="myForm" class="bg-white p-6 rounded-lg shadow-md w-96">
+        <label class="block mb-2 text-gray-700">Nombre:</label>
+        <input type="text" name="nombre" value="Cristopher" class="w-full p-2 border rounded-md mb-4">
+
+        <label class="block mb-2 text-gray-700">Correo:</label>
+        <input type="email" name="correo" value="email@example.com" class="w-full p-2 border rounded-md mb-4">
+
+        <button id="submitButton" type="submit" class="w-full p-2 bg-blue-500 text-white rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed">
+            Guardar cambios
+        </button>
+    </form>
+
+</body>
+</html>

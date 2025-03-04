@@ -272,18 +272,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-document.querySelectorAll(".vacate-btn").forEach((button) => {
-  button.addEventListener("click", function () {
-      const residenceId = this.getAttribute("data-residence-id");
-      const residentId = this.getAttribute("data-resident-id");
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".vacate-btn").forEach(button => {
+      button.addEventListener("click", function () {
+        let residenceId = this.getAttribute("data-residence-id");
+        let residentId = this.getAttribute("data-resident-id");
+        let residenceType = this.getAttribute("data-residence-type");
 
-      console.log("ID Capturado:", residenceId); 
-      console.log("ID Capturado:", residentId); 
-
-     
-      document.getElementById("residenceId").value = residenceId;
-      document.getElementById("residentId").value = residentId;
+        document.getElementById("residenceId").value = residenceId;
+        document.getElementById("residentId").value = residentId;
+        document.getElementById("residenceType").value = residenceType;
+        console.log('residence id:' + residenceId)
+        console.log('resident id:' + residentId)
+        console.log('residence type' + residenceType)
+      });
+    });
   });
-});
+
+
 
 
