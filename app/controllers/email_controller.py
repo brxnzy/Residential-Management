@@ -1,4 +1,5 @@
 import yagmail
+from flask import flash
 from email_validator import validate_email, EmailNotValidError
 import os
 from dotenv import load_dotenv
@@ -48,6 +49,26 @@ class EmailSender:
             print("Correo enviado exitosamente a:", destinatario)
         except Exception as e:
             print(f"Error al enviar el correo: {e}")
+        
+
+    def custom_email(self, destinatario, asunto, mensaje):
+        """Envía un correo con un asunto y mensaje personalizado en formato HTML."""
+        contenido = f"""
+            <html>
+            <body>
+                <h1>{mensaje}</h1>
+            </body>
+            </html>
+        """
+        try:
+            self.yag.send(to=destinatario, subject=asunto, contents=contenido)
+            print("Correo enviado exitosamente a:", destinatario)
+        except Exception as e:
+            print(f"Error al enviar el correo: {e}")
+
+
+
+
 
 
 

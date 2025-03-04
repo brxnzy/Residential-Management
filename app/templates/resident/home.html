@@ -16,6 +16,10 @@
   }
 
   .cursor-not-allowed {
+    cursor: pointer;
+  }
+
+  :disabled.cursor-not-allowed{
     cursor: not-allowed;
   }
 </style>
@@ -354,18 +358,19 @@
                             <button id="btn" type="submit" class="mt-4 hidden bgverde text-md text-white rounded-lg px-2.5 py-3 ">Actualizar foto</button>
                     </form>
 
-                    
+                    {% if user.photo %}
                     <form action="/resident/delete_photo/{{user.id}}" method="post">
                       <button data-tooltip-target="tooltip-right" data-tooltip-placement="right" type="submit" class=" mb-2 md:mb-0 text-white bg-white  font-medium rounded-lg text-sm  py-2.5 text-center">
                         <img class="w-6 h-6" src="{{url_for('static', filename='icons/trash.svg')}}" alt="">
                       </button>
-
-
+                      
+                      
                       <div id="tooltip-right" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white bgverde rounded-lg shadow-xs opacity-0 tooltip ">
                         Eliminar Foto actual
                         <div class="tooltip-arrow" data-popper-arrow></div>
-                    </div>
+                      </div>
                     </form>
+                    {% endif %}
                 </div>
               </div>
             </div> 
@@ -375,45 +380,45 @@
             <div class="md:col-span-2">
               <div class="bg-white p-6 rounded-lg border border-gray-200">
                 <h3 class="font-bold text-gray-700 mb-4">Información Personal</h3>
-                <form id="myInfoForm">
+                <form id="myInfoForm" method="post" action="/resident/update_info/{{user.id}}">
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                       <label class="block text-gray-700 text-sm font-bold mb-2" for="nombre">
                         Nombre
                       </label>
-                      <input name="nombre" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500" id="nombre" type="text" value="{{user.name}}">
+                      <input name="nombre" readonly class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500" id="nombre" type="text" value="{{user.name}}">
                     </div>
                     <div>
                       <label class="block text-gray-700 text-sm font-bold mb-2" for="apellido">
                         Apellido
                       </label>
-                      <input name="apellido" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500" id="apellido" type="text" value="{{user.last_name}}">
+                      <input name="apellido" readonly class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500" id="apellido" type="text" value="{{user.last_name}}">
                     </div>
                   </div>
                 
                   <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="cedula">
                       Cedula
                     </label>
-                    <input name="email" readonly class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500" id="email" type="email" value="{{user.id_card}}">
+                    <input name="cedula" readonly class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500" id="email" type="text" value="{{user.id_card}}">
                   </div>
 
                   <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
                       Correo Electrónico
                     </label>
-                    <input name="email" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight  focus:ring-green-500 focus:border-green-500" id="email" type="email" value="{{user.email}}">
+                    <input name="email" required class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight  focus:ring-green-500 focus:border-green-500" id="email" type="email" value="{{user.email}}">
                   </div>
                 
                   <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="telefono">
                       Teléfono
                     </label>
-                    <input name="telefono" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500" id="telefono" type="tel" value="{{user.Phone}}">
+                    <input name="phone" required id="phone" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500" id="telefono" type="tel" value="{{user.Phone}}">
                   </div>
                 
                   <div class="flex justify-end">
-                    <button type="button" id="submitButton" class="bgverde text-white px-4 py-2 rounded-md disabled:opacity-50 cursor-not-allowed transition">
+                    <button type="submit" id="submitButton" class="bgverde text-white px-4 py-2 rounded-md disabled:opacity-50 cursor-not-allowed transition">
                       Guardar Cambios
                     </button>
                   </div>
@@ -585,6 +590,7 @@ document.getElementById("dropzone-file").addEventListener("change", function(eve
 document.addEventListener("DOMContentLoaded", function () {
   const form = document.getElementById("myInfoForm");
   const inputs = form.querySelectorAll("input");
+  const inputPhone = document.getElementById("phone");
   const submitButton = document.getElementById("submitButton");
 
   // Guarda los valores originales usando el atributo "name"
@@ -595,13 +601,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function checkChanges() {
       let changed = false;
+
+      // Verifica si algún input ha cambiado
       inputs.forEach(input => {
-          if (originalValues.hasOwnProperty(input.name) && input.value !== originalValues[input.name]) {
+          if (input.value !== originalValues[input.name]) {
               changed = true;
           }
       });
 
-      submitButton.disabled = !changed;
+      // Formatea el número de teléfono
+      let phoneValue = inputPhone.value.replace(/\D/g, '');
+      let formattedPhone = '';
+      if (phoneValue.length > 0) formattedPhone += phoneValue.substring(0, 3);
+      if (phoneValue.length > 3) formattedPhone += '-' + phoneValue.substring(3, 6);
+      if (phoneValue.length > 6) formattedPhone += '-' + phoneValue.substring(6, 10);
+      inputPhone.value = formattedPhone;
+
+      // Validar que el teléfono tenga el formato correcto
+      let validPhone = /^\d{3}-\d{3}-\d{4}$/.test(formattedPhone);
+
+      // Habilita el botón solo si hay cambios y el teléfono es válido
+      submitButton.disabled = !(changed && validPhone);
   }
 
   // Agrega eventos de escucha a cada input
@@ -610,7 +630,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Al cargar la página, el botón está deshabilitado
-  submitButton.disabled = true;
+  checkChanges();
 });
 
 

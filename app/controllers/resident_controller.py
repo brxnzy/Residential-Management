@@ -1,5 +1,7 @@
 from config.database import connection_db
 from werkzeug.utils import secure_filename
+from controllers.email_controller import EmailSender
+from flask import flash
 import os
 """
 Clase Resident, donde estara toda la logica que maneja esa entidad, como por ejemplo, enviar reclamos, pagos, etc.
@@ -7,6 +9,7 @@ Clase Resident, donde estara toda la logica que maneja esa entidad, como por eje
 class Resident:
     def __init__(self,app):
         self.db = connection_db()
+        self.email = EmailSender()
         self.db.autocommit = True
         self.app = app
 
@@ -62,4 +65,30 @@ class Resident:
             flash('Error eliminando la foto', 'error')
             print('Error eliminando la foto')
             return False
+
+
+    def update_info(self, user_id, email, phone):
+        try:
+            valid_email = self.email.validar_correo(email)
+            if not valid_email:
+                print("El correo proporcionado no es válido.")
+                flash("El correo proporcionado no es válido.", "error")
+                return False
+
+            query = "UPDATE users SET email = %s, phone = %s WHERE id = %s"
+            cursor = self.db.cursor(dictionary=True)
+            cursor.execute(query, (valid_email, phone, user_id))
+            self.db.commit()
+            cursor.close()
+            self.email.custom_email(valid_email, "Actualización de información",
+                            "Has actualizado correctamente tu información. Gracias por preferirnos.")
+
+            print("Información actualizada y correo de confirmación enviado.")
+            return True
+
+        except Exception as e:
+            print(f"Error al actualizar la información: {e}")
+            return False
+
+
 

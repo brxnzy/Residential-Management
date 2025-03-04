@@ -431,6 +431,28 @@ class App:
 
 
 
+        @self.app.route('/resident/update_info/<int:user_id>', methods=['POST'])
+        def update_info(user_id):
+            try:
+                if request.method == 'POST':
+                    email = request.form.get('email')
+                    phone = request.form.get('phone')
+
+                    if self.resident.update_info(user_id, email, phone):
+                        flash("Credenciales editadas correctamente!", "success")
+                    else:
+                        flash("Error al actualizar la información.", "error")
+
+            except Exception as e:
+                print(f"Error en la ruta update_info: {e}")
+                flash("Ocurrió un error al procesar la solicitud.", "error")
+
+            return redirect(url_for('home'))
+
+
+
+
+
 
 
            
