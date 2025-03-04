@@ -16,9 +16,12 @@
   }
 
   .cursor-not-allowed {
-    cursor: pointer;
+    cursor: not-allowed;
   }
 
+  .disabled\:cursor-not-allowed:disabled {
+    cursor: not-allowed;
+}
   :disabled.cursor-not-allowed{
     cursor: not-allowed;
   }
@@ -427,63 +430,68 @@
               
               <div class="bg-white p-6 rounded-lg border border-gray-200 mt-6">
                 <h3 class="font-bold text-gray-700 mb-4">Cambiar Contraseña</h3>
-                <form>
+                <form action="/resident/update_password/{{user.id}}" method="post">
                   <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="current-password">
-                      Contraseña Actual
-                    </label>
-                    <input name="current_password" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500" id="current-password" type="password">
+                      <label class="block text-gray-700 text-sm font-bold mb-2" for="current-password">
+                          Contraseña Actual
+                      </label>
+                      <input name="current_password" required class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500" id="current-password" type="password">
                   </div>
-                  
+              
                   <div x-data="passwordValidation()">
-                    <div class="mb-4">
-                        <label for="new_password" class="block text-gray-700 text-sm font-bold mb-2">Contraseña</label>
-                        <input type="password" id="new_password" name="new_password" required
-                            x-model="password" x-on:input="validate()"
-                            class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500">
-                    </div>
-                  
-                  <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="confirm-password">
-                      Confirmar Nueva Contraseña
-                    </label>
-                    <input name="confirm_password" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500" id="confirm-password" type="password">
+                      <div class="mb-4">
+                          <label for="new_password" class="block text-gray-700 text-sm font-bold mb-2">Contraseña</label>
+                          <input type="password" id="new_password" name="new_password" required
+                              x-model="password" x-on:input="validate()"
+                              class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500">
+                      </div>
+              
+                      <div class="mb-4">
+                          <label class="block text-gray-700 text-sm font-bold mb-2" for="confirm-password">
+                              Confirmar Nueva Contraseña
+                          </label>
+                          <input name="confirm_password" required class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500" id="confirm-password" type="password"
+                              x-model="confirmPassword" x-on:input="validate()">
+                      </div>
+              
+                      <!-- Lista de requisitos -->
+                      <h2 class="mb-2 text-lg font-semibold text-gray-900">Requisitos de la contraseña:</h2>
+                      <ul class="max-w-md space-y-1 text-gray-500 list-inside">
+                          <li class="flex items-center">
+                              <svg class="w-4 h-4 me-2 shrink-0" 
+                                  :class="lengthValid ? 'text-green-500' : 'text-gray-500'" 
+                                  aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
+                              </svg>
+                              Mínimo 10 caracteres
+                          </li>
+                          <li class="flex items-center">
+                              <svg class="w-4 h-4 me-2 shrink-0" 
+                                  :class="uppercaseValid ? 'text-green-500' : 'text-gray-500'" 
+                                  aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
+                              </svg>
+                              Al menos una letra mayúscula
+                          </li>
+                          <li class="flex items-center">
+                              <svg class="w-4 h-4 me-2 shrink-0" 
+                                  :class="specialCharValid ? 'text-green-500' : 'text-gray-500'" 
+                                  aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
+                              </svg>
+                              Al menos un carácter especial (!@#?()&$*)
+                          </li>
+                      </ul>
+              
+                      <div class="flex justify-end mt-4">
+                        <button type="submit"
+                        class="bgverde text-white px-4 py-2 disabled:opacity-50 cursor-not-allowed rounded-md transition"
+                        :disabled="!isValid">
+                        Actualizar Contraseña
+                    </button>
+                      </div>
                   </div>
-                  
-                  <div class="flex justify-end">
-                    <button type="button" class="bgverde text-white px-4 py-2 rounded-md transition">Actualizar Contraseña</button>
-                  </div>
-
-
-                              <!-- Lista de requisitos -->
-            <h2 class="mb-2 text-lg font-semibold text-gray-900">Requisitos de la contraseña:</h2>
-            <ul class="max-w-md space-y-1 text-gray-500 list-inside">
-                <li class="flex items-center">
-                    <svg class="w-4 h-4 me-2 shrink-0" 
-                         :class="lengthValid ? 'verde' : 'text-gray-500'" 
-                         aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
-                    </svg>
-                    Mínimo 10 caracteres
-                </li>
-                <li class="flex items-center">
-                    <svg class="w-4 h-4 me-2 shrink-0" 
-                         :class="uppercaseValid ? 'verde' : 'text-gray-500'" 
-                         aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
-                    </svg>
-                    Al menos una letra mayúscula
-                </li>
-                <li class="flex items-center">
-                    <svg class="w-4 h-4 me-2 shrink-0" 
-                         :class="specialCharValid ? 'verde' : 'text-gray-500'" 
-                         aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
-                    </svg>
-                    Al menos un carácter especial (!@#?()&$*)
-                </li>
-            </ul>
-                </form>
+              </form>
               </div>
             </div>
           </div>

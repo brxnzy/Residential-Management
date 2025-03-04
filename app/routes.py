@@ -106,7 +106,7 @@ class App:
                     return redirect(url_for('login'))
                     
            
-            return render_template('login.html')
+            return render_template('secure/login.html')
 
 
         @self.app.route('/disabled')
@@ -115,9 +115,16 @@ class App:
 
         @self.app.route('/logout')
         def logout():
+            message = request.args.get('flash_message')  # Recibe el mensaje desde la URL
             session.clear()
-            flash('Has cerrado sesión exitosamente.', 'success')
+            
+            if message:
+                flash(message, "success")
+            flash('Cerraste sesion exitosamente', 'success')
+                
+            
             return redirect(url_for('login'))
+
 
 
 
@@ -290,9 +297,7 @@ class App:
 
             return redirect(url_for('dashboard', section='users'))
 
-        @self.app.route('/prueba')
-        def prueba():
-            return render_template('prueba.html')
+
 
 
 
@@ -330,7 +335,7 @@ class App:
                 except Exception as e:
                     flash(f"Error al habilitar usuario: {e}", "error")
 
-            return render_template("activate_acc.html", user=user)
+            return render_template("secure/activate_acc.html", user=user)
 
 
         @self.app.route('/admin/user_info/<int:user_id>')
@@ -448,6 +453,40 @@ class App:
                 flash("Ocurrió un error al procesar la solicitud.", "error")
 
             return redirect(url_for('home'))
+
+
+
+
+
+        @self.app.route('/resident/update_password/<int:user_id>', methods=['POST'])
+        def update_password(user_id):
+            try:
+                print(f"[DEBUG] Procesando actualización de contraseña para usuario ID: {user_id}")
+
+                current_password = request.form.get('current_password')
+                print(current_password)
+                new_password = request.form.get('new_password')
+                confirm_password = request.form.get('confirm_password')
+
+                print("[DEBUG] Datos recibidos correctamente")
+
+                # Intentar actualizar la contraseña
+                if self.resident.update_password(user_id, current_password, new_password, confirm_password):
+                    print("[DEBUG] Contraseña actualizada exitosamente")
+                    flash("Contraseña actualizada correctamente", "success")
+                    return redirect(url_for('logout', flash_message='Cambiaste tu contraseña'))
+                else:
+                    flash("Error al actualizar la contraseña. Verifica tu información.", "error")
+                    print("[DEBUG] Error en la actualización de la contraseña")
+
+                return redirect(url_for('home')) 
+
+            except Exception as e:
+                flash("Error interno del servidor", "error")
+                print(f"[DEBUG] Error en update_password: {e}")
+                return redirect(url_for('home')) 
+ 
+
 
 
 

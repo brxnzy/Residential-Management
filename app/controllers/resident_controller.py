@@ -1,6 +1,7 @@
 from config.database import connection_db
 from werkzeug.utils import secure_filename
 from controllers.email_controller import EmailSender
+from auth.login import Auth
 from flask import flash
 import os
 """
@@ -10,6 +11,7 @@ class Resident:
     def __init__(self,app):
         self.db = connection_db()
         self.email = EmailSender()
+        self.auth = Auth()
         self.db.autocommit = True
         self.app = app
 
@@ -89,6 +91,48 @@ class Resident:
         except Exception as e:
             print(f"Error al actualizar la información: {e}")
             return False
+
+
+    def update_password(self, user_id, current_password, new_password, confirm_password):
+        try:
+            print(f"[DEBUG] Intentando actualizar la contraseña para el usuario ID: {user_id}")
+
+            cursor = self.db.cursor(dictionary=True)  # Crear cursor correctamente
+
+            # Obtener la contraseña actual del usuario
+            cursor.execute('SELECT password FROM users WHERE id = %s', (user_id,))
+            user_data = cursor.fetchone()
+
+            if not user_data:
+                print("[DEBUG] Usuario no encontrado")
+                return False 
+
+            stored_password = user_data['password']
+
+            # Verificar si la contraseña antigua es correcta
+            if self.auth.check_password(current_password, stored_password):
+                if new_password == confirm_password:
+                    hashed_password = self.auth.hash_password(new_password)
+
+                    # Actualizar la contraseña en la base de datos
+                    cursor.execute('UPDATE users SET password = %s WHERE id = %s', (hashed_password, user_id))
+                    self.db.commit()  # Guardar cambios
+
+                    print("[DEBUG] Contraseña actualizada correctamente")
+                    return True
+                else:
+                    print("[DEBUG] Las nuevas contraseñas no coinciden")
+                    return False
+            else:
+                print("[DEBUG] La contraseña antigua es incorrecta")
+                return False
+
+        except Exception as e:
+            print(f"[DEBUG] Error actualizando password: {e}")
+            return False
+
+        finally:
+            cursor.close()  # Cerrar el cursor correctamente
 
 
 
