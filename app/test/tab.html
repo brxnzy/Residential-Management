@@ -1,56 +1,160 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../static/css/global.css">
+</head>
+<body>
+    <div class="flex justify-center m-5">
+        <button id="defaultModalButton" data-modal-target="defaultModal" data-modal-toggle="defaultModal" class="block text-white bgverde px-2.5 py-3 rounded-lg" type="button">
+        Enviar Reclamo
+        </button>
+    </div>
+
+    <div id="defaultModal" class="hidden fixed inset-0 z-50">
+          <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full mx-4">
+            <h3 class="text-lg font-semibold mb-4">Agregar Evidencia</h3>
+            <form id="uploadForm" action="/resident/send_claim" method="post" enctype="multipart/form-data">
+
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Problematica</label>
+                <select class="border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500" id="complaint-type">
+                  <option value="maintenance">Mantenimiento</option>
+                  <option value="security">Seguridad</option>
+                  <option value="noise">Ruido</option>
+                  <option value="cleaning">Limpieza</option>
+                  <option value="other">Otro</option>
+                </select>
+              </div>
+      
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Descripción</label>
+                <textarea
+                  class="block w-full text-sm text-gray-900 p-2 border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 resize-none"
+                  id="description"
+                  name="description"
+                  rows="4"
+                ></textarea>
+              </div>
+      
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2" for="file_input">
+                  Evidencia *Max. 3* <span class="text-xs text-gray-500">(Opcional)</span>
+                </label>
+                <div class="relative w-full">
+                  <input
+                    class="hidden"
+                    id="file_input"
+                    type="file"
+                    multiple
+                    accept="image/*"
+                  />
+                  <label
+                    for="file_input"
+                    class="block w-full cursor-pointer rounded-lg border border-gray-300  px-4 bg-gray-100 py-2 text-center text-gray-800 "
+                  >
+                    Seleccionar archivos
+                  </label>
+                </div>
+                
+              </div>
+      
+              <div id="previewContainer" class="flex gap-2"></div>
+
+              <button type="submit" class="text-white bgverde px-2.5 rounded-lg py-3">Enviar Reclamo</button>
+            </form>
+          </div>
+
+      </div>
+
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const form = document.getElementById("myForm");
-            const inputs = form.querySelectorAll("input, textarea, select");
-            const submitButton = document.getElementById("submitButton");
+        document.getElementById('file_input').addEventListener('change', function(event) {
+            const files = event.target.files;
+            const previewContainer = document.getElementById('previewContainer');
 
-
-            const originalValues = {};
-            inputs.forEach(input => {
-                originalValues[input.name] = input.value;
-            });
-
-            function checkChanges() {
-                let changed = false;
-                inputs.forEach(input => {
-                    if (input.value !== originalValues[input.name]) {
-                        changed = true;
-                    }
-                });
-
-                submitButton.disabled = !changed;
+            // Validación para asegurarse de no cargar más de 3 imágenes
+            if (previewContainer.children.length + files.length > 3) {
+                // Deshabilitar el input si ya hay 3 imágenes
+                checkFileInputVisibility();
+                return;
             }
 
-            // Agrega eventos de escucha a cada input
-            inputs.forEach(input => {
-                input.addEventListener("input", checkChanges);
-            });
+            // Mostrar imágenes en el contenedor de vista previa
+            for (const file of files) {
+                if (previewContainer.children.length >= 3) break;
 
-            // Al cargar la página, el botón está deshabilitado
-            submitButton.disabled = true;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgContainer = document.createElement('div');
+                    imgContainer.classList.add('relative', 'group');
+
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.classList.add('w-20', 'h-20', 'border', 'rounded', 'object-cover', 'transition-opacity', 'duration-300', 'hover:opacity-50');
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.classList.add('absolute', 'top-1', 'right-1', 'bg-red-600', 'text-white', 'rounded-full', 'p-1', 'opacity-0', 'group-hover:opacity-100', 'transition-opacity', 'duration-300');
+
+                    deleteBtn.innerHTML = `
+<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2.0" stroke="#fff">
+  <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+</svg>
+                    `;
+
+                    deleteBtn.addEventListener('click', function() {
+                        imgContainer.remove();
+                        updateFileInput();
+                        checkFileInputVisibility();
+                    });
+
+                    imgContainer.appendChild(img);
+                    imgContainer.appendChild(deleteBtn);
+                    previewContainer.appendChild(imgContainer);
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // Actualizar el input file después de agregar las imágenes
+            updateFileInput();
+
+            // Verificar si se deben habilitar/deshabilitar los inputs después de agregar las imágenes
+            checkFileInputVisibility();
         });
+
+        function checkFileInputVisibility() {
+            const fileInput = document.getElementById('file_input');
+            const previewContainer = document.getElementById('previewContainer');
+        
+            // Deshabilitar el input si ya hay 3 imágenes
+            if (previewContainer.children.length >= 3) {
+                fileInput.disabled = true;
+            } else {
+                fileInput.disabled = false;
+            }
+        }
+
+        function updateFileInput() {
+            const fileInput = document.getElementById('file_input');
+            const previewContainer = document.getElementById('previewContainer');
+            const dataTransfer = new DataTransfer();
+
+            Array.from(previewContainer.children).forEach(imgContainer => {
+                const imgSrc = imgContainer.querySelector('img').src;
+                fetch(imgSrc)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const file = new File([blob], 'image.jpg', { type: 'image/jpeg' });
+                        dataTransfer.items.add(file);
+                        fileInput.files = dataTransfer.files;
+                    });
+            });
+        }
     </script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <title>Formulario con botón deshabilitado</title>
-</head>
-<body class="p-6 bg-gray-100 flex items-center justify-center h-screen">
-
-    <form id="myForm" class="bg-white p-6 rounded-lg shadow-md w-96">
-        <label class="block mb-2 text-gray-700">Nombre:</label>
-        <input type="text" name="nombre" value="Cristopher" class="w-full p-2 border rounded-md mb-4">
-
-        <label class="block mb-2 text-gray-700">Correo:</label>
-        <input type="email" name="correo" value="email@example.com" class="w-full p-2 border rounded-md mb-4">
-
-        <button id="submitButton" type="submit" class="w-full p-2 bg-blue-500 text-white rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed">
-            Guardar cambios
-        </button>
-    </form>
-
 </body>
 </html>

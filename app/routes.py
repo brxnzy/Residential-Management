@@ -4,6 +4,7 @@ from auth.login import Auth
 from controllers.users_controller import Users
 from controllers.residences_controller import  Residences
 from controllers.resident_controller import  Resident
+from controllers.claims_controller import Claims
 from functools import wraps
 import os
 
@@ -21,6 +22,7 @@ class App:
         self.user = Users(self.app)
         self.resident = Resident(self.app)
         self.residences = Residences()
+        self.claims = Claims(self.app)
         self.app.config['SECRET_KEY'] = 'secretkey'
         UPLOAD_FOLDER = r'C:\Users\Crist\OneDrive\Documents\Desktop\Final Proyect\app\static\uploads'
         self.app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -392,7 +394,8 @@ class App:
         def home():
             id = session.get('user_id')
             user = self.user.get_user_by_id(id)
-            return render_template('resident/home.html', user=user)
+            claims = self.claims.get_my_claims(id)
+            return render_template('resident/home.html', user=user, claims=claims)
 
 
         @self.app.route('/resident/update_photo/<int:user_id>', methods=['POST'])
@@ -487,17 +490,36 @@ class App:
                 return redirect(url_for('home')) 
  
 
+        @self.app.route('/resident/send_claim', methods=['POST'])
+        def send_claim():
+            try:
+                if request.method == 'POST':
+                    # Obtén el id del usuario de la sesión
+                    user_id = session.get('user_id')  # Debes usar user_id, no id
+                    print('id del usuario', user_id)
+                    
+                    # Obtén los datos del formulario
+                    category = request.form.get('category')
+                    description = request.form.get('description')
+                    evidences = request.files.getlist('evidences')
+                    
+                    print('Category: ', category)
+                    print('Description: ', description)
+                    print('Evidences: ', evidences)
+                    
+                    # Llamamos a la función send_claim
+                    if self.claims.send_claim(user_id, category, description, evidences):
+                        flash('reclamo enviado correctamente', 'success')
+                        return redirect(url_for('home')) 
+                    flash('Ocurrio un Error mandando tu reclamo', 'error')
+                    return redirect(url_for('home'))
+
+            except Exception as e:
+                print(f'An exception occurred: {e}')
+                return redirect(url_for('home')) \
 
 
-
-
-
-
-
-           
-
-
-
+            
 
         @self.app.route('/')
         def redirect_to_dashboard():
