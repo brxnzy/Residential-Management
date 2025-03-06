@@ -23,7 +23,8 @@ class Claims:
                 print("Usuario no encontrado")
                 return False
             
-            name_lastname = f"{user['name']}_{user['last_name']}"  # Formato: "Nombre_Apellido"
+            name_lastname = f"{user['name'].strip()}_{user['last_name'].strip()}"
+
 
             # Insertar el reclamo en la base de datos
             query = """
