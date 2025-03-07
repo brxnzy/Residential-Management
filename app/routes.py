@@ -144,13 +144,17 @@ class App:
             'users': 'admin/users.html',
             'my_info': 'admin/my_info.html',
             'user_info': 'admin/user_info.html',
-            'residences': 'admin/residences.html'
+            'residences': 'admin/residences.html',
+            'claims': 'admin/claims.html'
         }
  
 
-            residents, admins, disabled, selected_user, houses = {}, {}, {}, {},{}
+            residents, admins, disabled, selected_user, houses, claims = {}, {}, {}, {},{},{}
             apartments = self.residences.get_apartments() 
             houses = self.residences.get_houses() 
+            claims = self.claims.get_all_claims()
+
+            
 
            
          
@@ -186,7 +190,8 @@ class App:
                 **disabled,
                 houses=houses,
                 apartments=apartments,
-                usuario=selected_user
+                usuario=selected_user,
+                claims=claims
             )
 
 

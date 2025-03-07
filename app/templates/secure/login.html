@@ -26,12 +26,12 @@
     <div class="sm:mx-auto sm:w-full sm:max-w-lg  ">
       <form class="py-8 px-5 rounded-lg shadow-xl   bg-white " action="#" method="POST">
         <img class="mx-auto h-48  w-auto" src="{{url_for('static',filename='img/logo.png')}}" alt="Your Company">
-        <h1 class="text-center mb-8 text-4xl/9 bold tracking-tight text-gray-900">Inicia sesion en tu cuenta</h1>
+        <h1 class="text-center mb-8 text-4xl/9 font-bold tracking-tight text-gray-900">Inicia sesion en tu cuenta</h1>
 
         <div>
           <label for="cedula" class="block text-lg/6 font-medium text-gray-900">Cedula</label>
           <div class="mt-2">
-            <input type="text" name="id_card" id="id_card" autocomplete="off"   required class="block w-full rounded-md bg-white px-3 py-1.5 text-md normal text-gray-900 mb-4 border border-gray-200 -outline-offset-1 outline-gray-300 placeholder:text-gray-400  focus:outline-green-600 sm:text-sm/6"  placeholder="xxx-xxxxxxx-x">
+            <input type="text" name="id_card" id="id_card" autocomplete="off"   required class="block w-full rounded-md bg-white px-3 py-1.5 text-md text-gray-900 mb-4 border border-gray-200 -outline-offset-1 outline-gray-300 placeholder:text-gray-400  focus:outline-green-600 sm:text-sm/6"  placeholder="xxx-xxxxxxx-x">
           </div>
         </div>
   
@@ -39,11 +39,11 @@
         <div class="relative mb-2">
           <div class="flex items-center justify-between">
               <label for="password" class="block text-md font-medium text-black">Password</label>
-              <a href="#" class="text-sm normal verde hover:underline">Forgot your password?</a>
+              <a href="#" class="text-sm verde hover:underline">Forgot your password?</a>
           </div>
           <div class="mt-2 relative">
               <input type="password" id="password" name="password" required
-                     class="block w-full rounded-md bg-white px-3 py-1.5 text-lg normal text-gray-900 mb-4 border border-gray-200  outline-gray-300 placeholder:text-gray-400  focus:outline-green-600 sm:text-sm/6">
+                     class="block w-full rounded-md bg-white px-3 py-1.5 text-lg text-gray-900 mb-4 border border-gray-200  outline-gray-300 placeholder:text-gray-400  focus:outline-green-600 sm:text-sm/6">
               <!-- Button to show/hide password -->
               <button type="button" class="absolute right-0 top-0 py-2 px-2 h-full  rounded-r-md     focus:outline-none" onclick="togglePassword()">
                   <!-- SVG Icon (open eye) -->

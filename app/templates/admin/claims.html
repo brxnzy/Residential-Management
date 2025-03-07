@@ -1,0 +1,146 @@
+<div class="flex px-4 items-center mt-2 justify-between mb-8">
+  <h1 class="text-4xl font-normal bold sm:text-2xl md:text-4xl lg:text-5xl text-left">
+    Reclamos
+  </h1>
+</div>
+
+
+{% if claims %}
+{% for c in claims %}
+  <div class="space-y-4 claim-card {{ 'hidden additional-claim' if loop.index0 > 2 }}">
+    <div class="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition">
+      <div class="flex justify-between">
+        <h3 class="font-bold text-gray-800">{{ c.category }}</h3>
+        <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded">{{ c.status }}</span>
+      </div>
+      <p class="text-gray-600 text-sm mt-2">{{ c.description }}</p>
+
+      <!-- Galería de imágenes de evidencia -->
+      <div class="mt-3 flex space-x-2 thumbnails" data-claim-id="{{ c.id }}">
+        {% set evidence_list = [] %}
+        {% if c.evidence_1 %}
+          {% set _ = evidence_list.append(url_for('static', filename='uploads/evidences/' + c.name|trim + '_' + c.last_name|trim + '/' + c.evidence_1)) %}
+          <img src="{{ evidence_list[-1] }}"
+               alt=""
+               class="w-16 h-16 rounded overflow-hidden cursor-pointer hover:opacity-80 transition thumbnail-img"
+               data-index="0"
+               data-claim-id="{{ c.id }}">
+        {% endif %}
+        {% if c.evidence_2 %}
+          {% set _ = evidence_list.append(url_for('static', filename='uploads/evidences/' + c.name|trim + '_' + c.last_name|trim + '/' + c.evidence_2)) %}
+          <img src="{{ evidence_list[-1] }}"
+               alt="Evidencia 2 del reclamo"
+               class="w-16 h-16 rounded overflow-hidden cursor-pointer hover:opacity-80 transition thumbnail-img"
+               data-index="1"
+               data-claim-id="{{ c.id }}">
+        {% endif %}
+        {% if c.evidence_3 %}
+          {% set _ = evidence_list.append(url_for('static', filename='uploads/evidences/' + c.name|trim + '_' + c.last_name|trim + '/' + c.evidence_3)) %}
+          <img src="{{ evidence_list[-1] }}"
+               alt="Evidencia 3 del reclamo"
+               class="w-16 h-16 rounded overflow-hidden cursor-pointer hover:opacity-80 transition thumbnail-img"
+               data-index="2"
+               data-claim-id="{{ c.id }}">
+        {% endif %}
+      </div>
+      <h2 class="text-sm mt-2 verde hover:underline">{{c.name}} {{c.last_name}}</h2>
+
+      <div class="flex justify-between items-center mt-1">
+        <span class="text-xs text-gray-500">Creado: {{ c.created_at }}</span>
+        <button class="bgverde px-2.5 py-2 rounded-lg text-white" data-modal-toggle="maintenance-modal" data-modal-target="maintenance-modal">solucionar</button>
+      </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+</div>
+</div>  
+{% if claims|length > 3 %}
+<button id="show-more-btn" class="mt-4 verde text-sm hover:underline">Ver Historial</button>
+{% endif %}
+</div>
+</div>
+
+
+
+
+
+<div id="maintenance-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-lg max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t">
+                <h3 class="text-xl font-semibold text-gray-900">
+                    Poner un mantenimiento
+                </h3>
+                <button type="button" class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="maintenance-modal">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Cerrar modal</span>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <div class="p-4 md:p-5 space-y-4">
+                <form id="maintenance-form" class="space-y-4">
+                    <!-- Fecha de mantenimiento -->
+                    <div>
+                        <label for="maintenance-date" class="block mb-2 text-sm font-medium text-gray-900">Fecha de mantenimiento:</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="#b3b2b1" viewBox="0 0 20 20">
+                                    <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                                </svg>
+                            </div>
+                            <!-- Input date de Flowbite -->
+                            <input id="maintenance-date" type="date" class="flowbite-datepicker block w-full rounded-lg border border-gray-300 p-2.5 pl-10 text-sm text-gray-900 focus:ring-2 focus:ring-green-500" placeholder="Seleccionar fecha">
+                        </div>
+                    </div>
+                    
+                    <!-- Horas de inicio y fin -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="start-time" class="block mb-2 text-sm font-medium text-gray-900">Hora de inicio:</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none">
+                                    <svg class="w-4 h-4 time-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="#b3b2b1" viewBox="0 0 24 24">
+                                        <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <input type="time" id="start-time" class="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5" required />
+                            </div>
+                        </div>
+                        <div>
+                            <label for="end-time" class="block mb-2 text-sm font-medium text-gray-900">Hora de fin:</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none">
+                                    <svg class="w-4 h-4 time-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="#b3b2b1" viewBox="0 0 24 24">
+                                        <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <input type="time" id="end-time" class="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5"  required />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Descripción del mantenimiento -->
+                    <div>
+                        <label for="maintenance-description" class="block mb-2 text-sm font-medium text-gray-900">Descripción:</label>
+                        <textarea id="maintenance-description" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5" placeholder="Detalles del mantenimiento..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <!-- Modal footer -->
+            <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b">
+                <button id="save-button" type="button" class="text-white bgverde font-medium rounded-lg text-sm px-5 py-2.5 text-center">Guardar</button>
+                <button data-modal-hide="maintenance-modal" type="button" class="ms-3 text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="{{url_for('static', filename='js/claims.js')}}"></script>
+

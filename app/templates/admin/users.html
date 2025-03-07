@@ -1,6 +1,6 @@
 <div class="flex px-4 items-center mt-2 justify-between mb-8">
   <h1
-    class="text-4xl font-normal bold sm:text-2xl md:text-4xl lg:text-5xl text-left"
+    class="text-4xl font-bold sm:text-2xl md:text-4xl lg:text-5xl text-left"
   >
     Usuarios
   </h1>
@@ -33,7 +33,7 @@
     <tbody>
       {% for admin in admins %}
       <tr>
-        <td class="text-md medium lg:text-lg">
+        <td class="text-md font-medium lg:text-lg">
           <div class="avatar h-20 w-20 rounded-full">
             {% if admin.photo %}
             <img
@@ -49,12 +49,12 @@
             {% endif %}
           </div>
         </td>
-        <td class="text-md medium lg:text-lg font-bold">
+        <td class="text-md  lg:text-lg font-bold">
           {{ admin.name }} {{ admin.last_name }}
         </td>
-        <td class="text-md medium lg:text-lg">{{ admin.id_card }}</td>
-        <td class="text-md medium lg:text-lg">{{ admin.email }}</td>
-        <td class="text-md medium lg:text-lg">{{ admin.registration_date }}</td>
+        <td class="text-md font-font-medium lg:text-lg">{{ admin.id_card }}</td>
+        <td class="text-md font-medium lg:text-lg">{{ admin.email }}</td>
+        <td class="text-md font-medium lg:text-lg">{{ admin.registration_date }}</td>
         <td class="">
           <div class="flex gap-3 justify-end">
             {% if admin.id != user.id %}
@@ -112,7 +112,7 @@
     <tbody>
       {% for resident in residents %}
       <tr>
-        <td class="text-md medium lg:text-lg">
+        <td class="text-md font-medium lg:text-lg">
           <div class="avatar h-20 w-20 rounded-full">
             {% if resident.photo %}
             <img
@@ -128,12 +128,12 @@
             {% endif %}
           </div>
         </td>
-        <td class="text-md medium lg:text-lg font-bold">
+        <td class="text-md font-medium lg:text-lg font-bold">
           {{ resident.name }} {{ resident.last_name }}
         </td>
-        <td class="text-md medium lg:text-lg">{{ resident.id_card }}</td>
-        <td class="text-md medium lg:text-lg">{{ resident.email }}</td>
-        <td class="text-md medium lg:text-lg">
+        <td class="text-md font-medium lg:text-lg">{{ resident.id_card }}</td>
+        <td class="text-md font-medium lg:text-lg">{{ resident.email }}</td>
+        <td class="text-md font-medium lg:text-lg">
           {{ resident.registration_date }}
         </td>
         <td class="">
@@ -197,7 +197,7 @@
       <tbody>
         {% for d in disabled %}
         <tr>
-          <td class="text-md medium lg:text-lg">
+          <td class="text-md font-medium lg:text-lg">
             <div class="avatar h-20 w-20 rounded-full">
               {% if d.photo %}
               <img
@@ -210,13 +210,13 @@
               {% endif %}
             </div>
           </td>
-          <td class="text-md medium lg:text-lg font-bold">
+          <td class="text-md font-medium lg:text-lg font-bold">
             {{ d.name }} {{ d.last_name }}
           </td>
-          <td class="text-md medium lg:text-lg">{{ d.id_card }}</td>
-          <td class="text-md medium lg:text-lg">{{ d.email }}</td>
-          <td class="text-md medium lg:text-lg">{{ d.roles }}</td>
-          <td class="text-md medium lg:text-lg">{{ d.registration_date }}</td>
+          <td class="text-md font-medium lg:text-lg">{{ d.id_card }}</td>
+          <td class="text-md font-medium lg:text-lg">{{ d.email }}</td>
+          <td class="text-md font-medium lg:text-lg">{{ d.roles }}</td>
+          <td class="text-md font-medium lg:text-lg">{{ d.registration_date }}</td>
           <td class="">
             <div class="flex gap-3 justify-end">
               <!-- Si el usuario tiene el rol de residente, mostrar el modal -->
@@ -265,7 +265,7 @@
     class="w-3/4 md:w-2/3 lg:w-1/2 max-w-md scale-x-[-1]"
   />
   <h2
-    class="text-xl sm:text-2xl md:text-4xl lg:text-4xl medium text-black text-left"
+    class="text-xl sm:text-2xl md:text-4xl lg:text-4xl font-medium text-black text-left"
   >
     No hay usuarios deshabilitados...
   </h2>
@@ -309,12 +309,12 @@
               <!-- Contenedor flex para los botones -->
               <div class="flex justify-center gap-3">
                   <form action="/admin/dashboard/delete_user/" method="post" id="deleteForm">
-                      <button data-modal-hide="popup-modal" type="submit" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
+                      <button data-modal-hide="popup-modal" type="submit" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
                           Yes, I'm sure
                       </button>
                   </form>
                   
-                  <button data-modal-hide="popup-modal" type="button" class="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-green-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                  <button data-modal-hide="popup-modal" type="button" class="py-2.5 px-5 text-sm font-font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-green-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
                       No, cancel
                   </button>
               </div>
@@ -373,8 +373,8 @@
                   </div>
 
                   <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b">
-                      <button type="submit" class="text-white bgverde focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Asignar Propiedad</button>
-                      <button data-modal-hide="assign-property-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700">Cancelar</button>
+                      <button type="submit" class="text-white bgverde focus:ring-4 font-font-medium rounded-lg text-sm px-5 py-2.5 text-center">Asignar Propiedad</button>
+                      <button data-modal-hide="assign-property-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700">Cancelar</button>
                   </div>
               </form>
           </div>

@@ -80,22 +80,12 @@
 </head>
 <body class="bg-gray-100">
 <div id="app">
-  <div class="min-h-screen bg-gray-100">
+  <div class="min-h-screen bg-gray-100 mt-8">
     <!-- Header -->
-    <header class="bg-indigo-600 text-white shadow-lg">
-      <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-        <h1 class="text-2xl font-bold">Portal Residencial</h1>
-        <div class="flex items-center space-x-4">
-          <span class="font-medium">Juan Pérez</span>
-          <div class="w-10 h-10 rounded-full bg-indigo-400 flex items-center justify-center">
-            <span class="text-lg font-bold">JP</span>
-          </div>
-        </div>
-      </div>
-    </header>
+    
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
+    <main class="container mx-auto px-4 py-8 ">
 
        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
         <h2 class="text-xl font-bold text-gray-800 mb-4">Resumen</h2>
@@ -153,11 +143,11 @@
                 <div class="mb-4">
                   <label class="block text-sm font-medium text-gray-700">Problematica</label>
                   <select required name="category" class="border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500" id="complaint-type">
-                    <option value="maintenance">Mantenimiento</option>
-                    <option value="security">Seguridad</option>
-                    <option value="noise">Ruido</option>
-                    <option value="cleaning">Limpieza</option>
-                    <option value="other">Otro</option>
+                    <option value="mantenimiento">Mantenimiento</option>
+                    <option value="seguridad">Seguridad</option>
+                    <option value="ruido">Ruido</option>
+                    <option value="limpieza">Limpieza</option>
+                    <option value="otro">Otro</option>
                   </select>
                 </div>
         
@@ -247,15 +237,22 @@
                   <span class="text-xs text-gray-500">Creado: {{ c.created_at }}</span>
                 </div>
               </div>
+              {% endfor %}
+              {% else %}
+              <div class="flex flex-col items-center justify-center">
+                <img src="{{url_for('static', filename='icons/claim.svg')}}" alt="" class="w-96 mb-4">
+                <h1 class="text-xl text-gray-700">Manda tu primer reclamo!</h1>
+              </div>
+              
+              {% endif %}
             </div>
-          {% endfor %}
-        {% endif %}
       </div>
-  
+      </div>  
       {% if claims|length > 3 %}
-        <button id="show-more-btn" class="mt-4 text-indigo-600 text-sm hover:underline">Ver más</button>
+        <button id="show-more-btn" class="mt-4 verde text-sm hover:underline">Ver Historial</button>
       {% endif %}
     </div>
+</div>  
 
 
         <!-- Pagos Tab -->
@@ -581,12 +578,13 @@
           </div>
         </div>
       </div>
+    </div>
     </main>
-
-
-    
   </div>
 </div>
+
+
+     
 
 
 

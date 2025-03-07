@@ -78,7 +78,7 @@ class Claims:
     def get_my_claims(self, user_id):
         try:
             cursor = self.db.cursor(dictionary=True)
-            cursor.execute("SELECT * FROM claims WHERE id_usuario = %s", (user_id,))  # <-- La coma es importante
+            cursor.execute("SELECT * FROM claims WHERE id_usuario = %s ORDER BY created_at DESC", (user_id,))
             claims = cursor.fetchall()
             return claims
         except Exception as e:
@@ -86,3 +86,28 @@ class Claims:
             return []
         finally:
             cursor.close()  
+
+
+    def get_all_claims(self):
+        try:
+            cursor = self.db.cursor(dictionary=True)
+            cursor.execute("""
+            SELECT c.*, u.name AS name, u.last_name AS last_name,
+                    COALESCE(
+                        CONCAT('Building ', a.building, ', Apt ', a.apartment_number),
+                        CONCAT('House ', h.house_number)
+                    ) AS residence
+                FROM claims c
+                JOIN users u ON c.id_usuario = u.id
+                LEFT JOIN apartments a ON c.id_usuario = a.id_usuario
+                LEFT JOIN houses h ON c.id_usuario = h.id_usuario
+                ORDER BY c.created_at DESC
+            """)
+            claims = cursor.fetchall()
+            return claims
+        except Exception as e:
+            print('Un error ocurrió:', e)
+            return []
+        finally:
+            cursor.close()
+
