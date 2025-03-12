@@ -20,11 +20,9 @@
     <h2 class="text-2xl mb-2 text-gray-800">Número de teléfono: {{ usuario.Phone }}</h2>
     
     {% if 'resident' in usuario.role %}
-        {% if usuario.building and usuario.apartment_number %}
-            <h2 class="text-2xl mb-2 text-gray-800 text-left">Residencia: {{ usuario.building }} - {{ usuario.apartment_number }}</h2>
-        {% else %}
-            <h2 class="text-2xl mb-2 text-gray-800 text-left">Residencia: Casa {{ usuario.house }}</h2>
-        {% endif %}
+
+            <h2 class="text-2xl mb-2 text-gray-800 text-left">Residencia: Casa {{ usuario.residence }}</h2>
+
     {% endif %}
 
     <h2 class="text-2xl text-gray-800">Fecha de Registro: {{ usuario.registration_date }}</h2>

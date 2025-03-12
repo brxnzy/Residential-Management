@@ -1,108 +1,154 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const dateInput = document.getElementById('maintenance-date');
-    const startTimeInput = document.getElementById('start-time');
-    const endTimeInput = document.getElementById('end-time');
-    const descriptionInput = document.getElementById('maintenance-description');
-    const saveButton = document.getElementById('save-button');
-    const form = document.getElementById('maintenance-form');
+const form = document.getElementById('claim-form');
+const claimDateInput = document.getElementById('claim-date');
+const startTimeInput = document.getElementById('start-time');
+const claimDateError = document.getElementById('claim-date-error');
+const startTimeError = document.getElementById('start-time-error');
+const saveButton = document.getElementById('save-button'); 
 
-    // Helper: Get current time as a string (HH:MM format)
-    function getCurrentTimeStr() {
-        const now = new Date();
-        const hours = now.getHours().toString().padStart(2, '0');
-        const minutes = (Math.ceil(now.getMinutes() / 5) * 5 % 60).toString().padStart(2, '0');
-        return `${hours}:${minutes}`;
+// Función para formatear hora a HH:MM
+function formatTime(date) {
+    return date.toTimeString().slice(0, 5); 
+}
+
+// Establecer valores por defecto
+function setDefaultValues() {
+    const today = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Santo_Domingo" }));
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const currentDate = `${year}-${month}-${day}`; // Formato YYYY-MM-DD
+
+    const currentTime = new Date(today.getTime() + 5 * 60000); // +10 minutos
+
+    claimDateInput.value = currentDate;
+    if (claimDateInput.value === currentDate) {
+        startTimeInput.value = formatTime(currentTime);
+    } else {
+        startTimeInput.value = '08:00';
+    }
+}
+
+// Función para mostrar errores
+function showError(element, message) {
+    element.textContent = message;
+    element.classList.remove('hidden');
+}
+
+function hideError(element) {
+    element.textContent = '';
+    element.classList.add('hidden');
+}
+
+// Función de validación
+function validateForm() {
+    let isValid = true;
+
+    // Obtener la fecha y hora actuales en la zona horaria de Santo Domingo
+    const now = new Date().toLocaleString("es-ES", { timeZone: "America/Santo_Domingo" });
+    const dateParts = now.split(",")[0].split("/");
+    const currentDate = `${dateParts[2]}-${dateParts[1].padStart(2, "0")}-${dateParts[0].padStart(2, "0")}`;
+    const today = new Date();
+    const currentTime = formatTime(today);
+
+    const claimDate = claimDateInput.value;
+    const startTime = startTimeInput.value;
+
+    // Resetear errores
+    hideError(claimDateError);
+    hideError(startTimeError);
+
+    // Validación 1: La fecha no puede ser anterior a hoy
+    if (claimDate < currentDate) {
+        showError(claimDateError, 'La fecha no puede ser anterior a hoy.');
+        isValid = false;
     }
 
-    // Helper: Convert time string to Date object for comparison
-    function timeToDate(dateStr, timeStr) {
-        const [hours, minutes] = timeStr.split(':').map(Number);
-        const date = new Date(dateStr);
-        date.setHours(hours, minutes, 0, 0);
-        return date;
-    }
-
-    // Set default values
-    function setDefaultValues() {
-        const now = new Date();
-        const today = now.toISOString().split('T')[0];
-        dateInput.value = today;
-        dateInput.min = today;
-
-        const currentTimeStr = getCurrentTimeStr();
-        startTimeInput.value = currentTimeStr;
-        startTimeInput.min = currentTimeStr; // Prevent past times for today
-
-        const endTime = new Date(now);
-        endTime.setMinutes(endTime.getMinutes() + 30);
-        endTimeInput.value = endTime.toTimeString().slice(0, 5);
-        endTimeInput.min = currentTimeStr; // Ensure end time is after start
-    }
-
-    // Validate and enforce constraints
-    function enforceConstraints() {
-        const now = new Date();
-        const selectedDate = new Date(dateInput.value);
-        const todayStr = now.toISOString().split('T')[0];
-        const isToday = selectedDate.toDateString() === new Date(todayStr).toDateString();
-
-        // Validate date (must be today or future)
-        if (selectedDate < new Date(todayStr)) {
-            dateInput.value = todayStr;
-            dateInput.setCustomValidity('La fecha no puede ser anterior a hoy');
-        } else {
-            dateInput.setCustomValidity('');
+    // Validación 2: Campos completos y formato válido
+    if (!claimDate || !startTime) {
+        if (!claimDate) showError(claimDateError, 'Seleccione una fecha.');
+        if (!startTime) showError(startTimeError, 'Seleccione una hora de inicio.');
+        isValid = false;
+    } else {
+        // Validación 3: Horario permitido (08:00-20:00)
+        const minTime = '08:00';
+        const maxTime = '20:00';
+        if (startTime < minTime || startTime > maxTime) {
+            showError(startTimeError, 'La hora debe estar entre 08:00 y 20:00.');
+            isValid = false;
         }
 
-        // Validate start time (no past times for today)
-        const currentTimeStr = getCurrentTimeStr();
-        startTimeInput.min = isToday ? currentTimeStr : '00:00';
-        const startDateTime = timeToDate(dateInput.value, startTimeInput.value);
-        if (isToday && startDateTime < now) {
-            startTimeInput.value = currentTimeStr; // Automatically correct to current time
-            startTimeInput.setCustomValidity('La hora de inicio no puede ser anterior a la hora actual');
-        } else {
-            startTimeInput.setCustomValidity('');
+        // Validación 4: Si es hoy, hora de inicio no anterior a la actual
+        if (claimDate === currentDate && startTime < currentTime) {
+            showError(startTimeError, 'La hora de inicio no puede ser anterior a la actual.');
+            isValid = false;
         }
-
-        // Validate end time (must be after start time)
-        endTimeInput.min = startTimeInput.value;
-        const endDateTime = timeToDate(dateInput.value, endTimeInput.value);
-        if (endDateTime <= startDateTime) {
-            const newEndTime = new Date(startDateTime);
-            newEndTime.setMinutes(newEndTime.getMinutes() + 30);
-            endTimeInput.value = newEndTime.toTimeString().slice(0, 5); // Automatically correct
-            endTimeInput.setCustomValidity('La hora de fin debe ser posterior a la hora de inicio');
-        } else {
-            endTimeInput.setCustomValidity('');
-        }
-
-        // Optional: Validate description (can be empty, no custom validity needed)
-        descriptionInput.setCustomValidity('');
     }
 
-    // Event listeners for real-time validation
-    dateInput.addEventListener('input', enforceConstraints);
-    startTimeInput.addEventListener('input', enforceConstraints);
-    endTimeInput.addEventListener('input', enforceConstraints);
-    descriptionInput.addEventListener('input', enforceConstraints); // For consistency, though optional
+    // Habilitar o deshabilitar el botón según la validez
+    saveButton.disabled = !isValid;
 
-    // Form submission
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        enforceConstraints(); // Final validation and correction
-        console.log('Maintenance scheduled:', {
-            date: dateInput.value,
-            startTime: startTimeInput.value,
-            endTime: endTimeInput.value,
-            description: descriptionInput.value
+    return isValid;
+}
+
+// Inicializar valores por defecto al cargar la página
+setDefaultValues();
+validateForm(); // Validar al cargar para establecer el estado inicial del botón
+
+// Validación y ajustes en tiempo real
+claimDateInput.addEventListener('input', () => {
+    const today = new Date().toLocaleString("en-US", { timeZone: "America/Santo_Domingo" });
+    const currentDate = today.split('T')[0];
+    const nowPlus10 = new Date(new Date().getTime() + 10 * 60000);
+    if (claimDateInput.value === currentDate) {
+        startTimeInput.value = formatTime(nowPlus10);
+    } else {
+        startTimeInput.value = '08:00';
+    }
+    validateForm();
+});
+
+startTimeInput.addEventListener('input', validateForm);
+
+// Validación al enviar el formulario
+form.addEventListener('submit', function (event) {
+    event.preventDefault(); // Prevenir el envío por defecto
+    if (validateForm()) {
+        console.log('Formulario válido, enviando...');
+        this.submit(); // Enviar solo si es válido
+    } else {
+        console.log('Formulario no enviado debido a errores.');
+    }
+});
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".attend-claim-btn").forEach(button => {
+        button.addEventListener("click", function () {
+            const claimId = this.getAttribute("data-claim-id");
+            console.log("ID del reclamo:", claimId);
+            
+            // Aquí puedes pasar el ID al modal
+            document.getElementById("claim-id-input").value = claimId;
         });
     });
-
-    // Initialize
-    setDefaultValues();
-    enforceConstraints();
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".reject-claim-btn").forEach(button => {
+        button.addEventListener("click", function () {
+            const claimId = this.getAttribute("data-claim-id");
+            console.log("ID del reclamo:", claimId);
+            
+            // Aquí puedes pasar el ID al modal
+            document.getElementById("reject-id-input").value = claimId;
+        });
+    });
+});
+
 
 document.addEventListener('DOMContentLoaded', () => {
     // Crear overlay para imagen grande

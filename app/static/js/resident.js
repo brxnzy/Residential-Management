@@ -1,3 +1,44 @@
+function filterNotifications() {
+  const filter = document.getElementById('notification-filter').value;
+  const notifications = document.querySelectorAll('.notification-item');
+  let hasVisible = false;
+
+  notifications.forEach(notification => {
+    const status = notification.getAttribute('data-status');
+    const isVisible = filter === 'all' || filter === status;
+    
+    notification.classList.toggle('hidden', !isVisible);
+    if (isVisible) hasVisible = true;
+  });
+
+  // Mostrar mensaje si no hay notificaciones visibles
+  document.getElementById('no-notifications-message').classList.toggle('hidden', hasVisible);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const filterDropdown = document.getElementById('notification-filter');
+  filterDropdown.value = 'unread';
+  filterNotifications();
+  filterDropdown.addEventListener('change', filterNotifications);
+});
+
+// Marcar como leído sin recargar la página
+
+
+function updateNotificationCounts() {
+  const unreadCount = document.querySelectorAll('.notification-item[data-status="unread"]').length;
+  const readCount = document.querySelectorAll('.notification-item[data-status="read"]').length;
+  const totalCount = unreadCount + readCount;
+
+  document.querySelector('option[value="unread"]').textContent = `Sin leer (${unreadCount})`;
+  document.querySelector('option[value="read"]').textContent = `Leídas (${readCount})`;
+  document.querySelector('option[value="all"]').textContent = `Todas (${totalCount})`;
+
+  filterNotifications(); // Verificar si se debe mostrar el mensaje de "No hay notificaciones"
+}
+
+
+
 document.addEventListener('DOMContentLoaded', () => {
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');

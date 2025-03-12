@@ -5,6 +5,7 @@ from controllers.users_controller import Users
 from controllers.residences_controller import  Residences
 from controllers.resident_controller import  Resident
 from controllers.claims_controller import Claims
+from controllers.notifications_controller import Notifications
 from functools import wraps
 import os
 
@@ -23,6 +24,7 @@ class App:
         self.resident = Resident(self.app)
         self.residences = Residences()
         self.claims = Claims(self.app)
+        self.notification = Notifications()
         self.app.config['SECRET_KEY'] = 'secretkey'
         UPLOAD_FOLDER = r'C:\Users\Crist\OneDrive\Documents\Desktop\Final Proyect\app\static\uploads'
         self.app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -400,7 +402,9 @@ class App:
             id = session.get('user_id')
             user = self.user.get_user_by_id(id)
             claims = self.claims.get_my_claims(id)
-            return render_template('resident/home.html', user=user, claims=claims)
+            notifications = self.notification.user_notifications(id)
+          
+            return render_template('resident/home.html', user=user, claims=claims, notifications=notifications)
 
 
         @self.app.route('/resident/update_photo/<int:user_id>', methods=['POST'])
@@ -499,8 +503,7 @@ class App:
         def send_claim():
             try:
                 if request.method == 'POST':
-                    # Obtén el id del usuario de la sesión
-                    user_id = session.get('user_id')  # Debes usar user_id, no id
+                    user_id = session.get('user_id')
                     print('id del usuario', user_id)
                     
                     # Obtén los datos del formulario
@@ -508,12 +511,18 @@ class App:
                     description = request.form.get('description')
                     evidences = request.files.getlist('evidences')
                     
+                    # Filtrar archivos vacíos
+                    valid_evidences = [file for file in evidences if file and file.filename and file.stream.read()]
+                    # Reiniciar los streams de los archivos válidos para que puedan ser leídos de nuevo
+                    for file in valid_evidences:
+                        file.stream.seek(0)
+                    
                     print('Category: ', category)
                     print('Description: ', description)
-                    print('Evidences: ', evidences)
+                    print('Valid Evidences: ', valid_evidences)
                     
-                    # Llamamos a la función send_claim
-                    if self.claims.send_claim(user_id, category, description, evidences):
+                    # Llamamos a la función send_claim con los archivos filtrados
+                    if self.claims.send_claim(user_id, category, description, valid_evidences):
                         flash('reclamo enviado correctamente', 'success')
                         return redirect(url_for('home')) 
                     flash('Ocurrio un Error mandando tu reclamo', 'error')
@@ -521,7 +530,93 @@ class App:
 
             except Exception as e:
                 print(f'An exception occurred: {e}')
-                return redirect(url_for('home')) \
+                return redirect(url_for('home'))
+
+
+        @self.app.route('/admin/attend_claim', methods=['POST'])
+        def attend_claim():
+            try:
+                if request.method == 'POST':
+                    claim_id = request.form.get('claim_id')
+                    schedule_date = request.form.get('schedule_date')
+                    start_time = request.form.get('start_time')
+                    description = request.form.get('description')
+
+                    print('Claim ID:', claim_id)
+                    print('Schedule Date:', schedule_date)
+                    print('Start Time:', start_time)
+                    print('Description:', description)
+ 
+                    # Llamar al método attend_claim en la instancia claims
+                    if self.claims.attend_claim(claim_id, schedule_date, start_time,  description):
+                        flash('Reclamo atendido correctamente', 'success')
+                        return redirect(url_for('dashboard', section='claims')) 
+
+                    flash('Ocurrió un error al atender el reclamo', 'error')
+                    return redirect(url_for('dashboard', section='claims'))
+
+            except Exception as e:
+                print(f'An exception occurred: {e}')
+                return redirect(url_for('dashboard', section='claims'))
+
+
+        @self.app.route('/admin/reject_claim', methods=['POST'])
+        def reject_claim():
+            try:
+                claim_id = request.form.get('claim_id')
+                reject_reason = request.form.get('reject_reason')  # Corrected line
+
+                reject = self.claims.reject_claim(claim_id, reject_reason)  # 
+
+                if reject:
+                    flash("Reclamo rechazado exitosamente", "success")
+                    return redirect(url_for('dashboard', section='claims'))
+                else:
+                    flash("Hubo un error al rechazar el reclamo", "error")
+                    return redirect(url_for('dashboard', section='claims'))
+
+                return redirect(url_for('dashboard', section='claims'))
+            except Exception as e:
+                print('Error rechazando el reclamo', e)
+
+        
+        @self.app.route('/resident/mark_as_read', methods=['POST'])
+        def mark_as_read():
+            try:
+                notification_id = request.form.get('notification_id')
+                if self.notification.mark_as_read(notification_id):
+                    flash('Notificacion marcada como leída', 'success')
+                    return redirect(url_for('home'))
+                else:
+                    flash('Error al marcar la notificacion como leída','error')
+                    return redirect(url_for('home'))
+
+                return redirect(url_for('home'))
+ 
+            except:
+              print('An exception occurred')
+
+        
+        @self.app.route('/admin/finish_claim', methods=['POST'])
+        def finish_claim():
+            try:
+                claim_id = request.form.get('claim_id')
+                finish = self.claims.finish_claim(claim_id)
+                print(f"el id del claim es:" , claim_id)
+
+                if finish:
+                    flash("Reclamo finalizado exitosamente", "success")
+                    return redirect(url_for('dashboard', section='claims'))
+            except Exception as e:
+                print('Error finalizando el reclamo', e)
+                flash("Hubo un error al finalizar el reclamo", "error")
+                return redirect(url_for('dashboard', section='claims'))
+
+            return redirect(url_for('dashboard', section='claims'))
+
+
+
+
 
 
             

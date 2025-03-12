@@ -110,12 +110,19 @@
 
       <!-- Tabs --> 
       <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-        <div class="flex border-b" id="tabs">
-          <button class="tab-button  flex-1 py-3 px-4 text-center font-medium hover:bg-gray-100 " data-tab="reclamos">Reclamos</button>
-          <button class="tab-button flex-1 py-3 px-4 text-center font-medium hover:bg-gray-100 " data-tab="pagos">Pagos</button>
-          <button class="tab-button flex-1 py-3 px-4 text-center font-medium hover:bg-gray-100 " data-tab="notificaciones">Notificaciones</button>
-          <button class="tab-button flex-1 py-3 px-4 text-center font-medium hover:bg-gray-100 " data-tab="perfil">Mi Perfil</button>
-        </div>
+        <div class="flex border-b overflow-x-auto whitespace-nowrap" id="tabs">
+          <button class="tab-button flex-1 py-3 px-6 text-center font-medium hover:bg-gray-100" data-tab="reclamos">Reclamos</button>
+          <button class="tab-button flex-1 py-3 px-6 text-center font-medium hover:bg-gray-100" data-tab="pagos">Pagos</button>
+          <button class="tab-button flex-1 py-3 px-6 text-center font-medium hover:bg-gray-100 inline-flex items-center justify-center" data-tab="notificaciones">
+              Notificaciones
+              {% set unread_count = notifications | selectattr('status', 'equalto', 'unread') | list | length %}
+              {% if unread_count > 0 %}
+                  <span class="w-2 h-2 ms-2 bg-red-500 rounded-full"></span>
+              {% endif %}
+          </button>
+          <button class="tab-button flex-1 py-3 px-6 text-center font-medium hover:bg-gray-100" data-tab="perfil">Mi Perfil</button>
+      </div>
+        
 
 
 
@@ -126,272 +133,260 @@
 
 
 
-        <div id="reclamos" class="tab-content active p-6">
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold text-gray-800">Mis Reclamos</h2>
-            <button id="defaultModalButton" data-modal-target="defaultModal" data-modal-toggle="defaultModal" class="block text-white bgverde px-2.5 py-3 rounded-lg" type="button">
+<!-- Contenido de los tabs -->
+<div class="tab-contents">
+  <!-- Reclamos Tab -->
+  <div id="reclamos" class="tab-content active p-6">
+      <div class="flex justify-between items-center mb-6">
+          <h2 class="text-xl font-bold text-gray-800">Mis Reclamos</h2>
+          <button id="defaultModalButton" data-modal-target="defaultModal" data-modal-toggle="defaultModal" class="block text-white bgverde px-2.5 py-3 rounded-lg" type="button">
               Enviar Reclamo
-              </button>
-          </div>
+          </button>
+      </div>
 
-          <!-- New Complaint Form (Hidden by default) -->
-          <div id="defaultModal" class="hidden fixed inset-0 z-50">
-            <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full mx-4">
+      <!-- New Complaint Form (Hidden by default) -->
+      <div id="defaultModal" class="hidden fixed inset-0 z-50">
+          <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full mx-4">
               <h3 class="text-lg font-semibold mb-4">Agregar Evidencia</h3>
               <form id="uploadForm" action="/resident/send_claim" method="post" enctype="multipart/form-data">
-    
-                <div class="mb-4">
-                  <label class="block text-sm font-medium text-gray-700">Problematica</label>
-                  <select required name="category" class="border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500" id="complaint-type">
-                    <option value="mantenimiento">Mantenimiento</option>
-                    <option value="seguridad">Seguridad</option>
-                    <option value="ruido">Ruido</option>
-                    <option value="limpieza">Limpieza</option>
-                    <option value="otro">Otro</option>
-                  </select>
-                </div>
-        
-                <div class="mb-4">
-                  <label class="block text-sm font-medium text-gray-700">Descripción</label>
-                  <textarea
-                    required
-                    class="block w-full text-sm text-gray-900 p-2 border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500  resize-none"
-                    id="description"
-                    name="description"
-                    rows="4"
-                  ></textarea>
-                </div>
-        
-                <div class="mb-4">
-                  <label class="block text-sm font-medium text-gray-700 mb-2" for="file_input">
-                    Evidencia *Max. 3* <span class="text-xs text-gray-500">(Opcional)</span>
-                  </label>
-                  <div class="relative w-full">
-                    <input
-                      class="hidden"
-                      id="file_input"
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      name="evidences"
-                    />
-                    <label
-                      for="file_input"
-                      class="block w-full cursor-pointer rounded-lg border border-gray-300  px-4 bg-gray-100 py-2 text-center text-gray-800 "
-                    >
-                      Seleccionar archivos
-                    </label>
+                  <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700">Problemática</label>
+                      <select required name="category" class="border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500" id="complaint-type">
+                          <option value="Mantenimiento">Mantenimiento</option>
+                          <option value="Seguridad">Seguridad</option>
+                          <option value="Ruido">Ruido</option>
+                          <option value="Limpieza">Limpieza</option>
+                          <option value="Otro">Otro</option>
+                      </select>
                   </div>
-                  
-                </div>
-        
-                <div id="previewContainer" class="flex gap-2 mb-4"></div>
-    
-                <button type="submit" class="text-white bgverde px-2.5 rounded-lg py-3">Enviar Reclamo</button>
+                  <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700">Descripción</label>
+                      <textarea required class="block w-full text-sm text-gray-900 p-2 border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 resize-none" id="description" name="description" rows="4"></textarea>
+                  </div>
+                  <div class="mb-4">
+                      <label class="block text-sm font-medium text-gray-700 mb-2" for="file_input">
+                          Evidencia *Max. 3* <span class="text-xs text-gray-500">(Opcional)</span>
+                      </label>
+                      <div class="relative w-full">
+                          <input class="hidden" id="file_input" type="file" multiple accept="image/*" name="evidences" />
+                          <label for="file_input" class="block w-full cursor-pointer rounded-lg border border-gray-300 px-4 bg-gray-100 py-2 text-center text-gray-800">
+                              Seleccionar archivos
+                          </label>
+                      </div>
+                  </div>
+                  <div id="previewContainer" class="flex gap-2 mb-4"></div>
+                  <button type="submit" class="text-white bgverde px-2.5 rounded-lg py-3">Enviar Reclamo</button>
               </form>
-            </div>
-    
-        </div>
-          <!-- Complaints List -->
-
-          {% if claims %}
-          {% for c in claims %}
-            <div class="space-y-4 claim-card {{ 'hidden additional-claim' if loop.index0 > 2 }}">
-              <div class="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition">
-                <div class="flex justify-between">
-                  <h3 class="font-bold text-gray-800">{{ c.category }}</h3>
-                  <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded">{{ c.status }}</span>
-                </div>
-                <p class="text-gray-600 text-sm mt-2">{{ c.description }}</p>
-  
-                <!-- Galería de imágenes de evidencia -->
-                <div class="mt-3 flex space-x-2 thumbnails" data-claim-id="{{ c.id }}">
-                  {% set evidence_list = [] %}
-                  {% if c.evidence_1 %}
-                    {% set _ = evidence_list.append(url_for('static', filename='uploads/evidences/' + user.name|trim + '_' + user.last_name|trim + '/' + c.evidence_1)) %}
-                    <img src="{{ evidence_list[-1] }}"
-                         alt="Evidencia 1 del reclamo"
-                         class="w-16 h-16 rounded overflow-hidden cursor-pointer hover:opacity-80 transition thumbnail-img"
-                         data-index="0"
-                         data-claim-id="{{ c.id }}">
-                  {% endif %}
-                  {% if c.evidence_2 %}
-                    {% set _ = evidence_list.append(url_for('static', filename='uploads/evidences/' + user.name|trim + '_' + user.last_name|trim + '/' + c.evidence_2)) %}
-                    <img src="{{ evidence_list[-1] }}"
-                         alt="Evidencia 2 del reclamo"
-                         class="w-16 h-16 rounded overflow-hidden cursor-pointer hover:opacity-80 transition thumbnail-img"
-                         data-index="1"
-                         data-claim-id="{{ c.id }}">
-                  {% endif %}
-                  {% if c.evidence_3 %}
-                    {% set _ = evidence_list.append(url_for('static', filename='uploads/evidences/' + user.name|trim + '_' + user.last_name|trim + '/' + c.evidence_3)) %}
-                    <img src="{{ evidence_list[-1] }}"
-                         alt="Evidencia 3 del reclamo"
-                         class="w-16 h-16 rounded overflow-hidden cursor-pointer hover:opacity-80 transition thumbnail-img"
-                         data-index="2"
-                         data-claim-id="{{ c.id }}">
-                  {% endif %}
-                </div>
-  
-                <div class="flex justify-between items-center mt-3">
-                  <span class="text-xs text-gray-500">Creado: {{ c.created_at }}</span>
-                </div>
-              </div>
-              {% endfor %}
-              {% else %}
-              <div class="flex flex-col items-center justify-center">
-                <img src="{{url_for('static', filename='icons/claim.svg')}}" alt="" class="w-96 mb-4">
-                <h1 class="text-xl text-gray-700">Manda tu primer reclamo!</h1>
-              </div>
-              
-              {% endif %}
-            </div>
+          </div>
       </div>
-      </div>  
-      {% if claims|length > 3 %}
-        <button id="show-more-btn" class="mt-4 verde text-sm hover:underline">Ver Historial</button>
+
+      <!-- Complaints List -->
+      {% if claims %}
+          {% for c in claims %}
+              <div class="space-y-4 mb-4 claim-card {{ 'hidden additional-claim' if loop.index0 > 2 }}">
+                  <div class="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition">
+                      <div class="flex justify-between">
+                          <h3 class="font-bold text-gray-800">{{ c.category }}</h3>
+                          <span class="px-2 py-1 
+                              {% if c.status == 'pendiente' %} bg-red-100 text-red-800
+                              {% elif c.status == 'rechazado' %} bg-red-700 text-white
+                              {% elif c.status == 'atendido' %} bg-yellow-100 text-yellow-800
+                              {% elif c.status == 'en progreso' %} bg-blue-100 text-blue-800
+                              {% elif c.status == 'resuelto' %} bg-green-100 text-green-800
+                              {% endif %}
+                              text-xs font-medium rounded">
+                              {{ c.status }}
+                          </span>
+                      </div>
+                      <p class="text-gray-600 text-sm mt-2">{{ c.description }}</p>
+                      <!-- Galería de imágenes de evidencia -->
+                      {% set evidence_list = [] %}
+                      {% if c.evidence_1 and c.evidence_1|trim != '' %}
+                          {% set _ = evidence_list.append(url_for('static', filename='uploads/evidences/' + user.name|trim + '_' + user.last_name|trim + '/' + c.evidence_1)) %}
+                      {% endif %}
+                      {% if c.evidence_2 and c.evidence_2|trim != '' %}
+                          {% set _ = evidence_list.append(url_for('static', filename='uploads/evidences/' + user.name|trim + '_' + user.last_name|trim + '/' + c.evidence_2)) %}
+                      {% endif %}
+                      {% if c.evidence_3 and c.evidence_3|trim != '' %}
+                          {% set _ = evidence_list.append(url_for('static', filename='uploads/evidences/' + user.name|trim + '_' + user.last_name|trim + '/' + c.evidence_3)) %}
+                      {% endif %}
+                      {% if evidence_list %}
+                          <div class="mt-3 flex space-x-2 thumbnails" data-claim-id="{{ c.id }}">
+                              {% for img_url in evidence_list %}
+                                  <img src="{{ img_url }}"
+                                      class="w-16 h-16 rounded overflow-hidden object-cover cursor-pointer hover:opacity-80 transition thumbnail-img"
+                                      data-index="{{ loop.index0 }}"
+                                      data-claim-id="{{ c.id }}">
+                              {% endfor %}
+                          </div>
+                      {% endif %}
+                      <div class="flex justify-between items-center mt-3">
+                          <span class="text-xs text-gray-500">Creado: {{ c.created_at }}</span>
+                      </div>
+                  </div>
+              </div>
+          {% endfor %}
+          {% if claims|length > 3 %}
+              <button id="show-more-btn" class="mt-4 verde text-sm hover:underline">Ver Historial</button>
+          {% endif %}
+      {% else %}
+          <div class="flex flex-col items-center justify-center">
+              <img src="{{ url_for('static', filename='icons/claim.svg') }}" alt="" class="w-96 mb-4">
+              <h1 class="text-xl text-gray-700">Manda tu primer reclamo!</h1>
+          </div>
       {% endif %}
-    </div>
-</div>  
+  </div>
 
-
-        <!-- Pagos Tab -->
-
-        <div id="pagos" class="tab-content p-6">
-          <h2 class="text-xl font-bold text-gray-800 mb-6">Historial de Pagos</h2>
-          
-          <!-- Payment Summary -->
-          <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-6">
-            <div class="flex justify-between items-center">
+  <!-- Pagos Tab -->
+  <div id="pagos" class="tab-content p-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-6">Historial de Pagos</h2>
+      <!-- Payment Summary -->
+      <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-6">
+          <div class="flex justify-between items-center">
               <div>
-                <h3 class="font-medium text-blue-800">Próximo pago</h3>
-                <p class="text-2xl font-bold text-blue-600">$150.00</p>
-                <p class="text-sm text-blue-500">Vence: 15/10/2025</p>
+                  <h3 class="font-medium text-blue-800">Próximo pago</h3>
+                  <p class="text-2xl font-bold text-blue-600">$150.00</p>
+                  <p class="text-sm text-blue-500">Vence: 15/10/2025</p>
               </div>
               <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">Pagar ahora</button>
-            </div>
           </div>
-
-          <!-- Payment History Table -->
-          <div class="overflow-x-auto">
-            <table class="min-w-full bg-white">
+      </div>
+      <!-- Payment History Table -->
+      <div class="overflow-x-auto">
+          <table class="min-w-full bg-white">
               <thead class="bg-gray-100">
-                <tr>
-                  <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-                  <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Concepto</th>
-                  <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
-                  <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                  <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comprobante</th>
-                </tr>
+                  <tr>
+                      <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                      <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Concepto</th>
+                      <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+                      <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                      <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comprobante</th>
+                  </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
-                <tr>
-                  <td class="py-3 px-4 text-sm text-gray-500">15/09/2025</td>
-                  <td class="py-3 px-4 text-sm text-gray-500">Cuota de mantenimiento</td>
-                  <td class="py-3 px-4 text-sm text-gray-500">$150.00</td>
-                  <td class="py-3 px-4 text-sm">
-                    <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Pagado</span>
-                  </td>
-                  <td class="py-3 px-4 text-sm text-gray-500">
-                    <button class="text-indigo-600 hover:underline">Descargar</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="py-3 px-4 text-sm text-gray-500">15/08/2025</td>
-                  <td class="py-3 px-4 text-sm text-gray-500">Cuota de mantenimiento</td>
-                  <td class="py-3 px-4 text-sm text-gray-500">$150.00</td>
-                  <td class="py-3 px-4 text-sm">
-                    <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Pagado</span>
-                  </td>
-                  <td class="py-3 px-4 text-sm text-gray-500">
-                    <button class="text-indigo-600 hover:underline">Descargar</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="py-3 px-4 text-sm text-gray-500">15/07/2025</td>
-                  <td class="py-3 px-4 text-sm text-gray-500">Cuota de mantenimiento</td>
-                  <td class="py-3 px-4 text-sm text-gray-500">$150.00</td>
-                  <td class="py-3 px-4 text-sm">
-                    <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Pagado</span>
-                  </td>
-                  <td class="py-3 px-4 text-sm text-gray-500">
-                    <button class="text-indigo-600 hover:underline">Descargar</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="py-3 px-4 text-sm text-gray-500">15/06/2025</td>
-                  <td class="py-3 px-4 text-sm text-gray-500">Cuota de mantenimiento</td>
-                  <td class="py-3 px-4 text-sm text-gray-500">$150.00</td>
-                  <td class="py-3 px-4 text-sm">
-                    <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Pagado</span>
-                  </td>
-                  <td class="py-3 px-4 text-sm text-gray-500">
-                    <button class="text-indigo-600 hover:underline">Descargar</button>
-                  </td>
-                </tr>
+                  <tr>
+                      <td class="py-3 px-4 text-sm text-gray-500">15/09/2025</td>
+                      <td class="py-3 px-4 text-sm text-gray-500">Cuota de mantenimiento</td>
+                      <td class="py-3 px-4 text-sm text-gray-500">$150.00</td>
+                      <td class="py-3 px-4 text-sm">
+                          <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Pagado</span>
+                      </td>
+                      <td class="py-3 px-4 text-sm text-gray-500">
+                          <button class="text-indigo-600 hover:underline">Descargar</button>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td class="py-3 px-4 text-sm text-gray-500">15/08/2025</td>
+                      <td class="py-3 px-4 text-sm text-gray-500">Cuota de mantenimiento</td>
+                      <td class="py-3 px-4 text-sm text-gray-500">$150.00</td>
+                      <td class="py-3 px-4 text-sm">
+                          <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Pagado</span>
+                      </td>
+                      <td class="py-3 px-4 text-sm text-gray-500">
+                          <button class="text-indigo-600 hover:underline">Descargar</button>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td class="py-3 px-4 text-sm text-gray-500">15/07/2025</td>
+                      <td class="py-3 px-4 text-sm text-gray-500">Cuota de mantenimiento</td>
+                      <td class="py-3 px-4 text-sm text-gray-500">$150.00</td>
+                      <td class="py-3 px-4 text-sm">
+                          <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Pagado</span>
+                      </td>
+                      <td class="py-3 px-4 text-sm text-gray-500">
+                          <button class="text-indigo-600 hover:underline">Descargar</button>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td class="py-3 px-4 text-sm text-gray-500">15/06/2025</td>
+                      <td class="py-3 px-4 text-sm text-gray-500">Cuota de mantenimiento</td>
+                      <td class="py-3 px-4 text-sm text-gray-500">$150.00</td>
+                      <td class="py-3 px-4 text-sm">
+                          <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Pagado</span>
+                      </td>
+                      <td class="py-3 px-4 text-sm text-gray-500">
+                          <button class="text-indigo-600 hover:underline">Descargar</button>
+                      </td>
+                  </tr>
               </tbody>
-            </table>
+          </table>
+      </div>
+  </div>
+
+ <!-- Notificaciones Tab -->
+<!-- Notificaciones Tab -->
+<div id="notificaciones" class="tab-content p-6">
+  <div class="flex items-center justify-between">
+    <h2 class="text-xl font-bold text-gray-800 mb-6">Notificaciones</h2>
+
+    <!-- Calculate counts -->
+    {% set unread_count = notifications | selectattr('status', 'equalto', 'unread') | list | length %}
+    {% set read_count = notifications | selectattr('status', 'equalto', 'read') | list | length %}
+    {% set total_count = notifications | length %}
+
+    <!-- Dropdown for filtering notifications -->
+    <select id="notification-filter" class="border border-gray-300 rounded py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500">
+      <option value="unread" selected>Sin leer ({{ unread_count }})</option>
+      <option value="read">Leídas ({{ read_count }})</option>
+      <option value="all">Todas ({{ total_count }})</option>
+    </select>
+  </div>
+
+  <div class="space-y-4" id="notification-list">
+    {% if total_count == 0 %}
+      <p class="text-gray-500 text-center">No hay notificaciones.</p>
+    {% else %}
+      <!-- Mensaje oculto para cuando no haya notificaciones visibles tras filtrar -->
+      <p id="no-notifications-message" class="text-gray-500 text-center hidden">No hay notificaciones.</p>
+
+      {% for notification in notifications %}
+        <div class="notification-item p-4 rounded-lg border hover:shadow-md transition-all duration-200 {% if notification.status == 'unread' %} bg-yellow-50 border-yellow-200 {% else %} bg-white border-gray-200 {% endif %}" data-status="{{ notification.status }}">
+          <div class="flex flex-col space-y-3">
+            <!-- Notification Message -->
+            <div class="flex items-start">
+              <p class="text-gray-700 text-md font-medium">Tu reclamo de {{ notification.message }}</p>
+            </div>
+
+            <!-- Reply Section with Custom SVG from static/icons/reply.svg -->
+            {% if notification.reply %}
+              <div class="flex items-start space-x-2">
+                <img src="{{ url_for('static', filename='icons/reply.svg') }}" alt="Reply Icon" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-1">
+                <div class="pl-2 border-l-2 border-gray-300 w-full">
+                  <p class="text-sm text-gray-800 font-medium">Respuesta del administrador:</p>
+                  <p class="text-sm text-gray-700">{{ notification.reply }}</p>
+                </div>
+              </div>
+
+            {% endif %}
+
+            <!-- Metadata and Action Buttons -->
+            <div class="flex justify-between items-center">
+              <!-- Timestamp moved to bottom left -->
+              <span class="text-sm text-gray-500">Notificación enviada el {{ notification.created_at.strftime('%d/%m/%Y, %I:%M %p') }}</span>
+
+              <!-- Action Buttons -->
+              <div class="flex justify-end">
+                {% if notification.status == 'unread' %}
+                  <form action="/resident/mark_as_read" method="POST">
+                    <input type="hidden" name="notification_id" value="{{ notification.id }}">
+                    <button type="submit" class="text-blue-600 text-sm font-semibold hover:underline mark-as-read transition-colors duration-150">Marcar como leído</button>
+                  </form>
+                {% else %}
+                  <span class="text-gray-500 text-sm font-medium">Leído</span>
+                {% endif %}
+              </div>
+            </div>
           </div>
         </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
 
 
 
 
-
-        <!-- Notificaciones Tab -->
-
-
-
-        <div id="notificaciones" class="tab-content p-6">
-          <h2 class="text-xl font-bold text-gray-800 mb-6">Notificaciones</h2>
-          
-          <div class="space-y-4">
-            <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 hover:shadow-md transition">
-              <div class="flex justify-between">
-                <h3 class="font-bold text-gray-800">Corte de agua programado</h3>
-                <span class="text-xs text-gray-500">Hoy, 10:30 AM</span>
-              </div>
-              <p class="text-gray-600 text-sm mt-2">Se realizará un corte de agua programado mañana de 9:00 AM a 12:00 PM por mantenimiento.</p>
-              <div class="flex justify-end mt-3">
-                <button class="text-indigo-600 text-sm hover:underline">Marcar como leído</button>
-              </div>
-            </div>
-
-            <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 hover:shadow-md transition">
-              <div class="flex justify-between">
-                <h3 class="font-bold text-gray-800">Reunión de propietarios</h3>
-                <span class="text-xs text-gray-500">Ayer, 15:45 PM</span>
-              </div>
-              <p class="text-gray-600 text-sm mt-2">Se convoca a todos los propietarios a una reunión el próximo sábado a las 18:00 en el salón comunal.</p>
-              <div class="flex justify-end mt-3">
-                <button class="text-indigo-600 text-sm hover:underline">Marcar como leído</button>
-              </div>
-            </div>
-
-            <div class="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition">
-              <div class="flex justify-between">
-                <h3 class="font-bold text-gray-800">Actualización de su reclamo</h3>
-                <span class="text-xs text-gray-500">02/10/2025, 09:15 AM</span>
-              </div>
-              <p class="text-gray-600 text-sm mt-2">Su reclamo sobre la fuga de agua ha sido asignado a un técnico. Será atendido en las próximas 24 horas.</p>
-              <div class="flex justify-end mt-3">
-                <button class="text-gray-500 text-sm hover:underline">Ya leído</button>
-              </div>
-            </div>
-
-            <div class="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition">
-              <div class="flex justify-between">
-                <h3 class="font-bold text-gray-800">Pago recibido</h3>
-                <span class="text-xs text-gray-500">15/09/2025, 14:20 PM</span>
-              </div>
-              <p class="text-gray-600 text-sm mt-2">Hemos recibido su pago de $150.00 correspondiente a la cuota de mantenimiento de septiembre.</p>
-              <div class="flex justify-end mt-3">
-                <button class="text-gray-500 text-sm hover:underline">Ya leído</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
+      
 
 
 
@@ -610,3 +605,4 @@
 <script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
 <script src="{{ url_for('static', filename='js/resident.js') }}"></script>
 <script src="{{ url_for('static', filename='js/spinner.js') }}"></script>
+
