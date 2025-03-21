@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request, session, flash, make_response, abort
+from flask import Flask, render_template, redirect, url_for, request, session, flash, make_response, abort, send_file
 import bcrypt
 from auth.login import Auth
 from controllers.users_controller import Users
@@ -11,6 +11,7 @@ from controllers.payments_controllers import Payments
 from controllers.report_controller import Reports
 from functools import wraps
 import os
+
 
 
 class App:
@@ -147,17 +148,16 @@ class App:
         @self.nocache
         def dashboard(section, sub_section):
             sections = {
-            'main': 'admin/main.html',
-            'users': 'admin/users.html',
-            'my_info': 'admin/my_info.html',
-            'user_info': 'admin/user_info.html',
-            'residences': 'admin/residences.html',
-            'claims': 'admin/claims.html',
-            'payments': 'admin/payments.html'
-        }
- 
+                'main': 'admin/main.html',
+                'users': 'admin/users.html',
+                'my_info': 'admin/my_info.html',
+                'user_info': 'admin/user_info.html',
+                'residences': 'admin/residences.html',
+                'claims': 'admin/claims.html',
+                'payments': 'admin/payments.html'
+            }
 
-            residents, admins, disabled, selected_user, houses, claims, debts, payments = {}, {}, {}, {},{},{},{},{}
+            residents, admins, disabled, selected_user, houses, claims, debts, payments = {}, {}, {}, {}, {}, {}, {}, {}
             apartments = self.residences.get_apartments() 
             houses = self.residences.get_houses() 
             claims = self.claims.get_all_claims()
@@ -166,20 +166,22 @@ class App:
             admins['admins'] = self.user.get_admins()
             disabled['disabled'] = self.user.get_disabled_users()
             payments = self.payments.get_payments()
-            print(payments)
             
-            
+            # Mostrar mensaje flash si hay un pago exitoso y el archivo está listo para ser descargado
+            payment_message = session.get('payment_message', None)
+            if payment_message:
+                flash(payment_message, 'success')
+                session.pop('payment_message', None)  # Limpiar el mensaje después de mostrarlo
 
+            # Si la sección es 'user_info', buscar el usuario seleccionado
             user_id = request.args.get('user_id', type=int)
             if section == 'user_info' and user_id:
                 selected_user = self.user.get_user_by_id(user_id)
-                print(selected_user)
 
             key = f"{section}/{sub_section}" if sub_section else section
             if key not in sections:
                 return render_template('errors/404.html'), 404
-            template = sections[key]  
-
+            template = sections[key]
 
             session_user = session.get('user')
 
@@ -199,6 +201,9 @@ class App:
                 debts=debts,
                 payments=payments
             )
+
+
+        """ Rutas para el residente """
 
 
         """ Rutas de administracion """
@@ -228,7 +233,7 @@ class App:
                 except Exception as e:
                     flash(f"Error al agregar usuario: {e}", "danger")
                     return redirect(url_for('dashboard', section='users')) 
-
+ 
             return redirect(url_for('dashboard', section='users'))
 
 
@@ -457,23 +462,52 @@ class App:
         @self.app.route('/admin/payments/cash_payment', methods=['POST'])
         def cash_payment():
             try:
-                if request.method == 'POST':
-                    user_id = request.form.get('user_id')
-                    amount = request.form.get('amount')
-                    notes = request.form.get('notes')
-                    debts = request.form.getlist('deudas')
-                    print('User ID:', user_id)
-                    print('Amount:', amount)
-                    print('Notes:', notes)
-                    print('Debts:', debts)
-                    if self.payments.cash_payment(user_id, amount, notes, debts): 
-                        flash('Pago registrado correctamente', 'success')
-                        return redirect(url_for('dashboard', section='payments')) 
-                    flash('Ocurrió un Error registrando el pago', 'error')  
-                    return redirect(url_for('dashboard', section='payments'))
+                user_id = request.form.get('user_id')
+                amount = request.form.get('amount')
+                notes = request.form.get('notes')
+                debts = request.form.getlist('deudas')
+
+                print('User ID:', user_id)
+                print('Amount:', amount)
+                print('Notes:', notes)
+                print('Debts:', debts)
+
+                payment_id, file_path = self.payments.cash_payment(user_id, amount, notes, debts)
+
+                if payment_id and file_path and os.path.exists(file_path):
+                    print(f"Descargando archivo desde: {file_path}")
+                    
+                    # Guardar mensaje en la sesión para mostrarlo después de la descarga
+                    session['payment_message'] = 'Pago registrado correctamente'
+                    
+                    # Configurar la respuesta para descargar el archivo
+                    response = make_response(send_file(file_path, as_attachment=True, download_name="payment_report.pdf"))
+                    
+                    # Establecer una cookie para indicar que la descarga se completó
+                    response.set_cookie('payment_downloaded', 'true', max_age=30)
+                    
+                    return response
+                else:
+                    flash('Ocurrió un error al generar el reporte', 'error')
+
             except Exception as e:
-                print(f'An exception occurred: {e}')
-                return redirect(url_for('dashboard', section='payments'))
+                print(f'Error: {e}')
+                flash('Ocurrió un error inesperado', 'error')
+
+            return redirect(url_for('dashboard', section='payments'))
+
+        @self.app.route('/admin/payment_complete')
+        def payment_complete():
+            flash('Pago registrado correctamente', 'success')
+            return redirect(url_for('dashboard', section='payments'))
+            
+
+
+
+
+
+
+
 
 
 
@@ -650,4 +684,6 @@ class App:
 
     def run(self):
         self.app.run(debug=True, port=5000)
+
+
 

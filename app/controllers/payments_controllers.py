@@ -53,7 +53,6 @@ class Payments:
                 periods = []
             else:
                 print(f"Ejecutando SELECT con debt_ids: {debt_ids}")
-                # Usar %s como marcador de posición y pasar debt_ids como parámetro
                 cursor.execute("SELECT id, period, month FROM debts WHERE id IN (%s)" % ','.join(['%s'] * len(debt_ids)), debt_ids)
                 debt_records = cursor.fetchall()
                 print(f"Resultados de la consulta: {debt_records}")
@@ -71,7 +70,6 @@ class Payments:
                 paid_period = f"{year}, " + ", ".join(months)
             else:
                 paid_period = ""
-            print(f"Período pagado formateado: {paid_period}")
 
             print("Insertando pago en la tabla payments")
             cursor.execute("""
@@ -81,9 +79,10 @@ class Payments:
 
             payment_id = cursor.lastrowid
             print(f"ID del pago insertado: {payment_id}")
-            if payment_id:
-                self.report.generate_payment_report(payment_id)
 
+            file_path = None  # Inicializar variable para la ruta del reporte
+            if payment_id:
+                file_path = self.report.generate_payment_report(payment_id)  # Generar el reporte y obtener la ruta
 
             if debt_ids:
                 print(f"Eliminando deudas con IDs: {debt_ids}")
@@ -91,12 +90,14 @@ class Payments:
             else:
                 print("No hay deudas para eliminar")
 
-
             print("Cambios confirmados en la base de datos")
             cursor.close()
-            return True
+
+            return payment_id, file_path  # Retornar también la ruta del reporte
+
         except Exception as e:
             print("Error registrando pago en efectivo:", e)
             self.db.rollback()
             cursor.close()
-            return False
+            return False, None  # Asegurar que retorna ambos valores
+
