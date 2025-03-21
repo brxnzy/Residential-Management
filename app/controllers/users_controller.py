@@ -262,7 +262,7 @@ class Users:
 
             return True  # Éxito
 
-        except mysql.connector.Error as e:
+        except Exception as e:
             print(f"Error editando los roles del usuario: {e}")
             self.db.rollback()
             return False  # Fallo

@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from config.database import connection_db
 import os
 from apscheduler.schedulers.background import BackgroundScheduler
-
+    
 class Claims:
     def __init__(self, app):
         self.db = connection_db()

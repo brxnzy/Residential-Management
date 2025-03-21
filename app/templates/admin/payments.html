@@ -1,0 +1,252 @@
+<div class="flex px-4 items-center mt-2 justify-between mb-8">
+    <h1
+      class="text-4xl font-bold sm:text-2xl md:text-4xl lg:text-5xl text-left"
+    >
+        Pagos
+    </h1>
+</div>
+
+<div class="mb-4 border-b border-gray-200 dark:border-gray-700">
+    <ul class="flex flex-wrap -mb-px text-md  font-medium text-center" id="default-styled-tab" data-tabs-toggle="#default-styled-tab-content" data-tabs-active-classes="verde border-green-600 dark:border-purple-500" data-tabs-inactive-classes="dark:border-transparent text-gray-500 hover:text-gray-600 dark:text-gray-400 border-gray-100 hover:border-gray-300 dark:border-gray-700 dark:hover:text-gray-300" role="tablist">
+        <li class="me-2" role="presentation">
+            <button class="inline-block p-4 border-b-2 rounded-t-lg" id="cash-payment-tab" data-tabs-target="#cash-payment" type="button" role="tab" aria-controls="cash-payment" aria-selected="true">Registrar Pago en Efectivo</button>
+        </li>
+        <li class="me-2" role="presentation">
+            <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="transfer-approval-tab" data-tabs-target="#transfer-approval" type="button" role="tab" aria-controls="transfer-approval" aria-selected="false">Aceptar/Rechazar Transferencias</button>
+        </li>
+        <!-- New History Tab -->
+        <li role="presentation">
+            <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="history-tab" data-tabs-target="#history" type="button" role="tab" aria-controls="history" aria-selected="false">Historial</button>
+        </li>
+    </ul>
+</div>
+<div id="default-styled-tab-content">
+    <div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="cash-payment" role="tabpanel" aria-labelledby="cash-payment-tab">
+
+        <!-- Form for cash payment registration -->
+        <form class="mt-4" id="paymentForm" data-debts='{{ debts["debts"] | tojson | e }}' method="post" action="/admin/payments/cash_payment">
+            <div class="mb-4">
+                <label for="resident" class="block text-sm font-medium text-gray-700">Seleccionar Residente</label>
+                <select id="resident" required name="user_id"
+                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md" 
+                    onchange="filterDebts()">
+                    <option value="" selected disabled>--Seleccionar Residente--</option>
+                    {% for resident in residents %}
+                        {% if resident.id != user.id %}
+                            <option value="{{ resident.id }}">{{ resident.name }} {{ resident.last_name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        
+            <!-- Contenedor para las deudas -->
+            <div class="mb-4" id="debtsContainer"></div>
+        
+            <div class="mb-4">
+                <label for="amount"  class="block text-sm font-medium text-gray-700">Monto</label>
+                <input type="text" name="amount" value="0.0" id="amount" required  readonly class="mt-1 focus:outline-none focus:ring-green-500 focus:border-green-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md">
+            </div>
+
+            <div class="mb-4">
+                <label for="notes" class="block text-sm font-medium text-gray-700">Notas (Opcional)</label>
+                <textarea id="notes" name="notes" rows="3" class="focus:outline-none focus:ring-green-500 focus:border-green-500 shadow-sm mt-1 block w-full sm:text-sm border border-gray-300 rounded-md" placeholder="Detalles adicionales sobre el pago..."></textarea>
+            </div>
+            <div class="flex justify-end">
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bgverde focus:outline-none focus:ring-2 focus:ring-offset-2">
+                    Registrar Pago
+                </button>
+            </div>
+        </form>
+        
+        <script>
+
+            function updateAmount() {
+                const checkboxes = document.querySelectorAll('#debtsContainer input[type="checkbox"]');
+                const amountInput = document.getElementById('amount');
+                let total = 0;
+            
+                console.log("Checkboxes found:", checkboxes.length); // Debug
+                checkboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        total += 1500; // Replace with dynamic value if needed
+                    }
+                });
+            
+                amountInput.value = total.toFixed(2);
+            }
+            
+            try {
+                console.log("Inicializando script...");
+            
+                const form = document.getElementById('paymentForm');
+                const debtsData = JSON.parse(form.getAttribute('data-debts'));
+            
+                console.log("Deudas cargadas desde el dataset:", debtsData);
+            
+                function filterDebts() {
+                    try {
+                        console.log("Ejecutando filterDebts...");
+                        const residentSelect = document.getElementById('resident');
+                        const selectedResidentId = Number(residentSelect.value);
+                        const btn = form.querySelector('button[type="submit"]');
+
+            
+                        console.log("Residente seleccionado:", selectedResidentId);
+            
+                        const debtsContainer = document.getElementById('debtsContainer');
+                        debtsContainer.innerHTML = ''; // Clear container
+            
+                        if (!selectedResidentId) {
+                            console.warn("Ningún residente seleccionado.");
+                            return;
+                        }
+            
+                        const filteredDebts = debtsData.filter(debt => debt[1] === selectedResidentId);
+            
+                        console.log("Deudas encontradas:", filteredDebts);
+            
+                        if (filteredDebts.length > 0) {
+                            const debtsDiv = document.createElement('div');
+                            debtsDiv.className = 'mb-4';
+            
+                            filteredDebts.forEach(debt => {
+                                console.log("Procesando deuda:", debt);
+            
+                                const debtDiv = document.createElement('div');
+                                debtDiv.className = 'flex items-center mb-2';
+            
+                                const checkbox = document.createElement('input');
+                                checkbox.type = 'checkbox';
+                                checkbox.id = `debt-${debt[0]}`; // Assuming debt[0] is the ID
+                                checkbox.value = debt[0];
+                                checkbox.name = 'deudas'
+                                checkbox.className = 'w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600';
+                                checkbox.addEventListener('change', updateAmount); // Add listener here
+            
+                                const label = document.createElement('label');
+                                label.htmlFor = `debt-${debt[0]}`;
+                                label.className = 'ml-2 text-l font-bold text-gray-900 dark:text-gray-300';
+            
+                                const date = new Date(debt[2], debt[3] - 1); // Year, Month (0-based)
+                                const monthName = date.toLocaleString('es-ES', { month: 'long' });
+                                const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+                                label.textContent = `${capitalizedMonth}-${debt[2]}`;
+            
+                                debtDiv.appendChild(checkbox);
+                                debtDiv.appendChild(label);
+                                debtsDiv.appendChild(debtDiv);
+                            });
+            
+                            debtsContainer.appendChild(debtsDiv);
+                        } else {
+                            const noDebtsMessage = document.createElement('p');
+                            noDebtsMessage.className = ' text-gray-800 font-medium';
+                            noDebtsMessage.textContent = "El residente no debe.";
+                            debtsContainer.appendChild(noDebtsMessage)
+                           
+                            
+                            console.warn("No hay deudas para este residente.");
+                        }
+            
+                        updateAmount(); // Initial call after rendering
+                    } catch (error) {
+                        console.error("Error en filterDebts:", error);
+                    }
+                }
+            
+                // Attach event listener to resident select to trigger filterDebts
+                document.getElementById('resident').addEventListener('change', filterDebts);
+            
+            } catch (error) {
+                console.error("Error en la inicialización del script:", error);
+            }
+            
+        </script>
+        
+        
+    </div>
+    <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="transfer-approval" role="tabpanel" aria-labelledby="transfer-approval-tab">
+
+        <!-- Cards for approving or rejecting transfers -->
+        <div class="mt-4 space-y-4">
+            <!-- Transfer Request Card -->
+            <div class="bg-white shadow-md rounded-lg p-4">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                    <div class="mb-4 md:mb-0">
+                        <h3 class="text-lg font-medium text-gray-900">María González</h3>
+                        <p class="text-sm text-gray-500">Unidad B205</p>
+                        <p class="text-sm text-gray-500">Monto: $1,500.00</p>
+                        <p class="text-sm text-gray-500">Fecha: 15 Mar, 2025</p>
+                        <p class="text-sm text-gray-500">Referencia: #TR-78245</p>
+                    </div>
+                    <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 w-full md:w-auto">
+                        <button
+                            class="bgverde px-3 py-2 rounded-lg text-white text-sm attend-claim-btn w-full md:w-auto hover:bg-green-700 transition"
+                        >
+                            Atender
+                        </button>
+                        <button
+                            class="bg-red-700 px-3 py-2 rounded-lg reject-claim-btn text-white text-sm w-full md:w-auto hover:bg-red-800 transition"
+ 
+                        >
+                            Rechazar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Add more transfer request cards as needed -->
+        </div>
+    </div>
+    <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="history" role="tabpanel" aria-labelledby="history-tab">
+        <!-- Table for payment history -->
+         {% if payments %}
+         
+         <div class="overflow-x-auto mt-4">
+             <table class="min-w-full divide-y divide-gray-200">
+                 <thead class="bg-gray-50">
+                     <tr>
+                         <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                         <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                         <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+                         <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Metodo</th>
+                         <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <!-- Example row -->
+                        {% for p in payments %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{p.resident}}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{p.created_at.strftime('%d/%m/%Y')}}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{p.amount}}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{p.payment_method}}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-md font-medium">
+                                <button class="text-indigo-600 hover:underline">Ver Detalles</button>
+                            </td>
+                        </tr>
+                        <!-- Add more rows as needed -->
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% endif %}
+        </div>
+    </div>
+
+<script>
+    date = document.getElementById('date')
+    now = new Date()
+    date.value = now.toISOString().split('T')[0]
+</script>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('debtsData', () => [
+            // Example debts data structure
+            { id: 1, user_id: 1, month: 'Marzo', year: '2025' },
+            { id: 2, user_id: 2, month: 'Abril', year: '2025' },
+            // Add more debts as needed
+        ]);
+    });
+</script>  

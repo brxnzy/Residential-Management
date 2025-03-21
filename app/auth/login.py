@@ -30,7 +30,6 @@ class Auth:
                 return redirect(url_for('login'))
 
             print(f"Usuario encontrado: {user}")
-            print(f"Contraseña ingresada: {plain_password}")
 
             # Verificar si la contraseña es correcta
             if not self.check_password(plain_password, user['password']):
