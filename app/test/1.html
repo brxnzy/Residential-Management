@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vista Previa al Estilo Google Drive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+    <div class="max-w-5xl mx-auto">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">Subir Archivos</h2>
+        
+        <!-- Input para subir archivo -->
+        <input type="file" id="fileInput" multiple
+               class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full 
+               file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 
+               hover:file:bg-blue-100 mb-6">
+
+        <!-- Lista de archivos -->
+        <div id="fileList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+
+        <!-- Modal para vista completa -->
+        <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
+            <div class="bg-white rounded-lg p-4 max-w-4xl w-full max-h-[90vh] overflow-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="modalTitle" class="text-xl font-semibold"></h3>
+                    <button id="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                </div>
+                <div id="fullPreview"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const modal = document.getElementById('modal');
+        const fullPreview = document.getElementById('fullPreview');
+        const modalTitle = document.getElementById('modalTitle');
+        const closeModal = document.getElementById('closeModal');
+        let filesArray = [];
+
+        fileInput.addEventListener('change', function(e) {
+            filesArray = Array.from(e.target.files);
+            renderFileList();
+        });
+
+        function renderFileList() {
+            fileList.innerHTML = '';
+            filesArray.forEach((file, index) => {
+                const reader = new FileReader();
+                const fileCard = document.createElement('div');
+                fileCard.className = 'bg-white p-4 rounded-lg shadow hover:shadow-md cursor-pointer';
+                
+                reader.onload = function(e) {
+                    const previewContent = generatePreview(file, e.target.result);
+                    fileCard.innerHTML = `
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 flex-shrink-0">${previewContent}</div>
+                            <div class="truncate">${file.name}</div>
+                        </div>
+                    `;
+                    fileCard.addEventListener('click', () => showFullPreview(file, index));
+                };
+
+                if (file.type.startsWith('image/')) reader.readAsDataURL(file);
+                else if (file.type === 'application/pdf') reader.readAsArrayBuffer(file);
+                else reader.readAsText(file);
+
+                fileList.appendChild(fileCard);
+            });
+        }
+
+        function generatePreview(file, result) {
+            const fileType = file.type;
+            
+            if (fileType.startsWith('image/')) {
+                return `<img src="${result}" class="w-full h-full object-cover rounded">`;
+            }
+            if (fileType === 'application/pdf') {
+                return `<div class="w-full h-full bg-gray-200 flex items-center justify-center text-sm text-gray-600">PDF</div>`;
+            }
+            return `<div class="w-full h-full bg-gray-200 flex items-center justify-center text-sm text-gray-600">Archivo</div>`;
+        }
+
+        async function showFullPreview(file, index) {
+            modal.classList.remove('hidden');
+            modalTitle.textContent = file.name;
+            fullPreview.innerHTML = '';
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const fileType = file.type;
+
+                if (fileType.startsWith('image/')) {
+                    fullPreview.innerHTML = `<img src="${e.target.result}" class="max-w-full h-auto rounded-lg">`;
+                }
+                else if (fileType === 'application/pdf') {
+                    const loadingTask = pdfjsLib.getDocument({ data: e.target.result });
+                    const pdf = await loadingTask.promise;
+                    const page = await pdf.getPage(1);
+                    const scale = 1.5;
+                    const viewport = page.getViewport({ scale });
+                    
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    canvas.className = 'max-w-full rounded-lg';
+                    
+                    await page.render({ canvasContext: context, viewport }).promise;
+                    fullPreview.appendChild(canvas);
+                }
+                else if (fileType.startsWith('text/') || fileType === 'application/json') {
+                    fullPreview.innerHTML = `<pre class="bg-gray-50 p-4 rounded-lg whitespace-pre-wrap break-words">${e.target.result}</pre>`;
+                }
+                else {
+                    fullPreview.innerHTML = `
+                        <div class="space-y-2">
+                            <p class="text-gray-700">Nombre: ${file.name}</p>
+                            <p class="text-gray-700">Tipo: ${fileType || 'Desconocido'}</p>
+                            <p class="text-gray-700">Tamaño: ${(file.size / 1024).toFixed(2)} KB</p>
+                        </div>
+                    `;
+                }
+            };
+
+            if (file.type.startsWith('image/')) reader.readAsDataURL(file);
+            else if (file.type === 'application/pdf') reader.readAsArrayBuffer(file);
+            else reader.readAsText(file);
+        }
+
+        closeModal.addEventListener('click', () => modal.classList.add('hidden'));
+
+        // Cargar pdf.js
+        const pdfJsScript = document.createElement('script');
+        pdfJsScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js';
+        document.head.appendChild(pdfJsScript);
+    </script>
+</body>
+</html>

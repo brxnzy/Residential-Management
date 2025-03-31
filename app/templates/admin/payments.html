@@ -63,37 +63,46 @@
         
     </div>
     <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="transfer-approval" role="tabpanel" aria-labelledby="transfer-approval-tab">
-
-        <!-- Cards for approving or rejecting transfers -->
+        {% for tr in transfer_requests %}
         <div class="mt-4 space-y-4">
-            <!-- Transfer Request Card -->
             <div class="bg-white shadow-md rounded-lg p-4">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
                     <div class="mb-4 md:mb-0">
-                        <h3 class="text-lg font-medium text-gray-900">María González</h3>
-                        <p class="text-sm text-gray-500">Unidad B205</p>
-                        <p class="text-sm text-gray-500">Monto: $1,500.00</p>
-                        <p class="text-sm text-gray-500">Fecha: 15 Mar, 2025</p>
-                        <p class="text-sm text-gray-500">Referencia: #TR-78245</p>
+                        <h3 class="text-lg font-medium text-gray-900">{{tr.resident}}</h3>
+                        <p class="text-sm text-gray-500">{{tr.residence}}</p>
+                        
+                        <p class="text-sm text-gray-500">{{tr.description}}</p>
+                        <div class="image-container">
+                            <img src="{{url_for('static', filename='uploads/transfer_requests/' + tr.evidence)}}" alt="map" class="my-2 w-16 h-16 rounded overflow-hidden cursor-pointer object-cover hover:opacity-80 transition preview-img">
+                        </div>
+                            <p class="text-sm text-gray-500">{{tr.created_at}}</p>
                     </div>
                     <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 w-full md:w-auto">
                         <button
-                            class="bgverde px-3 py-2 rounded-lg text-white text-sm attend-claim-btn w-full md:w-auto hover:bg-green-700 transition"
+                        class="bgverde px-3 py-2 rounded-lg text-white text-sm attend-claim-btn w-full md:w-auto hover:bg-green-700 transition"
                         >
-                            Atender
-                        </button>
-                        <button
-                            class="bg-red-700 px-3 py-2 rounded-lg reject-claim-btn text-white text-sm w-full md:w-auto hover:bg-red-800 transition"
- 
-                        >
-                            Rechazar
-                        </button>
-                    </div>
-                </div>
+                        Atender
+                    </button>
+                    <button
+                    class="bg-red-700 px-3 py-2 rounded-lg reject-claim-btn text-white text-sm w-full md:w-auto hover:bg-red-800 transition"
+                    
+                    >
+                    Rechazar
+                </button>
             </div>
-            <!-- Add more transfer request cards as needed -->
         </div>
     </div>
+    <!-- Add more transfer request cards as needed -->
+    
+</div>
+{% endfor %}
+    </div>
+
+
+
+
+
+
     <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="history" role="tabpanel" aria-labelledby="history-tab">
         <!-- Table for payment history -->
          {% if payments %}
@@ -135,3 +144,56 @@
 
 <!-- Agrega este script al final de tu archivo payments.html, justo antes del cierre del body -->
 <script src="{{url_for('static', filename='js/payments.js')}}"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.image-container').forEach(container => {
+            const thumbnail = container.querySelector('.preview-img');
+            
+            if (!thumbnail) return;
+            
+            // Crear el overlay dinámicamente
+            const overlay = document.createElement('div');
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            overlay.style.background = 'rgba(0, 0, 0, 0.75)';
+            overlay.style.display = 'none';
+            overlay.style.alignItems = 'center';
+            overlay.style.justifyContent = 'center';
+            overlay.style.zIndex = '1000';
+            
+            const largeImage = document.createElement('img');
+            largeImage.style.maxWidth = '90%';
+            largeImage.style.maxHeight = '90%';
+            largeImage.style.borderRadius = '8px';
+            
+            overlay.appendChild(largeImage);
+            document.body.appendChild(overlay);
+            
+            thumbnail.addEventListener('click', () => {
+                largeImage.src = thumbnail.src;
+                overlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            });
+            
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.style.display = 'none';
+                    document.body.style.overflow = '';
+                }
+            });
+            
+            document.addEventListener('keydown', (e) => {
+                if (overlay.style.display === 'flex' && e.key === 'Escape') {
+                    overlay.style.display = 'none';
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+    });
+    
+    
+</script>

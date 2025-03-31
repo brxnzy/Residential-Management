@@ -1,5 +1,4 @@
 from flask import Flask, render_template, redirect, url_for, request, session, flash, make_response, abort, send_file
-import bcrypt
 from auth.login import Auth
 from controllers.users_controller import Users
 from controllers.residences_controller import  Residences
@@ -9,6 +8,7 @@ from controllers.notifications_controller import Notifications
 from controllers.debts_controller import Debts
 from controllers.payments_controllers import Payments
 from controllers.report_controller import Reports
+from controllers.transactions_controller import Transactions
 from functools import wraps
 import os
 
@@ -32,6 +32,7 @@ class App:
         self.debts = Debts()
         self.payments = Payments(self.app)
         self.report = Reports(self.app)
+        self.transactions = Transactions()
         self.app.config['SECRET_KEY'] = 'secretkey'
         UPLOAD_FOLDER = r'C:\Users\Crist\OneDrive\Documents\Desktop\Final Proyect\app\static\uploads'
         self.app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -157,7 +158,7 @@ class App:
                 'payments': 'admin/payments.html'
             }
 
-            residents, admins, disabled, selected_user, houses, claims, debts, payments = {}, {}, {}, {}, {}, {}, {}, {}
+            residents, admins, disabled, selected_user, houses, claims, debts, payments, transfer_requests = {}, {}, {}, {}, {}, {}, {}, {},{}
             apartments = self.residences.get_apartments() 
             houses = self.residences.get_houses() 
             claims = self.claims.get_all_claims()
@@ -166,6 +167,8 @@ class App:
             admins['admins'] = self.user.get_admins()
             disabled['disabled'] = self.user.get_disabled_users()
             payments = self.payments.get_payments()
+            transfer_requests = self.payments.get_all_transfer_requests()
+            balance = self.transactions.get_balance()
             
             # Mostrar mensaje flash si hay un pago exitoso y el archivo está listo para ser descargado
             payment_message = session.get('payment_message', None)
@@ -199,7 +202,9 @@ class App:
                 usuario=selected_user,
                 claims=claims,
                 debts=debts,
-                payments=payments
+                payments=payments,
+                balance=balance,
+                transfer_requests=transfer_requests
             )
 
 
@@ -523,8 +528,9 @@ class App:
             user = self.user.get_user_by_id(id)
             claims = self.claims.get_my_claims(id)
             notifications = self.notification.user_notifications(id)
-          
-            return render_template('resident/home.html', user=user, claims=claims, notifications=notifications)
+            debts = self.debts.get_users_debts(id)
+            transfer_requests = self.payments.get_my_transfer_requests(id)
+            return render_template('resident/home.html', user=user, claims=claims, notifications=notifications, debts=debts, transfer_requests=transfer_requests)
 
 
         @self.app.route('/resident/update_photo/<int:user_id>', methods=['POST'])
@@ -670,12 +676,28 @@ class App:
               print('An exception occurred')
 
 
+        @self.app.route('/resident/transfer_request', methods=['POST'])
+        def transfer_request():
+            try:
+                if request.method == 'POST':
+                    evidence = request.files.get('evidence')
+                    description = request.form.get('description')
+                    user_id = request.form.get('user_id')
+                    print(f"user_id: {user_id}")
+                    print(f"description: {description}")
+                    print(f"evidence: {evidence}")
+                    if self.payments.send_transfer_request(user_id, evidence, description):
+                        flash('Transferencia solicitada exitosamente', 'success')
+                        return redirect(url_for('home'))
+                    else:
+                        flash('Error al enviar la transferencia', 'error')
+                        return redirect(url_for('home'))
+            except Exception as e:
+                print(f'An exception occurred: {e}')
+                return redirect(url_for('home'))
 
 
 
-
-
-            
 
         @self.app.route('/')
         def redirect_to_dashboard():

@@ -1,5 +1,7 @@
 from config.database import connection_db
 from controllers.report_controller import Reports
+from werkzeug.utils import secure_filename
+import os
 
 class Payments:
     def __init__(self, app):
@@ -19,6 +21,7 @@ class Payments:
                     CONCAT(users.name, ' ', users.last_name) AS resident
                 FROM payments
                 INNER JOIN users ON payments.id_usuario = users.id
+                order by created_at ASC
             """
             cursor.execute(query)
             payments = cursor.fetchall()
@@ -91,7 +94,14 @@ class Payments:
                 print("No hay deudas para eliminar")
 
             print("Cambios confirmados en la base de datos")
+
+
+
+            cursor.execute('insert into transactions (amount, type) values (%s, "ingreso")', (amount,))
+            print("Transacción de ingreso registrada")
             cursor.close()
+
+
 
             return payment_id, file_path  # Retornar también la ruta del reporte
 
@@ -101,3 +111,75 @@ class Payments:
             cursor.close()
             return False, None  # Asegurar que retorna ambos valores
 
+
+    def send_transfer_request(self,user_id, evidence, description):
+        try:
+            cursor = self.db.cursor()
+            cursor.execute("insert into transfer_requests(id_usuario,description) values(%s,%s)", (user_id, description))
+            id = cursor.lastrowid
+
+            filename = secure_filename(evidence.filename)
+            extension = os.path.splitext(filename)[1]
+
+            new_filename = f"{id}{extension}"
+            upload_folder = self.app.config['UPLOAD_FOLDER']
+
+            transfer_requests_folder = os.path.join(upload_folder, 'transfer_requests')
+            if not os.path.exists(transfer_requests_folder):
+                os.makedirs(transfer_requests_folder)
+
+            file_path = os.path.join(transfer_requests_folder, new_filename)
+        
+          
+            evidence.save(file_path)
+
+            
+            cursor.execute(
+                "UPDATE transfer_requests SET evidence = %s WHERE id = %s",
+                (new_filename, id)
+            )
+
+            cursor.close()
+
+            return True
+
+        except Exception as e:
+          self.db.rollback()
+          print(f"Error al enviar la transferencia: {e}")
+          return False
+        
+    def get_my_transfer_requests(self, user_id):
+        try:
+            cursor = self.db.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM transfer_requests WHERE id_usuario = %s", (user_id,))
+            transfer_requests = cursor.fetchall()
+            cursor.close()
+            return transfer_requests
+        except Exception as e:
+            print(f"Error al obtener transferencias: {e}")
+            return False
+        
+    def get_all_transfer_requests(self):
+        try:
+            cursor = self.db.cursor(dictionary=True)
+            cursor.execute("""
+                SELECT 
+                    tr.*, 
+                    CONCAT(u.name, ' ', u.last_name) AS resident,
+                    COALESCE(
+                        h.house_number,
+                        CONCAT(a.building,' ','Apartamento ', a.apartment_number)
+                    ) AS residence
+                FROM transfer_requests tr
+                JOIN users u ON tr.id_usuario = u.id
+                LEFT JOIN houses h ON tr.id_usuario = h.id_usuario
+                LEFT JOIN apartments a ON tr.id_usuario = a.id_usuario;
+            """)
+
+
+            transfer_requests = cursor.fetchall()
+            cursor.close()
+            return transfer_requests
+        except Exception as e:
+            print(f"Error al obtener transferencias: {e}")
+            return False
