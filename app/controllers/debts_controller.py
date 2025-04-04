@@ -24,6 +24,7 @@ class Debts:
             cursor.execute("SELECT * FROM debts WHERE id_usuario = %s", (user_id,))
             debts = cursor.fetchall()
             cursor.close()
+            print(debts)
             return debts
         except Exception as e:
             print(e)

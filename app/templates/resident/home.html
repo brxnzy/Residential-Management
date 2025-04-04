@@ -107,8 +107,8 @@
           </div>
           <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
             <h3 class="font-medium text-purple-800">Notificaciones</h3>
-            <p class="text-2xl font-bold text-purple-600">3</p>
-            <p class="text-sm text-purple-500">2 sin leer</p>
+            <p class="text-2xl font-bold text-purple-600">{{notifications | length}} </p>
+            <p class="text-sm text-purple-500">{{notifications  | selectattr('status', 'equalto', 'unread') | list | length }} sin leer</p>
           </div>
         </div>
       </div> 
@@ -136,7 +136,6 @@
         <!-- Reclamos Tab -->
 
 
-for
 
 <!-- Contenido de los tabs -->
 <div class="tab-contents">
@@ -288,36 +287,40 @@ for
           </table>
       </div>
       
+      
       <div class="overflow-x-auto">
-        <h1>Mis Solicitudes de Transferencia</h1>
+        <h1 class="my-6 px-1 text-lg">Mis Solicitudes de Transferencia</h1>
         <table class="min-w-full bg-white">
-              <thead class="bg-gray-100">
-                  <tr>
-                    <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Evidencia</th>
-                      <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
-                      <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                  </tr>
-                </thead>
-              <tbody class="divide-y divide-gray-200">
-                  {% for tr in transfer_requests %}
-                  <tr>
-                    <td class="py-3 px-4 text-sm text-gray-500"><img src="{{url_for('static', filename='uploads/transfer_requests/' + tr.evidence)}}" alt="Evidencia" class="w-6 h-6"></td>
-                    <td class="py-3 px-4 text-sm text-gray-500"></td>
-                      <td class="py-3 px-4 text-sm">
-                        {% if tr.status == 'pending' %}
-                        <span class="px-2 py-1  bg-red-100 text-red-800 text-xs font-medium rounded">Pendiente</span>
-                        {% elif tr.status == 'rechazado' %}
-                        <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">Rechazado</span>
-                        {% elif tr.status == 'approved' %}
-                        <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Atendido</span>
-                        
-                        {% endif %}
-                      </td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-              </div>
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Evidencia</th>
+              <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+              <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            {% for tr in transfer_requests %}
+            <tr>
+              <td class="py-3 px-4 text-sm text-gray-500">
+                <div class="thumbnails">
+                  <img src="{{url_for('static', filename='uploads/transfer_requests/' + tr.evidence)}}" alt="Evidencia" class="w-16 h-16 rounded overflow-hidden object-cover cursor-pointer hover:opacity-80 transition thumbnail-img">
+                </div>
+              </td>
+              <td class="py-3 px-4 text-sm">
+                {% if tr.status == 'pending' %}
+                <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">Pendiente</span>
+                {% elif tr.status == 'rechazado' %}
+                <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">Rechazado</span>
+                {% elif tr.status == 'approved' %}
+                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Aprobado</span>
+                {% endif %}
+              </td>
+              <td class="py-3 px-4 text-sm text-gray-500">{{ tr.created_at.strftime('%d/%m/%Y') }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
             </div>
           </div>
 
@@ -586,7 +589,7 @@ for
      
 
 <div id="transfer-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-  <div class="relative p-4 w-full max-w-lg max-h-full">
+  <div class="relative p-4 w-full max-w-xl max-h-full">
       <!-- Modal content -->
       <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
           <!-- Modal header -->
@@ -607,7 +610,7 @@ for
               <!-- Input de archivo simple -->
               <div>
                   <label for="evidence" class="block mb-2 text-md font-medium text-gray-900 dark:text-white">Subir comprobante</label>
-                  <input id="evidence" name="evidence" type="file" required class="block w-full text-sm verde border border-gray-300 rounded-lg cursor-pointer bg-gray-50 custom-file-input focus:outline-none" />
+                  <input id="evidence" name="evidence" type="file" required class="block w-full text-sm  border border-gray-300 rounded-lg cursor-pointer bg-gray-50 custom-file-input focus:outline-none" />
               </div>
           
               <!-- Input de descripción -->

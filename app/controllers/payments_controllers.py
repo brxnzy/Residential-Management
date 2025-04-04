@@ -21,7 +21,7 @@ class Payments:
                     CONCAT(users.name, ' ', users.last_name) AS resident
                 FROM payments
                 INNER JOIN users ON payments.id_usuario = users.id
-                order by created_at ASC
+                order by created_at DESC
             """
             cursor.execute(query)
             payments = cursor.fetchall()
@@ -31,7 +31,7 @@ class Payments:
             print(f"Error al obtener pagos: {e}")
             return False
             
-    def user_payments(self, user_id):
+    def get_user_payments(self, user_id):
         try:
             cursor = self.db.cursor()
             cursor.execute("SELECT * FROM payments WHERE user_id = %s", (user_id,))
@@ -42,7 +42,7 @@ class Payments:
             print(e)
             return False
             
-    def cash_payment(self, user_id, amount, notes, debts: list):
+    def cash_payment(self, user_id, amount, notes, debts: list, admin_id):
         try:
             cursor = self.db.cursor()
             print("Registrando pago en efectivo")
@@ -85,7 +85,7 @@ class Payments:
 
             file_path = None  # Inicializar variable para la ruta del reporte
             if payment_id:
-                file_path = self.report.generate_payment_report(payment_id)  # Generar el reporte y obtener la ruta
+                file_path = self.report.generate_payment_report(payment_id, admin_id)  # Generar el reporte y obtener la ruta
 
             if debt_ids:
                 print(f"Eliminando deudas con IDs: {debt_ids}")
@@ -166,6 +166,7 @@ class Payments:
                 SELECT 
                     tr.*, 
                     CONCAT(u.name, ' ', u.last_name) AS resident,
+                    u.id as resident_id,
                     COALESCE(
                         h.house_number,
                         CONCAT(a.building,' ','Apartamento ', a.apartment_number)
@@ -182,4 +183,47 @@ class Payments:
             return transfer_requests
         except Exception as e:
             print(f"Error al obtener transferencias: {e}")
+            return False
+
+
+    def approve_transfer_request(self, transfer_request_id, debts: list, user_id, admin_id):
+        try:
+            cursor = self.db.cursor(dictionary=True)
+            total_amount = 0
+            periods = []
+
+            for i in debts:
+                cursor.execute("SELECT amount, period, month FROM debts WHERE id = %s", (i,))
+                debt = cursor.fetchone()
+                
+                if debt:
+                    total_amount += debt["amount"]
+                    period = f"{debt['period']}-{str(debt['month']).zfill(2)}"
+                    periods.append(period)
+                    
+                    cursor.execute("DELETE FROM debts WHERE id = %s", (i,))
+
+            if total_amount > 0 and periods:
+                # Formatear períodos: YYYY, MM, MM, MM
+                year = periods[0][:4]
+                months = [p[5:] for p in periods]
+                paid_period = f"{year}, " + ", ".join(months)
+
+                # Insertar pago
+                cursor.execute(
+                    "INSERT INTO payments (id_usuario, amount, transfer_request_id, payment_method, paid_period) VALUES (%s, %s, %s, 'Transferencia', %s)",
+                    (user_id, total_amount, transfer_request_id, paid_period)
+                )
+                payment_id = cursor.lastrowid
+                self.report.generate_payment_report(payment_id, admin_id)  # Generar el reporte
+                    
+
+                cursor.execute('insert into transactions (amount, type) values (%s, "ingreso")', (total_amount,))
+                cursor.execute("UPDATE transfer_requests SET status = 'approved' WHERE id = %s", (transfer_request_id,))
+                cursor.close()
+            return True
+
+        except Exception as e:
+            self.db.rollback()  # Deshacer cambios si hay error
+            print(f"Error al aprobar la transferencia: {e}")
             return False

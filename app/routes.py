@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request, session, flash, make_response, abort, send_file
+from flask import Flask, render_template, redirect, url_for, request, session, flash, make_response, abort, send_file, jsonify
 from auth.login import Auth
 from controllers.users_controller import Users
 from controllers.residences_controller import  Residences
@@ -471,13 +471,15 @@ class App:
                 amount = request.form.get('amount')
                 notes = request.form.get('notes')
                 debts = request.form.getlist('deudas')
+                admin_id = session.get('user_id')
+                print('id del admin:', admin_id)
 
                 print('User ID:', user_id)
                 print('Amount:', amount)
                 print('Notes:', notes)
                 print('Debts:', debts)
 
-                payment_id, file_path = self.payments.cash_payment(user_id, amount, notes, debts)
+                payment_id, file_path = self.payments.cash_payment(user_id, amount, notes, debts, admin_id)
 
                 if payment_id and file_path and os.path.exists(file_path):
                     print(f"Descargando archivo desde: {file_path}")
@@ -505,17 +507,33 @@ class App:
         def payment_complete():
             flash('Pago registrado correctamente', 'success')
             return redirect(url_for('dashboard', section='payments'))
+                
+        @self.app.route('/admin/payments/user_debts/<int:user_id>', methods=['GET'])
+        def user_debts(user_id):
+            try:
+                debts = self.debts.get_users_debts(user_id) 
+                print(debts) 
+                return jsonify(debts) 
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500  
             
+        @self.app.route('/admin/payments/accept_transfer', methods=['POST'])
+        def accept_transfer():
+            try:
+                if request.method == 'POST':
+                    debts = request.form.getlist('debts')
+                    user_id = request.form.get('user_id')
+                    transfer_request_id = request.form.get('transfer_id')
+                    admin_id = session.get('user_id')
+                    if self.payments.approve_transfer_request(transfer_request_id, debts, user_id, admin_id):
+                        flash('Transferencia aceptada correctamente', 'success')
+                        return redirect(url_for('dashboard', section='payments'))
+                    return redirect(url_for('dashboard', section='payments'))
 
-
-
-
-
-
-
-
-
-
+            except Exception as e:
+                print(f'An exception occurred: {e}')
+                return redirect(url_for('dashboard', section='payments'))
+            
 
 
         """ Rutas para el manejo del residente """
@@ -530,7 +548,8 @@ class App:
             notifications = self.notification.user_notifications(id)
             debts = self.debts.get_users_debts(id)
             transfer_requests = self.payments.get_my_transfer_requests(id)
-            return render_template('resident/home.html', user=user, claims=claims, notifications=notifications, debts=debts, transfer_requests=transfer_requests)
+            payments = self.payments.get_user_payments(id)
+            return render_template('resident/home.html', user=user, claims=claims, notifications=notifications, debts=debts, transfer_requests=transfer_requests,payments=payments)
 
 
         @self.app.route('/resident/update_photo/<int:user_id>', methods=['POST'])
