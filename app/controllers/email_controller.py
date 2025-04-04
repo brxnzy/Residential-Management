@@ -49,7 +49,6 @@ class EmailSender:
             print("Correo enviado exitosamente a:", destinatario)
         except Exception as e:
             print(f"Error al enviar el correo: {e}")
-        
 
     def custom_email(self, destinatario, asunto, mensaje):
         """Envía un correo con un asunto y mensaje personalizado en formato HTML."""
@@ -66,7 +65,36 @@ class EmailSender:
         except Exception as e:
             print(f"Error al enviar el correo: {e}")
 
+    def send_payment_evidence(self, destinatario, mensaje, ruta_archivo):
+            """Envía un correo con un archivo adjunto como evidencia de pago."""
+            asunto = "Evidencia de Pago - Habitat Max"
+            print("Ruta del archivo:", ruta_archivo)
+            print('DESTINATARIO:', destinatario)
+            contenido_html = f"""
+                <html>
+                <body>
+                    <p>{mensaje}</p>
+                    <p>Se adjunta evidencia de pago para su validación.</p>
+                </body>
+                </html>
+            """
+            try:
+                # Verificar si el archivo existe
+                if not os.path.isfile(ruta_archivo):
+                    raise FileNotFoundError(f"El archivo {ruta_archivo} no existe o no es accesible.")
 
+                # Enviar el correo con el archivo adjunto
+                self.yag.send(
+                    to=destinatario,
+                    subject=asunto,
+                    contents=contenido_html,
+                    attachments=ruta_archivo
+                )
+                print("Correo con evidencia enviado exitosamente a:", destinatario)
+            except Exception as e:
+                print(f"Error al enviar el correo con evidencia: {e}")
+
+    # Prueba del método
 
 
 

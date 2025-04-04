@@ -1,5 +1,6 @@
 from config.database import connection_db
 from controllers.report_controller import Reports
+from controllers.email_controller import EmailSender
 from werkzeug.utils import secure_filename
 import os
 
@@ -9,6 +10,7 @@ class Payments:
         self.db.autocommit = True
         self.app = app
         self.report = Reports(self.app)
+        self.email = EmailSender()
 
         
 
@@ -174,7 +176,8 @@ class Payments:
                 FROM transfer_requests tr
                 JOIN users u ON tr.id_usuario = u.id
                 LEFT JOIN houses h ON tr.id_usuario = h.id_usuario
-                LEFT JOIN apartments a ON tr.id_usuario = a.id_usuario;
+                LEFT JOIN apartments a ON tr.id_usuario = a.id_usuario
+                Order by tr.created_at DESC;
             """)
 
 
@@ -215,7 +218,13 @@ class Payments:
                     (user_id, total_amount, transfer_request_id, paid_period)
                 )
                 payment_id = cursor.lastrowid
-                self.report.generate_payment_report(payment_id, admin_id)  # Generar el reporte
+                file_path = self.report.generate_payment_report(payment_id, admin_id)
+                if file_path:
+                    cursor.execute('SELECT email FROM users WHERE id = %s', (user_id,))
+                    user = cursor.fetchone()
+                    email = user["email"]
+                    print(f"tratando de enviar correo a {email} con el archivo {file_path}")
+                    self.email.send_payment_evidence(email, "Tu Transferencia ha sido aceptada!", file_path) # Generar el reporte
                     
 
                 cursor.execute('insert into transactions (amount, type) values (%s, "ingreso")', (total_amount,))
