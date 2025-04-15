@@ -155,7 +155,8 @@ class App:
                 'user_info': 'admin/user_info.html',
                 'residences': 'admin/residences.html',
                 'claims': 'admin/claims.html',
-                'payments': 'admin/payments.html'
+                'payments': 'admin/payments.html',
+                'settings': 'admin/settings.html',
             }
 
             residents, admins, disabled, selected_user, houses, claims, debts, payments, transfer_requests = {}, {}, {}, {}, {}, {}, {}, {},{}
@@ -169,6 +170,12 @@ class App:
             payments = self.payments.get_payments()
             transfer_requests = self.payments.get_all_transfer_requests()
             balance = self.transactions.get_balance()
+            rating_info = self.claims.get_claims_rating()
+            incomes = self.transactions.get_monthly_incomes()
+            expenses = self.transactions.get_monthly_expenses()
+            community_status = self.transactions.get_community_status()
+            payment_methods = self.transactions.get_payment_method_stats()
+            historialEgresos = self.transactions.get_all_expenses()
             
             # Mostrar mensaje flash si hay un pago exitoso y el archivo está listo para ser descargado
             payment_message = session.get('payment_message', None)
@@ -204,7 +211,13 @@ class App:
                 debts=debts,
                 payments=payments,
                 balance=balance,
-                transfer_requests=transfer_requests
+                transfer_requests=transfer_requests,
+                rating_info = rating_info,
+                incomes=incomes,
+                expenses=expenses,
+                community_status=community_status,
+                payment_methods=payment_methods,
+                egresos=historialEgresos,
             )
 
 
@@ -348,7 +361,6 @@ class App:
 
                 try:
                     self.user.activate_account(user_id, photo, passw)
-                    # flash("Cuenta activada exitosamente. Ahora puedes iniciar sesión.", "success")
                     return redirect(url_for('login'))
                 except Exception as e:
                     flash(f"Error al habilitar usuario: {e}", "error")
@@ -531,8 +543,46 @@ class App:
                     return redirect(url_for('dashboard', section='payments'))
 
             except Exception as e:
-                print(f'An exception occurred: {e}')
+                print(f'ocurrio un error aceptando la transferencia: {e}')
                 return redirect(url_for('dashboard', section='payments'))
+            
+        @self.app.route('/admin/reject_transfer_request', methods=['POST'])
+        def reject_transfer():
+            try:
+                if request.method == 'POST':
+                    tr_id = request.form.get('tr_id')
+                    reason = request.form.get('reason')
+                    user_id = request.form.get('user_id')
+                    print('Transfer ID:', tr_id)
+                    print('Reason:', reason)
+                    print('User:', user_id)
+                    if self.payments.reject_transfer_request(tr_id, reason, user_id):
+                        flash('Transferencia rechazada correctamente', 'success')
+                        return redirect(url_for('dashboard', section='payments'))
+                    flash('Error al rechazar la transferencia', 'error')
+                    return redirect(url_for('dashboard', section='payments'))
+            except Exception as e:
+                print(f'ocurrio un error rechazando la transferencia: {e}')
+                return redirect(url_for('dashboard', section='payments'))
+            
+        @self.app.route('/admin/register_expense', methods=['POST'])
+        def register_expense():
+            try:
+                if request.method == 'POST':
+                    amount = request.form.get('amount')
+                    reason = request.form.get('reason')
+                    admin_id = session.get('user_id')
+
+                    if self.transactions.register_expense(amount, reason, admin_id):
+                        flash('Gasto registrado correctamente', 'success')
+                        return redirect(url_for('dashboard'))
+                    flash('Error al registrar el gasto', 'error')
+                    return redirect(url_for('dashboard'))
+
+            except Exception as e:
+                print(f'ocurrio un error registrando el gasto: {e}')
+                return redirect(url_for('dashboard'))
+                
             
 
 
@@ -671,6 +721,28 @@ class App:
                         flash('reclamo enviado correctamente', 'success')
                         return redirect(url_for('home')) 
                     flash('Ocurrio un Error mandando tu reclamo', 'error')
+                    return redirect(url_for('home'))
+
+            except Exception as e:
+                print(f'An exception occurred: {e}')
+                return redirect(url_for('home'))
+            
+
+        @self.app.route('/resident/rate_claim', methods=['POST'])
+        def rate_claim():
+            try:
+                if request.method == 'POST':
+                    claim_id = request.form.get('claim_id')
+                    rating = request.form.get('rating')
+
+
+                    print('Claim ID:', claim_id)
+                    print('Rating:', rating)
+
+                    if self.claims.rate_claim(claim_id, rating):
+                        flash('Reclamo calificado correctamente', 'success')
+                        return redirect(url_for('home')) 
+                    flash('Ocurrió un error al calificar el reclamo', 'error')
                     return redirect(url_for('home'))
 
             except Exception as e:

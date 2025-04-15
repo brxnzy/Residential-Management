@@ -6,15 +6,19 @@ function updateAmount() {
     const amountInput = document.getElementById('amount');
     let total = 0;
 
-    console.log("Checkboxes found:", checkboxes.length); // Debug
     checkboxes.forEach(checkbox => {
         if (checkbox.checked) {
-            total += 1500; // Replace with dynamic value if needed
+            const amount = parseFloat(checkbox.dataset.amount);
+            if (!isNaN(amount)) {
+                total += amount;
+            }
         }
     });
 
     amountInput.value = total.toFixed(2);
 }
+
+
 
 try {
     console.log("Inicializando script...");
@@ -61,6 +65,7 @@ try {
                     checkbox.id = `debt-${debt[0]}`; // Assuming debt[0] is the ID
                     checkbox.value = debt[0];
                     checkbox.name = 'deudas'
+                    checkbox.setAttribute('data-amount', debt[4]); // Assuming debt[4] is the amount
                     checkbox.className = 'w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600';
                     checkbox.addEventListener('change', updateAmount); // Add listener here
 
@@ -158,6 +163,107 @@ document.addEventListener('DOMContentLoaded', () => {
                 overlay.style.display = 'none';
                 document.body.style.overflow = '';
             }
+        });
+    });
+});
+
+
+function downloadInvoice(button) {
+    // Obtener el ID desde el atributo data-payment-id
+    const paymentId = button.getAttribute('data-payment-id');
+    
+    // Construir la ruta del archivo
+    const filePath = `../../static/uploads/reports/payment_${paymentId}.pdf`;
+    
+    // Crear un enlace temporal para descargar el archivo
+    const a = document.createElement('a');
+    a.href = filePath;
+    a.download = `payment_${paymentId}.pdf`; // Nombre del archivo al descargar
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    
+    console.log(`Descargando archivo: ${filePath}`);
+}
+
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll("[data-modal-toggle='transfer-modal']").forEach(button => {
+        button.addEventListener("click", function() {
+            let userId = this.getAttribute("data-user-id");
+            let transferId = this.getAttribute("data-transfer-id");
+            let modal = document.getElementById("transfer-modal");
+
+            let debtContainer = modal.querySelector("#debt-container"); // Donde se mostrarán las deudas
+            let form = modal.querySelector("form"); 
+            let submitButton = modal.querySelector("#submitButton"); // Obtener el botón de submit
+            let months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            let userIdInput = modal.querySelector("#user_id");
+            let transferIdInput = modal.querySelector("#transfer_id");
+
+            userIdInput.value = userId; 
+            transferIdInput.value = transferId; 
+
+            // Limpiar el contenedor de deudas antes de agregar nuevas
+            debtContainer.innerHTML = "";
+
+            // Deshabilitar el botón de submit al abrir el modal
+            submitButton.disabled = true;
+
+            // Actualizar el `action` del formulario con el ID del usuario
+            form.action = `/admin/payments/accept_transfer`;
+
+            // Obtener las deudas del usuario desde el backend
+            fetch(`/admin/payments/user_debts/${userId}`)
+                .then(response => response.json())
+                .then(debts => {
+                    if (debts.length > 0) {
+                        debts.forEach(debt => {
+                            let div = document.createElement("div");
+                            div.classList.add("flex", "items-center", "mb-4");
+
+                            div.innerHTML = `
+                                <input id="debt-${debt.id}" type="checkbox" name="debts" value="${debt.id}" class="debt-checkbox w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-green-500">
+                                <label for="debt-${debt.id}" class="ml-2 text-l font-bold text-gray-900">
+                                    ${months[debt.month - 1]} ${debt.period} - Monto: ${debt.amount}
+                                </label>
+                            `;
+                            debtContainer.appendChild(div);
+                        });
+
+                        // Agregar evento a los checkboxes para habilitar/deshabilitar el botón
+                        document.querySelectorAll(".debt-checkbox").forEach(checkbox => {
+                            checkbox.addEventListener("change", function() {
+                                let anyChecked = document.querySelectorAll(".debt-checkbox:checked").length > 0;
+                                submitButton.disabled = !anyChecked;
+                            });
+                        });
+                    } else {
+                        debtContainer.innerHTML = `<p class="text-gray-500">No hay deudas pendientes.</p>`;
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al obtener las deudas:", error);
+                    debtContainer.innerHTML = `<p class="text-red-500">Error al cargar las deudas.</p>`;
+                });
+        });
+    });
+});
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".reject-tr-btn").forEach(button => {
+        button.addEventListener("click", function () {
+            const trId = this.getAttribute("data-tr-id");
+            const userId = this.getAttribute("data-user-id");
+            console.log("ID de la transferencia:", trId);
+            console.log("ID del user:", userId);
+            
+            // Aquí puedes pasar el ID al modal
+            document.getElementById("reject-tr-input").value = trId;
+            document.getElementById("user-id_input").value = userId;
         });
     });
 });

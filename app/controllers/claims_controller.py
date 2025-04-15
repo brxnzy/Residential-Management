@@ -48,7 +48,7 @@ class Claims:
                     cursor.execute("UPDATE claims SET status = 'en progreso' WHERE id = %s", (claim['id'],))
 
             self.db.commit()  # Guardar los cambios en la base de datos
-            print("Estados de los reclamos actualizados correctamente.")
+            # print("Estados de los reclamos actualizados correctamente.")
             return True
 
         except Exception as e:
@@ -201,7 +201,7 @@ class Claims:
                     description = claim['description']
                     print(f'descripcion del reclamo: {description}')
 
-                    message = f"Categoría: {category} - '{description}' / ha sido programado para {schedule_date} e inicia a las {start_time}."
+                    message = f"Tu reclamo de Categoría: {category} - '{description}' / ha sido programado para {schedule_date} e inicia a las {start_time}."
                 else:
                     # Si no se encuentra el reclamo, usar un mensaje genérico
                     message = f"Tu reclamo {claim_id} ha sido programado para {schedule_date} e inicia a las {start_time} ."
@@ -302,7 +302,7 @@ class Claims:
 
             # Crear el mensaje de notificación
             notification_message = (
-                f"Tu reclamo (Categoría: {claim['category']} - {claim['description']}) "
+                f" (Tu reclamo de Categoría: {claim['category']} - {claim['description']}) "
                 f"terminó el día {finished_at} a la hora {end_time.strftime('%H:%M:%S')}"
             )
             user_id = claim['id_usuario']  # El ID del usuario asociado al reclamo
@@ -322,3 +322,38 @@ class Claims:
         except Exception as e:
             print('Error finalizando el reclamo:', e)
             return False
+
+
+    def rate_claim(self, claim_id, rating):
+        try:
+            cursor = self.db.cursor(dictionary=True)
+
+            # Actualizar la calificación y el comentario en la tabla claims
+            cursor.execute("""
+                UPDATE claims 
+                SET rating = %s
+                WHERE id = %s
+            """, (rating, claim_id))
+
+            self.db.commit()  # Guardar los cambios en la base de datos
+
+            return True
+
+        except Exception as e:
+            print('Error al calificar el reclamo:', e)
+            return False
+        
+    def get_claims_rating(self):
+        try:
+            cursor = self.db.cursor(dictionary=True)
+            cursor.execute("SELECT AVG(rating) AS promedio, COUNT(rating) AS cantidad FROM claims WHERE rating IS NOT NULL")
+            row = cursor.fetchone()
+            
+            promedio = float(row["promedio"]) if row["promedio"] is not None else 0.0
+            promedio = round(promedio, 1)
+            cantidad = row["cantidad"]
+
+            return {"promedio": promedio, "cantidad": cantidad}
+        except Exception as e:
+            print('An exception occurred:', e)
+            return {"promedio": 0.0, "cantidad": 0}

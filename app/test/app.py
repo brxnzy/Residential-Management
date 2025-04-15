@@ -1,10 +1,10 @@
+import os
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
-from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.graphics.shapes import Drawing, Line
-import os
+from reportlab.lib.units import inch
 from datetime import datetime
 
 def generate_invoice():
@@ -39,7 +39,7 @@ def generate_invoice():
         fontSize=18,
         spaceAfter=2,
         alignment=0,  # 0 = Left align
-        textColor= colors.black,
+        textColor=colors.black,
         fontName="Helvetica-Bold"
     )
     
@@ -111,11 +111,9 @@ def generate_invoice():
 
     # Create header with two columns: logo and invoice title
     if has_logo:
-       header_data = [
-        [logo_img, Paragraph('<br/><br/><br/><b>Residencial Pinares del Norte</b><br/><br/>Factura de Mantenimiento', title_style)]
-    ]
-
-        
+        header_data = [
+            [logo_img, Paragraph('<br/><br/><br/><b>Residencial Pinares del Norte</b><br/><br/>Factura de Mantenimiento', title_style)]
+        ]
     else:
         header_data = [
             [Paragraph('<b>Residencial XYZ</b>', title_style), 
@@ -153,7 +151,7 @@ def generate_invoice():
     """, company_info_style)
     
     info_data = [[company_info, invoice_info]]
-    info_table = Table(info_data, colWidths=[3.2*inch, 3.2*inch])
+    info_table = Table(info_data, colWidths=[3.55*inch, 3.55*inch])  # 7.1 pulgadas totales
     info_table.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         ('ALIGN', (0, 0), (0, 0), 'LEFT'),
@@ -191,14 +189,14 @@ def generate_invoice():
     elements.append(d)
     elements.append(Spacer(1, 10))
     
-    # Payment details table with improved styling
+    # Payment details table with improved styling (ajustado a 7.1 pulgadas)
     data = [
         ["Período", "Descripción", "Monto", "Método de Pago"],
         ["2025-03", "Cuota de Mantenimiento", "$10,000.00", "Transferencia"],
         ["2025-04", "Cuota de Mantenimiento", "$10,000.00", "Transferencia"],
     ]
     
-    table = Table(data, colWidths=[1.2*inch, 2.2*inch, 1.5*inch, 1.5*inch])
+    table = Table(data, colWidths=[1.24*inch, 2.4*inch, 1.65*inch, 1.65*inch])  # Suma = 7.1 pulgadas
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), green),  # Header background
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),  # Header text color

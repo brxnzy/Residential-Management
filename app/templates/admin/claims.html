@@ -90,6 +90,16 @@
         </h2>
         <span class="text-gray-500">Creado: {{ c.created_at }}</span>
       </div>
+      {% if c.rating %}
+  <div class="rating mt-2">
+
+    {% for i in range(1, 6) %}
+      <input type="radio" name="admin-rating-{{ c.id }}" class="mask mask-star-2 bgverde" disabled
+        {% if i == c.rating %} checked {% endif %} />
+    {% endfor %}
+  </div>
+{% endif %}
+
     </div>
 
     <!-- Botones (al final, alineados a la derecha) -->

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Administración de Residencias</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.35.3/apexcharts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/js/all.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <style>
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .star-rating {
+            color: #d1d5db;
+        }
+        .star-rating .fill {
+            color: #fbbf24;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Sidebar and Navbar -->
+    <div class="flex">
+        <!-- Sidebar -->
+        <div class="w-64 h-screen bg-indigo-800 text-white fixed">
+            <div class="p-6">
+                <h2 class="text-2xl font-semibold">ResidenceAdmin</h2>
+            </div>
+            <nav class="mt-6">
+                <div class="px-6 py-4 bg-indigo-900">
+                    <a href="#" class="flex items-center space-x-2">
+                        <i class="fas fa-th-large"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+                <div class="px-6 py-4">
+                    <a href="#" class="flex items-center space-x-2">
+                        <i class="fas fa-users"></i>
+                        <span>Residentes</span>
+                    </a>
+                </div>
+                <div class="px-6 py-4">
+                    <a href="#" class="flex items-center space-x-2">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span>Pagos</span>
+                    </a>
+                </div>
+                <div class="px-6 py-4">
+                    <a href="#" class="flex items-center space-x-2">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Reclamos</span>
+                    </a>
+                </div>
+                <div class="px-6 py-4">
+                    <a href="#" class="flex items-center space-x-2">
+                        <i class="fas fa-cog"></i>
+                        <span>Configuración</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="ml-64 flex-1">
+            <!-- Top Navbar -->
+            <div class="bg-white shadow-md p-4 flex justify-between items-center">
+                <div>
+                    <h1 class="text-xl font-semibold">Panel de Control</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <i class="fas fa-bell text-gray-600"></i>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">5</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white">
+                            <span>A</span>
+                        </div>
+                        <span class="font-medium">Admin</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Content -->
+            <div class="p-6">
+                <!-- Cards Row -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <!-- Balance Total Card -->
+                    <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 card-hover border-l-4 border-green-500">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Balance Total</p>
+                                <h3 class="text-2xl font-bold">$128,250.00</h3>
+                                <p class="text-green-600 text-sm mt-2">
+                                    <i class="fas fa-arrow-up mr-1"></i>
+                                    <span>8.2% desde el mes pasado</span>
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                                <i class="fas fa-dollar-sign text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Reclamos Pendientes Card -->
+                    <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 card-hover border-l-4 border-yellow-500">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Reclamos Pendientes</p>
+                                <h3 class="text-2xl font-bold">24</h3>
+                                <p class="text-yellow-600 text-sm mt-2">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    <span>12 requieren atención inmediata</span>
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600">
+                                <i class="fas fa-bell text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Solicitudes de Transferencias Card -->
+                    <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 card-hover border-l-4 border-blue-500">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Solicitudes de Transferencias</p>
+                                <h3 class="text-2xl font-bold">8</h3>
+                                <p class="text-blue-600 text-sm mt-2">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    <span>3 nuevas en las últimas 24h</span>
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                                <i class="fas fa-exchange-alt text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- Ingresos vs Egresos Chart -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-lg font-semibold mb-4">Ingresos vs Egresos (2025)</h3>
+                        <div id="ingresos-egresos-chart" class="w-full h-64"></div>
+                    </div>
+                    
+                    <!-- Rating de Reclamos -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-lg font-semibold mb-4">Satisfacción de Reclamos</h3>
+                        <div class="flex flex-col space-y-4">
+                            <div id="donut-chart" class="w-full h-48"></div>
+                            <div class="flex justify-center mt-2">
+                                <div class="star-rating text-2xl">
+                                    <span class="fill"><i class="fas fa-star text-green-700"></i></span>
+                                    <span class="fill"><i class="fas fa-star"></i></span>
+                                    <span class="fill"><i class="fas fa-star"></i></span>
+                                    <span class="fill"><i class="fas fa-star-half-alt"></i></span>
+                                    <span><i class="far fa-star"></i></span>
+                                </div>
+                            </div>
+                            <p class="text-center text-gray-600">Calificación promedio: <span class="font-semibold">3.5/5</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historiales y Recordatorios -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Historial de Egresos -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold">Historial de Egresos</h3>
+                            <button class="text-sm text-blue-600 hover:underline">Ver todos</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead>
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Concepto</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-4 py-3 whitespace-nowrap">Mantenimiento Ascensores</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">10/04/2025</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">$4,500.00</td>
+                                        <td class="px-4 py-3 whitespace-nowrap"><span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Completado</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 whitespace-nowrap">Servicios de Jardinería</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">05/04/2025</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">$1,200.00</td>
+                                        <td class="px-4 py-3 whitespace-nowrap"><span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Completado</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 whitespace-nowrap">Reparación Sistema Eléctrico</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">01/04/2025</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">$2,850.00</td>
+                                        <td class="px-4 py-3 whitespace-nowrap"><span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Pendiente</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-3 whitespace-nowrap">Servicio de Seguridad</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">28/03/2025</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">$5,000.00</td>
+                                        <td class="px-4 py-3 whitespace-nowrap"><span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Completado</span></td>
+                                    </tr>  
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Recordatorios de Pagos -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold">Recordatorios de Pagos Pendientes</h3>
+                            <button class="text-sm text-blue-600 hover:underline">Enviar recordatorios</button>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="border-l-4 border-red-500 bg-red-50 p-4 rounded-r">
+                                <div class="flex justify-between">
+                                    <div>
+                                        <p class="font-medium">Miguel Ángel Rodríguez</p>
+                                        <p class="text-sm text-gray-600">Apto 502 - Torre Norte</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-bold text-red-600">$2,500.00</p>
+                                        <p class="text-xs text-gray-500">Vencido: 45 días</p>
+                                    </div>
+                                </div>
+                                <div class="mt-2 flex justify-between">
+                                    <button class="text-xs bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700">Llamar</button>
+                                    <button class="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">WhatsApp</button>
+                                    <button class="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Email</button>
+                                </div>
+                            </div>
+                            
+                            <div class="border-l-4 border-red-500 bg-red-50 p-4 rounded-r">
+                                <div class="flex justify-between">
+                                    <div>
+                                        <p class="font-medium">Carolina Mendoza</p>
+                                        <p class="text-sm text-gray-600">Apto 301 - Torre Sur</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-bold text-red-600">$1,800.00</p>
+                                        <p class="text-xs text-gray-500">Vencido: 30 días</p>
+                                    </div>
+                                </div>
+                                <div class="mt-2 flex justify-between">
+                                    <button class="text-xs bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700">Llamar</button>
+                                    <button class="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">WhatsApp</button>
+                                    <button class="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Email</button>
+                                </div>
+                            </div>
+                            
+                            <div class="border-l-4 border-yellow-500 bg-yellow-50 p-4 rounded-r">
+                                <div class="flex justify-between">
+                                    <div>
+                                        <p class="font-medium">Roberto Gómez</p>
+                                        <p class="text-sm text-gray-600">Apto 108 - Torre Este</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-bold text-yellow-600">$950.00</p>
+                                        <p class="text-xs text-gray-500">Vencido: 15 días</p>
+                                    </div>
+                                </div>
+                                <div class="mt-2 flex justify-between">
+                                    <button class="text-xs bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700">Llamar</button>
+                                    <button class="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">WhatsApp</button>
+                                    <button class="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Email</button>
+                                </div>
+                            </div>
+                            
+                            <div class="border-l-4 border-yellow-500 bg-yellow-50 p-4 rounded-r">
+                                <div class="flex justify-between">
+                                    <div>
+                                        <p class="font-medium">Ana María López</p>
+                                        <p class="text-sm text-gray-600">Apto 403 - Torre Norte</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-bold text-yellow-600">$1,250.00</p>
+                                        <p class="text-xs text-gray-500">Vencido: 10 días</p>
+                                    </div>
+                                </div>
+                                <div class="mt-2 flex justify-between">
+                                    <button class="text-xs bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700">Llamar</button>
+                                    <button class="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">WhatsApp</button>
+                                    <button class="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Email</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de ApexCharts para Ingresos vs Egresos
+        var ingresosEgresosOptions = {
+            series: [{
+                name: 'Ingresos',
+                data: [18500, 19200, 21000, 22400, 20800, 19600, 23500, 25000, 24300, 26500, 0, 0]
+            }, {
+                name: 'Egresos',
+                data: [12500, 11800, 14200, 15000, 12900, 13500, 15800, 16200, 14500, 15900, 0, 0]
+            }],
+            chart: {
+                type: 'area',
+                height: 250,
+                toolbar: {
+                    show: false
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 2
+            },
+            colors: ['#4f46e5', '#ef4444'],
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.7,
+                    opacityTo: 0.2,
+                    stops: [0, 90, 100]
+                }
+            },
+            xaxis: {
+                categories: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            },
+            tooltip: {
+                y: {
+                    formatter: function (val) {
+                        return "$" + val.toLocaleString();
+                    }
+                }
+            }
+        };
+
+        var ingresosEgresosChart = new ApexCharts(document.querySelector("#ingresos-egresos-chart"), ingresosEgresosOptions);
+        ingresosEgresosChart.render();
+
+        // Configuración de ApexCharts para Donut Chart (Satisfacción)
+        var donutOptions = {
+            series: [15, 40, 25, 15, 5],
+            chart: {
+                type: 'donut',
+                height: 200
+            },
+            labels: ['5 estrellas', '4 estrellas', '3 estrellas', '2 estrellas', '1 estrella'],
+            colors: ['#10b981', '#3b82f6', '#f59e0b', '#f97316', '#ef4444'],
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '70%'
+                    }
+                }
+            },
+            legend: {
+                show: false
+            },
+            dataLabels: {
+                enabled: false
+            }
+        };
+
+        var donutChart = new ApexCharts(document.querySelector("#donut-chart"), donutOptions);
+        donutChart.render();
+    </script>
+</body>
+</html>

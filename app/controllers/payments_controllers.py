@@ -35,8 +35,8 @@ class Payments:
             
     def get_user_payments(self, user_id):
         try:
-            cursor = self.db.cursor()
-            cursor.execute("SELECT * FROM payments WHERE user_id = %s", (user_id,))
+            cursor = self.db.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM payments WHERE id_usuario = %s", (user_id,))
             payments = cursor.fetchall()
             cursor.close()
             return payments
@@ -229,6 +229,7 @@ class Payments:
 
                 cursor.execute('insert into transactions (amount, type) values (%s, "ingreso")', (total_amount,))
                 cursor.execute("UPDATE transfer_requests SET status = 'approved' WHERE id = %s", (transfer_request_id,))
+                cursor.execute('insert into notifications (id_usuario, message) values (%s, %s, %s)', (user_id, "Tu transferencia ha sido aprobada!"))
                 cursor.close()
             return True
 
@@ -236,3 +237,18 @@ class Payments:
             self.db.rollback()  # Deshacer cambios si hay error
             print(f"Error al aprobar la transferencia: {e}")
             return False
+        
+
+    def reject_transfer_request(self, id, reason, id_usuario):
+        try:
+            cursor = self.db.cursor()
+            cursor.execute("UPDATE transfer_requests SET status = 'rejected' WHERE id = %s", (id,))
+            cursor.execute("insert into notifications (id_usuario, message) values (%s, %s)", (id_usuario, reason))
+            cursor.close()
+            return True
+        except Exception as e:
+            self.db.rollback()
+            print(f"Error al rechazar la transferencia: {e}")
+            return False
+        
+

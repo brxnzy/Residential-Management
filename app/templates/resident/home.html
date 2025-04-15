@@ -227,6 +227,30 @@
                       <div class="flex justify-between items-center mt-3">
                           <span class="text-xs text-gray-500">Creado: {{ c.created_at }}</span>
                       </div>
+
+
+                      {% if c.status == 'resuelto' and c.rating is none %}
+  <!-- Mostrar estrellas para calificar -->
+                      <form method="POST" class="flex items-center justify-between" action="/resident/rate_claim">
+                        <div class="rating">
+                          {% for i in range(1, 6) %}
+                            <input type="radio" name="rating" value="{{ i }}" class="mask mask-star-2 bgverde" aria-label="{{ i }} star" />
+                          {% endfor %}
+                        </div>
+                        <input type="hidden" name="claim_id" value="{{ c.id }}">
+                        <button type="submit" class="mt-2 bgverde text-white px-3 py-1 rounded-md">Enviar calificación</button>
+                      </form>
+
+                    {% elif c.rating is not none %}
+                      <!-- Mostrar estrellas fijas según lo que calificó -->
+                      <div class="rating">
+                        {% for i in range(1, 6) %}
+                          <input type="radio" name="rating-show-{{ c.id }}" class="mask mask-star-2 bgverde" disabled
+                            {% if i == c.rating %} checked {% endif %} />
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+
                   </div>
               </div>
           {% endfor %}
@@ -242,87 +266,107 @@
   </div>
 
 
-  {% set months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"] %}
-
   <div id="pagos" class="tab-content p-6">
-      <h2 class="text-xl font-bold text-gray-800 mb-6">Mis Pagos</h2>
-  
-      {% if debts %}
-          {% set next_payment = debts[0] %}
-          <!-- Payment Summary -->
-          <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-6">
-              <div class="flex justify-between items-center">
-                  <div>
-                      <h3 class="font-medium text-blue-800">Próximo pago</h3>
-                      <p class="text-2xl font-bold text-blue-600">${{ next_payment.amount }}</p>
-                      <p class="text-sm text-blue-500">{{months[next_payment.month - 1] }} {{ next_payment.period }}</p>
-                  </div>
-                  <button data-modal-target="transfer-modal" data-modal-toggle="transfer-modal" class=" bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">Pagar ahora</button>
-              </div>
-          </div>
-      {% endif %}
-  
-      <!-- Payment History Table -->
+    <h2 class="text-xl font-bold text-gray-800 mb-6">Mis Pagos</h2>
+    {% set months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"] %}
 
-    <div class="overflow-x-auto">
-          <table class="min-w-full bg-white">
-              <thead class="bg-gray-100">
-                  <tr>
-                      <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Periodo</th>
-                      <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
-                      <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                  </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200">
-                  {% for debt in debts %}
-                  <tr>
-                      <td class="py-3 px-4 text-sm text-gray-500">{{months[debt.month - 1] }} {{ debt.period }}</td>
-                      <td class="py-3 px-4 text-sm text-gray-500">${{ debt.amount }}</td>
-                      <td class="py-3 px-4 text-sm">
-                          <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">Pendiente</span>
-                      </td>
-                  </tr>
-                  {% endfor %}
-              </tbody>
-          </table>
-      </div>
-      
-      
-      <div class="overflow-x-auto">
-        <h1 class="my-6 px-1 text-lg">Mis Solicitudes de Transferencia</h1>
-        <table class="min-w-full bg-white">
-          <thead class="bg-gray-100">
-            <tr>
-              <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Evidencia</th>
-              <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-              <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            {% for tr in transfer_requests %}
-            <tr>
-              <td class="py-3 px-4 text-sm text-gray-500">
-                <div class="thumbnails">
-                  <img src="{{url_for('static', filename='uploads/transfer_requests/' + tr.evidence)}}" alt="Evidencia" class="w-16 h-16 rounded overflow-hidden object-cover cursor-pointer hover:opacity-80 transition thumbnail-img">
-                </div>
-              </td>
-              <td class="py-3 px-4 text-sm">
-                {% if tr.status == 'pending' %}
-                <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">Pendiente</span>
-                {% elif tr.status == 'rechazado' %}
-                <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">Rechazado</span>
-                {% elif tr.status == 'approved' %}
-                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Aprobado</span>
-                {% endif %}
-              </td>
-              <td class="py-3 px-4 text-sm text-gray-500">{{ tr.created_at.strftime('%d/%m/%Y') }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-            </div>
+    {% if debts %}
+      {% set next_payment = debts[0] %}
+      <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-6">
+        <div class="flex justify-between items-center">
+          <div>
+            <h3 class="font-medium text-blue-800">Próximo pago</h3>
+            <p class="text-2xl font-bold text-blue-600">${{ next_payment.amount }}</p>
+            <p class="text-sm text-blue-500">{{ months[next_payment.month - 1] }} {{ next_payment.period }}</p>
           </div>
+          <button data-modal-target="transfer-modal" data-modal-toggle="transfer-modal" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">Pagar ahora</button>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Payment and Debt History Table -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Periodo</th>
+            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          {% for debt in debts %}
+            <tr>
+              <td class="py-3 px-4 text-sm text-gray-500">{{ months[debt.month - 1] }} {{ debt.period }}</td>
+              <td class="py-3 px-4 text-sm text-gray-500">${{ debt.amount }}</td>
+              <td class="py-3 px-4 text-sm">
+                <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">Pendiente</span>
+              </td>
+            </tr>
+          {% endfor %}
+          {% for payment in payments %}
+            <tr>
+              {% set period_parts = payment.paid_period.split(',') %}
+              {% if period_parts | length == 2 %}
+                {% set month_number = period_parts[1] | int %}
+                {% set year = period_parts[0] %}
+                <td class="py-3 px-4 text-sm text-gray-500">{{ months[month_number - 1] }} {{ year }}</td>
+              {% else %}
+                <td class="py-3 px-4 text-sm text-gray-500">{{ payment.paid_period }}</td>
+              {% endif %}
+              <td class="py-3 px-4 text-sm text-gray-500">${{ payment.amount }}</td>
+              <td class="py-3 px-4 text-sm">
+                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Pagado</span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Transfer Requests Section -->
+    <div class="mt-6">
+      <h3 class="text-lg font-bold text-gray-800 mb-4">Solicitudes de Transferencia</h3>
+      {% if transfer_requests %}
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Evidencia</th>
+                <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              {% for tr in transfer_requests %}
+                <tr>
+                  <td class="py-3 px-4 text-sm text-gray-500">
+                    <div class="thumbnails">
+                      <img src="{{ url_for('static', filename='uploads/transfer_requests/' + tr.evidence) }}" alt="Evidencia" class="w-16 h-16 rounded overflow-hidden object-cover cursor-pointer hover:opacity-80 transition thumbnail-img">
+                    </div>
+                  </td>
+                  <td class="py-3 px-4 text-sm">
+                    {% if tr.status == 'pending' %}
+                      <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">Pendiente</span>
+                    {% elif tr.status == 'rechazado' %}
+                      <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">Rechazado</span>
+                    {% elif tr.status == 'approved' %}
+                      <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Aprobado</span>
+                    {% endif %}
+                  </td>
+                  <td class="py-3 px-4 text-sm text-gray-500">{{ tr.created_at.strftime('%d/%m/%Y') }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="text-md p-1">No has hecho una solicitud de transferencia todavía...</p>
+      {% endif %}
+    </div>
+  </div>
+  
+    
 
  <!-- Notificaciones Tab -->
 
@@ -591,13 +635,13 @@
 <div id="transfer-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
   <div class="relative p-4 w-full max-w-xl max-h-full">
       <!-- Modal content -->
-      <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+      <div class="relative bg-white rounded-lg shadow-sm ">
           <!-- Modal header -->
-          <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+          <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t  border-gray-200">
+              <h3 class="text-xl font-bold text-gray-900 ">
                   Pago por transferencia
               </h3>
-              <button type="button" class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="transfer-modal">
+              <button type="button" class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center " data-modal-hide="transfer-modal">
                   <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                       <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                   </svg>
@@ -609,13 +653,13 @@
             <form class="space-y-4" action="/resident/transfer_request" method="post" enctype="multipart/form-data">
               <!-- Input de archivo simple -->
               <div>
-                  <label for="evidence" class="block mb-2 text-md font-medium text-gray-900 dark:text-white">Subir comprobante</label>
+                  <label for="evidence" class="block mb-2 text-md font-medium text-gray-900 ">Subir comprobante</label>
                   <input id="evidence" name="evidence" type="file" required class="block w-full text-sm  border border-gray-300 rounded-lg cursor-pointer bg-gray-50 custom-file-input focus:outline-none" />
               </div>
           
               <!-- Input de descripción -->
               <div>
-                  <label for="description" class="block mb-2 text-md font-medium text-gray-900 dark:text-white">Descripción (opcional)</label>
+                  <label for="description" class="block mb-2 text-md font-medium text-gray-900 ">Descripción (opcional)</label>
                   <textarea id="description" name="description" rows="3" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500" placeholder="Escribe aquí detalles adicionales..."></textarea>
                   <input type="hidden" name="user_id" value="{{ user.id }}">
               </div>

@@ -85,14 +85,14 @@ class Reports:
             months = paid_period if paid_period else "N/A"
 
             # Define save path                        
-            # Definir ruta de guardado
             report_folder = os.path.join(self.app.config['UPLOAD_FOLDER'], "reports")
-            os.makedirs(report_folder, exist_ok=True)  # Crear carpeta si no existe
+            os.makedirs(report_folder, exist_ok=True)
             file_path = os.path.join(report_folder, f"payment_{id}.pdf")
+
             # Custom colors
             primary_color = colors.HexColor('#A6A6A6')  
             secondary_color = colors.HexColor('#adadad')
-            gray = colors.HexColor('#242424')  # Gris claro para fondos
+            gray = colors.HexColor('#242424')
             green = colors.HexColor('#157f3d')
             green2 = colors.Color(21/255, 127/255, 61/255, alpha=0.3)
             
@@ -114,7 +114,7 @@ class Reports:
                 name="TitleStyle",
                 fontSize=18,
                 spaceAfter=2,
-                alignment=0,  # 0 = Left align
+                alignment=0,
                 textColor=colors.black,
                 fontName="Helvetica-Bold"
             )
@@ -167,7 +167,7 @@ class Reports:
                 fontSize=12,
                 textColor=colors.black,
                 fontName="Helvetica-Bold",
-                alignment=2  # Right align
+                alignment=2
             )
 
             # Create header table with logo and company info
@@ -210,14 +210,13 @@ class Reports:
             elements.append(d)
             elements.append(Spacer(1, 15))
             
-            # Two column layout for company and client info
+            # Two column layout for company and client info (ajustado a 7.1 pulgadas)
             company_info = Paragraph("""
                 <b>Dirección:</b> Santo Domingo D.N., Gualey  <br/>
                 <b>Teléfono:</b> 849-284-2781<br/>
                 <b>Email:</b> respinaresdelnorte@gmail.com<br/>
             """, company_info_style)
             
-            # Current date from payment info
             payment_date = created_at.strftime("%d-%m-%Y")
             
             invoice_info = Paragraph(f"""
@@ -227,7 +226,7 @@ class Reports:
             """, company_info_style)
             
             info_data = [[company_info, invoice_info]]
-            info_table = Table(info_data, colWidths=[3.2*inch, 3.2*inch])
+            info_table = Table(info_data, colWidths=[3.55*inch, 3.55*inch])  # 7.1 pulgadas totales
             info_table.setStyle(TableStyle([
                 ('VALIGN', (0, 0), (-1, -1), 'TOP'),
                 ('ALIGN', (0, 0), (0, 0), 'LEFT'),
@@ -236,11 +235,10 @@ class Reports:
             elements.append(info_table)
             elements.append(Spacer(1, 15))
             
-            # Client information section with background
+            # Client information section (como Paragraph, no tabla)
             client_header = Paragraph("<b>INFORMACIÓN DEL RESIDENTE</b>", header_style)
             elements.append(client_header)
             
-            # Line under client header
             d = Drawing(500, 1)
             d.add(Line(0, 0, 500, 0, strokeColor=secondary_color, strokeWidth=1))
             elements.append(d)
@@ -255,38 +253,36 @@ class Reports:
             elements.append(client_info)
             elements.append(Spacer(1, 15))
             
-            # Payment details section
+            # Payment details section (ajustado a 7.1 pulgadas)
             payment_header = Paragraph("<b>DETALLE DE PAGOS</b>", header_style)
             elements.append(payment_header)
             
-            # Line under payment header
             d = Drawing(500, 1)
             d.add(Line(0, 0, 500, 0, strokeColor=secondary_color, strokeWidth=1))
             elements.append(d)
             elements.append(Spacer(1, 10))
             
-            # Payment details table with improved styling
             data = [
                 ["Período", "Descripción", "Monto", "Método de Pago"],
                 [months, "Cuota de Mantenimiento", f"${amount:,.2f}", payment_method],
             ]
             
-            table = Table(data, colWidths=[1.2*inch, 2.2*inch, 1.5*inch, 1.5*inch])
+            table = Table(data, colWidths=[1.25*inch, 2.4*inch, 1.65*inch, 1.65*inch])  # 7.1 pulgadas totales
             table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), green),  # Header background
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),  # Header text color
+                ('BACKGROUND', (0, 0), (-1, 0), green),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                 ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
                 ('FONTSIZE', (0, 0), (-1, 0), 10),
                 ('BOTTOMPADDING', (0, 0), (-1, 0), 7),
                 ('TOPPADDING', (0, 0), (-1, 0), 7),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.white),  # Body background
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.white),  # Thinner grid lines
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.white),
                 ('LINEABOVE', (0, 0), (-1, 0), 1, colors.white),
                 ('LINEBELOW', (0, 0), (-1, 0), 1, colors.white),
                 ('LINEBELOW', (0, -1), (-1, -1), 1, colors.white),
-                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, green2])  # Alternating row colors
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, green2])
             ]))
             
             elements.append(table)
