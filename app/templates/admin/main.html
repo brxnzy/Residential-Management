@@ -238,17 +238,105 @@ class="hidden z-50 fixed inset-0 w-full h-full bg-black/20"
 </div>
 </div>
 
+{% set months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'] %}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-2 mb-6 mt-4">
+
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <h3 class="text-xl font-semibold mb-4">Satisfacción de Reclamos</h3>
+    <div class="flex flex-col space-y-4">
+      
+      <!-- Donut Chart con data de distribución -->
+      <div id="donut-chart" class="w-full h-48" data-distribution='{{ rating_distribution | tojson }}'></div>
+      
+      <!-- Estrellas según promedio -->
+      {% set promedio = rating_info.promedio %}
+      {% set full_stars = promedio | int %}
+      {% set decimal = promedio - full_stars %}
+      {% set half_star = 1 if decimal >= 0.5 else 0 %}
+      {% set empty_stars = 5 - full_stars - half_star %}
+      
+      <div class="flex justify-center mt-2">
+        <div class="star-rating text-2xl text-yellow-500">
+          {% for _ in range(full_stars) %}
+          <i class="fas fa-star"></i>
+          {% endfor %}
+          {% if half_star %}
+          <i class="fas fa-star-half-alt"></i>
+          {% endif %}
+          {% for _ in range(empty_stars) %}
+          <i class="far fa-star"></i>
+          {% endfor %}
+        </div>
+      </div>
+      
+      <!-- Promedio -->
+      <p class="text-center text-gray-600">
+        Calificación promedio: <span class="font-semibold">{{ promedio }}/5</span>
+      </p>
+    </div>
+  </div>
+  <div class="p-4">
+    <h2 class="text-xl font-bold mb-4">Residentes con Deudas</h2>
+  {% if debtors %}
+  
+  <div class="overflow-x-auto bg-white rounded-xl shadow-md">
+    <table class="table table-zebra w-full">
+      <thead>
+        <tr class="text-left text-sm text-gray-600">
+          <th>Residente</th>
+          <th>Monto Adeudado</th>
+          <th>Periodo</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in debtors %}
+        
+        <tr>
+          <td>{{d.resident}}</td>
+          <td class="text-red-600 font-semibold">{{d.debt_amount}}</td>
+          <td>{{months[d.month]}} {{d.period}} </td>
+          <td>
+            <form action="/admin/payment-reminder" method="post">
+              <input type="hidden" name="debt_id" value="{{d.id}}">
+
+              <button class="bgverde w-10 h-10 rounded-full flex items-center justify-center text-white" data-tooltip-target="tooltip-default" data-tooltip-placement="top" data-tooltip-trigger="hover" data-modal-toggle="modal-default" data-modal-target="modal-default">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
+                </svg>
+                
+              </button>
+            </form>
+          </td>
+        </tr>
+        <tr>
+          {% endfor %}
+          
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+  </div>
+  
+
+</div>
+
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
 <script>
 
+</script>
 
-  </script>
   
 
 
 
 <!-- Incluye ApexCharts en tu HTML (en <head> o antes de cerrar el body) -->
-  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-
+  
 
     
 <script src="{{url_for('static', filename='js/main.js')}}"></script>

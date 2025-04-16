@@ -30,4 +30,30 @@ class Debts:
             print(e)
             return False
         
-    
+    def get_debtors(self):
+        try:
+            cursor = self.db.cursor(dictionary=True)
+            cursor.execute("""
+            SELECT 
+                    u.id AS user_id,
+                    CONCAT(u.name, ' ', u.last_name) AS resident,
+                    d.amount AS debt_amount,
+                    d.period,
+                    d.month,
+                    d.id,
+                    COALESCE(
+                        CONCAT( a.building, ', Apto. ', a.apartment_number),
+                        CONCAT('Casa ', h.house_number)
+                    ) AS residence
+                FROM debts d
+                JOIN users u ON u.id = d.id_usuario
+                LEFT JOIN apartments a ON a.id_usuario = d.id_usuario
+                LEFT JOIN houses h ON h.id_usuario = d.id_usuario
+                WHERE d.amount > 0;
+                """)
+            debtors = cursor.fetchall()
+            cursor.close()
+            return debtors
+        except Exception as e:
+            print(e)
+            return False    

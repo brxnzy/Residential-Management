@@ -346,14 +346,54 @@ class Claims:
     def get_claims_rating(self):
         try:
             cursor = self.db.cursor(dictionary=True)
-            cursor.execute("SELECT AVG(rating) AS promedio, COUNT(rating) AS cantidad FROM claims WHERE rating IS NOT NULL")
+            query = """
+                SELECT 
+                    ROUND(AVG(rating), 1) AS promedio, 
+                    COUNT(rating) AS cantidad 
+                FROM claims 
+                WHERE rating IS NOT NULL
+            """
+            cursor.execute(query)
             row = cursor.fetchone()
-            
-            promedio = float(row["promedio"]) if row["promedio"] is not None else 0.0
-            promedio = round(promedio, 1)
-            cantidad = row["cantidad"]
 
-            return {"promedio": promedio, "cantidad": cantidad}
+            promedio = row["promedio"] if row["promedio"] is not None else 0.0
+            cantidad = row["cantidad"] if row["cantidad"] else 0
+
+            cursor.close()
+
+            return {
+                "promedio": float(promedio),
+                "cantidad": int(cantidad)
+            }
+
         except Exception as e:
-            print('An exception occurred:', e)
+            print("An exception occurred:", e)
             return {"promedio": 0.0, "cantidad": 0}
+
+
+
+    def get_rating_distribution(self):
+        try:
+            cursor = self.db.cursor()
+            cursor.execute("""
+                SELECT rating, COUNT(*) as total 
+                FROM claims 
+                WHERE rating IS NOT NULL 
+                GROUP BY rating
+            """)
+            rows = cursor.fetchall()
+            cursor.close()
+
+            # Inicializar arreglo [1★, 2★, 3★, 4★, 5★]
+            distribution = [0, 0, 0, 0, 0]
+
+            for row in rows:
+                rating = int(row[0])
+                if 1 <= rating <= 5:
+                    distribution[rating - 1] = row[1]
+
+            return distribution
+
+        except Exception as e:
+            print("An exception occurred:", e)
+            return [0, 0, 0, 0, 0]

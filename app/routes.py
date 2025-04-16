@@ -171,11 +171,14 @@ class App:
             transfer_requests = self.payments.get_all_transfer_requests()
             balance = self.transactions.get_balance()
             rating_info = self.claims.get_claims_rating()
+            rating_distribution = self.claims.get_rating_distribution()
             incomes = self.transactions.get_monthly_incomes()
             expenses = self.transactions.get_monthly_expenses()
             community_status = self.transactions.get_community_status()
             payment_methods = self.transactions.get_payment_method_stats()
             historialEgresos = self.transactions.get_all_expenses()
+            debtors = self.debts.get_debtors()
+            
             
             # Mostrar mensaje flash si hay un pago exitoso y el archivo está listo para ser descargado
             payment_message = session.get('payment_message', None)
@@ -213,11 +216,13 @@ class App:
                 balance=balance,
                 transfer_requests=transfer_requests,
                 rating_info = rating_info,
+                rating_distribution = rating_distribution,
                 incomes=incomes,
                 expenses=expenses,
                 community_status=community_status,
                 payment_methods=payment_methods,
                 egresos=historialEgresos,
+                debtors=debtors
             )
 
 
@@ -581,6 +586,22 @@ class App:
 
             except Exception as e:
                 print(f'ocurrio un error registrando el gasto: {e}')
+                return redirect(url_for('dashboard'))
+
+
+        @self.app.route('/admin/payment-reminder', methods=['POST'])    
+        def payment_reminder():
+            try:
+                if request.method == 'POST':
+                    debt_id = request.form.get('debt_id')
+                    print('Debt ID:', debt_id)
+                    if self.notification.send_payment_reminder(debt_id):
+                        flash('Recordatorio de pago enviado correctamente', 'success')
+                        return redirect(url_for('dashboard'))
+                    flash('Error al enviar el recordatorio de pago', 'error')
+                    return redirect(url_for('dashboard'))
+            except Exception as e:
+                print(f'ocurrio un error enviando el recordatorio de pago: {e}')
                 return redirect(url_for('dashboard'))
                 
             

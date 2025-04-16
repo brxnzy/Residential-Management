@@ -111,3 +111,33 @@ ingresosEgresosChart.render();
     }
   });
   
+
+  const chartEl = document.querySelector("#donut-chart");
+  const data = JSON.parse(chartEl.dataset.distribution); // Tus datos reales
+
+  // Configuración con tus estilos de ejemplo
+  var donutOptions = {
+      series: data,
+      chart: {
+          type: 'donut',
+          height: 200
+      },
+      labels: ['1 estrella', '2 estrellas', '3 estrellas', '4 estrellas', '5 estrellas'],
+      colors: ['#ef4444', '#f97316', '#f59e0b', '#3b82f6', '#10b981'],
+      plotOptions: {
+          pie: {
+              donut: {
+                  size: '70%'
+              }
+          }
+      },
+      legend: {
+          show: false
+      },
+      dataLabels: {
+          enabled: false
+      }
+  };
+
+  var donutChart = new ApexCharts(chartEl, donutOptions);
+  donutChart.render();
