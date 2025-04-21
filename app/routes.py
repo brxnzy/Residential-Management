@@ -9,6 +9,7 @@ from controllers.debts_controller import Debts
 from controllers.payments_controllers import Payments
 from controllers.report_controller import Reports
 from controllers.transactions_controller import Transactions
+from controllers.settings_controller import Settings
 from functools import wraps
 import os
 
@@ -33,6 +34,7 @@ class App:
         self.payments = Payments(self.app)
         self.report = Reports(self.app)
         self.transactions = Transactions()
+        self.settings = Settings()
         self.app.config['SECRET_KEY'] = 'secretkey'
         UPLOAD_FOLDER = r'C:\Users\Crist\OneDrive\Documents\Desktop\Final Proyect\app\static\uploads'
         self.app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -151,7 +153,6 @@ class App:
             sections = {
                 'main': 'admin/main.html',
                 'users': 'admin/users.html',
-                'my_info': 'admin/my_info.html',
                 'user_info': 'admin/user_info.html',
                 'residences': 'admin/residences.html',
                 'claims': 'admin/claims.html',
@@ -178,6 +179,7 @@ class App:
             payment_methods = self.transactions.get_payment_method_stats()
             historialEgresos = self.transactions.get_all_expenses()
             debtors = self.debts.get_debtors()
+            debt_amount = self.debts.get_debt_amount()
             
             
             # Mostrar mensaje flash si hay un pago exitoso y el archivo está listo para ser descargado
@@ -196,12 +198,14 @@ class App:
                 return render_template('errors/404.html'), 404
             template = sections[key]
 
-            session_user = session.get('user')
+            id = session.get('user_id')
+            user = self.user.get_user_by_id(id)
+
 
             return render_template(
                 'admin/dashboard.html',
                 content_template=template,
-                user=session_user,
+                user=user,
                 section=section,
                 sub_section=sub_section,
                 **residents,
@@ -222,7 +226,9 @@ class App:
                 community_status=community_status,
                 payment_methods=payment_methods,
                 egresos=historialEgresos,
-                debtors=debtors
+                debtors=debtors,
+                debt_amount=debt_amount
+
             )
 
 
@@ -603,6 +609,120 @@ class App:
             except Exception as e:
                 print(f'ocurrio un error enviando el recordatorio de pago: {e}')
                 return redirect(url_for('dashboard'))
+            
+        @self.app.route('/admin/update_logo', methods=['POST'])
+        def update_logo():
+            try:
+                if request.method == 'POST':
+                    file = request.files.get('logo')
+                    if self.settings.update_logo(file):
+                        flash('Logo actualizado correctamente', 'success')
+                        return redirect(url_for('dashboard', section='settings'))
+                    flash('Error al actualizar el logo', 'error')
+                    return redirect(url_for('dashboard', section='settings'))
+            except Exception as e:
+                print(f'ocurrio un error actualizando el logo: {e}')
+                return redirect(url_for('dashboard', section='settings'))
+            
+        @self.app.route('/admin/update_debt_amount', methods=['POST'])
+        def update_debt_amount():
+            try:
+                if request.method == 'POST':
+                    amount = request.form.get('debt_amount')
+                    if self.debts.update_debt_amount(amount):
+                        flash('Monto de deuda actualizado correctamente', 'success')
+                        return redirect(url_for('dashboard', section='settings'))
+                    flash('Error al actualizar el monto de deuda', 'error')
+                    return redirect(url_for('dashboard', section='settings'))
+            except Exception as e:
+                print(f'ocurrio un error actualizando el monto de deuda: {e}')
+                return redirect(url_for('dashboard', section='settings'))
+            
+        @self.app.route('/admin/update_photo', methods=['POST'])
+        def update_pfp():
+            try:
+                photo = request.files.get('photo')
+                user_id = request.form.get('user_id')
+                
+                if not photo or photo.filename == '':
+                    flash('No se seleccionó ninguna foto', 'error')
+                    print('[ERROR] No se seleccionó ninguna foto')
+                    return redirect(request.referrer)
+
+                if self.resident.update_photo(user_id, photo):
+                    flash('Foto actualizada correctamente', 'success')
+                    print(f'[INFO] Foto actualizada para el usuario {user_id}')
+                else:
+                    flash('Error al actualizar la foto', 'error')
+                    print(f'[ERROR] No se pudo actualizar la foto para el usuario {user_id}')
+
+                return redirect(url_for('dashboard', section='settings'))
+            
+            except Exception as e:
+                print(f'[EXCEPTION] Error en update_photo: {e}')
+                flash('Ocurrió un error inesperado', 'error')
+                return redirect(request.referrer)
+            
+        @self.app.route('/admin/delete_photo', methods=['POST'])
+        def delete_photo2():
+            try:
+                user_id = request.form.get('user_id')
+                print(f"user id:", user_id)
+                if self.resident.delete_photo(user_id):
+                    flash('Foto eliminada correctamente', 'success')
+                    print('foto eliminada correctamente')
+                return redirect(url_for('dashboard', section='settings'))  
+            except Exception as e:
+                print('Error', e)
+                flash('Error al eliminar la foto', 'danger')
+                return redirect(url_for('dashboard', section='settings'))
+            
+
+        @self.app.route('/admin/update_profile', methods=['POST'])
+        def update_profile():
+            try:
+                if request.method == 'POST':
+                    user_id = request.form.get('user_id')
+                    email = request.form.get('email')
+                    phone = request.form.get('phone')
+                    print('User ID:', user_id)
+                    print('Email:', email)
+                    print('Phone:', phone)
+                    if self.resident.update_info(user_id, email, phone):
+                        flash("Credenciales editadas correctamente!", "success")
+                        return redirect(url_for('dashboard', section='settings'))
+                    else:
+                        flash("Error al actualizar la información.", "error")
+                        return redirect(url_for('dashboard', section='settings'))
+
+            except Exception as e:
+                print(f"Error en la ruta update_info: {e}")
+                flash("Ocurrió un error al procesar la solicitud.", "error")
+
+            return redirect(url_for('dashboard', section='settings'))
+        
+
+        @self.app.route('/admin/update_password', methods=['POST'])
+        def update_password2():
+            try:
+                user_id = request.form.get('user_id')
+                current_password = request.form.get('current_password')
+                new_password = request.form.get('new_password')
+                confirm_password = request.form.get('confirm_password')
+
+                if self.resident.update_password(user_id, current_password, new_password, confirm_password):
+                    flash("Contraseña actualizada correctamente", "success")
+                    return redirect(url_for('logout', flash_message='Cambiaste tu contraseña'))
+                else:
+                    flash("Error al actualizar la contraseña. Verifica tu información.", "error")
+                    print("[DEBUG] Error en la actualización de la contraseña")
+
+                return redirect(url_for('dashboard', section='settings')) 
+
+            except Exception as e:
+                flash("Error interno del servidor", "error")
+                print(f"[DEBUG] Error en update_password: {e}")
+                return redirect(url_for('dashboard', section='settings'))
                 
             
 
@@ -807,7 +927,6 @@ class App:
             except Exception as e:
                 print(f'An exception occurred: {e}')
                 return redirect(url_for('home'))
-
 
 
 

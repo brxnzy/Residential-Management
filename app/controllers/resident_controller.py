@@ -56,11 +56,13 @@ class Resident:
         return False
 
 
-    def delete_photo(self,user_id):
+    def delete_photo(self, user_id):
         try:
             cursor = self.db.cursor(dictionary=True)
             cursor.execute('UPDATE users SET photo = NULL WHERE id = %s', (user_id,))
+            self.db.commit()
             print('Foto eliminada correctamente')
+            print('Eliminando foto...')
             return True
         
         except Exception as e:
@@ -132,7 +134,7 @@ class Resident:
             return False
 
         finally:
-            cursor.close()  # Cerrar el cursor correctamente
+            cursor.close()  
 
 
 

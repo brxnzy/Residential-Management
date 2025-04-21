@@ -27,7 +27,7 @@ class EmailSender:
 
     def enviar_correo(self, destinatario, name, last_name, cedula, user_id):
         """Envía un correo en formato HTML con enlace de establecimiento de contraseña."""
-        asunto = "Bienvenido a Habitat Max - Establece tu contraseña"
+        asunto = "Bienvenido a Pinares del Norte - Establece tu contraseña"
         enlace = f"http://127.0.0.1:5000/activate_account/{user_id}"
 
         contenido = f"""

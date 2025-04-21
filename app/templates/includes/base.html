@@ -28,8 +28,9 @@
                 <!-- Dropdown con foto del usuario -->
                 <div x-data="{ open: false }" class="relative">
                     <button @click="open = !open" class="h-16 w-16 mt-1 rounded-full overflow-hidden">
-                        {% if user.photo %}
+                        {% if user['photo'] %}
                         <img src="{{ url_for('static', filename='uploads/' + user.photo) }}" alt="Foto de usuario" class="w-14 h-14 rounded-full object-cover">
+                        
 
                         {% else %}
                             <img src="{{ url_for('static', filename='uploads/default.png') }}" alt="Foto de usuario" class="w-full h-full object-cover">
@@ -46,6 +47,7 @@
                             <span class="block text-sm text-gray-900 ">
                                 {{ user['name'] }} {{ user['last_name'] }}
                             </span>
+                            
                             <span class="block text-sm text-gray-500 truncate ">
                                 {{ user['email'] }}
                             </span>
@@ -58,25 +60,10 @@
                             </span>
                         {% endif %}
                     </div>
-                    <ul class="py-2">
+                    <ul class="">
                         <li>
-                            <a href="/dashboard/my_info" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100  ">
-                                Personal info
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 ">
-                                Settings
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700  dark:hover:text-white">
-                                Earnings
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/logout" class="block px-4 py-2 text-sm text-red-700  dark:hover:text-white">
-                                Sign out
+                            <a href="/logout" class="block px-4 py-2 text-sm text-red-700 hover:bg-gray-100">
+                                Cerrar sesion
                             </a>
                         </li>
                     </ul>

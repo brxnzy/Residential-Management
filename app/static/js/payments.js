@@ -66,12 +66,12 @@ try {
                     checkbox.value = debt[0];
                     checkbox.name = 'deudas'
                     checkbox.setAttribute('data-amount', debt[4]); // Assuming debt[4] is the amount
-                    checkbox.className = 'w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600';
+                    checkbox.className = 'w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-green-500   focus:ring-2';
                     checkbox.addEventListener('change', updateAmount); // Add listener here
 
                     const label = document.createElement('label');
                     label.htmlFor = `debt-${debt[0]}`;
-                    label.className = 'ml-2 text-l font-bold text-gray-900 dark:text-gray-300';
+                    label.className = 'ml-2 text-l font-bold ';
 
                     const date = new Date(debt[2], debt[3] - 1); // Year, Month (0-based)
                     const monthName = date.toLocaleString('es-ES', { month: 'long' });

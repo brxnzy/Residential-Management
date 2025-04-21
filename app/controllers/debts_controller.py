@@ -57,3 +57,31 @@ class Debts:
         except Exception as e:
             print(e)
             return False    
+        
+    def get_debt_amount(self):
+        try:
+            cursor = self.db.cursor(dictionary=True)
+            cursor.execute("""
+                SELECT amount from debt_amount;
+            """)
+            debt_amount = cursor.fetchone()
+            cursor.close()
+            return debt_amount
+        
+        except Exception as e:
+            print(f"error tomando el debt amount",e)
+            return False
+    
+    def update_debt_amount(self,amount):
+        try:
+            cursor = self.db.cursor(dictionary=True)
+            cursor.execute("""
+                UPDATE debt_amount SET amount = %s;
+            """,(amount,))
+            self.db.commit()
+            cursor.close()
+            return True
+        
+        except Exception as e:
+            print(f"error actualizando el debt amount",e)
+            return False
