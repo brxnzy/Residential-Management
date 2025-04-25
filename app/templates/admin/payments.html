@@ -81,6 +81,20 @@
                         </div>
                         <p class="text-sm text-gray-500">{{ tr.residence }}</p>
                         <p class="text-sm text-gray-500">{{ tr.description }}</p>
+                        <!-- Deudas asociadas -->
+                        {% if tr.debts %}
+                        <div class="mt-2">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-1">Deudas pagadas:</h4>
+                            <ul class="text-sm text-gray-600 list-disc list-inside space-y-1">
+                                {% for debt in tr.debts %}
+                                    <li>
+                                        Periodo: {{ debt.period }} — Monto: RD$ {{ "{:,.2f}".format(debt.amount) }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
                         <div class="image-container">
                             <img src="{{ url_for('static', filename='uploads/transfer_requests/' + tr.evidence) }}" 
                                  alt="map" 
@@ -96,10 +110,21 @@
         
                     {% if tr.status == 'pending' %}
                     <div class="flex space-x-2">
+                        <form method="post" action="/admin/payments/accept_transfer_request" class="accept-tr-form">
+                            <input type="hidden" name="transfer_id" value="{{ tr.id }}">
                         
-                        <button data-modal-toggle="transfer-modal" data-modal-target="transfer-modal" data-transfer-id="{{tr.id}}" data-user-id="{{ tr.resident_id }}" class="bgverde px-3 py-2 rounded-lg text-white text-sm hover:bg-green-700 transition">
-                            Aceptar
-                        </button>
+                            {% if tr.debts %}
+                                {% for debt in tr.debts %}
+                                    <input type="hidden" name="debts" value="{{ debt.id }}">
+                                {% endfor %}
+                            {% endif %}
+                        
+                            <button type="submit" class="bgverde px-3 py-2 rounded-lg text-white text-sm hover:bg-green-700 transition">
+                                Aceptar
+                            </button>
+                        </form>
+                        
+                        
                         <button data-modal-target="reject-tr-modal" data-modal-toggle="reject-tr-modal" class="bg-red-700 px-3 py-2 rounded-lg text-white text-sm hover:bg-red-800 transition reject-tr-btn" data-user-id="{{tr.id_usuario}}" data-tr-id="{{tr.id}}">
                             Rechazar
                         </button>

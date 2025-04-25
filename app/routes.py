@@ -540,22 +540,27 @@ class App:
             except Exception as e:
                 return jsonify({"error": str(e)}), 500  
             
-        @self.app.route('/admin/payments/accept_transfer', methods=['POST'])
+        @self.app.route('/admin//payments/accept_transfer_request', methods=['POST'])
         def accept_transfer():
             try:
                 if request.method == 'POST':
-                    debts = request.form.getlist('debts')
-                    user_id = request.form.get('user_id')
                     transfer_request_id = request.form.get('transfer_id')
+                    debts = request.form.getlist('debts')
                     admin_id = session.get('user_id')
-                    if self.payments.approve_transfer_request(transfer_request_id, debts, user_id, admin_id):
+
+                    if self.payments.approve_transfer_request(transfer_request_id, debts, admin_id):
                         flash('Transferencia aceptada correctamente', 'success')
-                        return redirect(url_for('dashboard', section='payments'))
+                    else:
+                        flash('Hubo un problema al procesar la transferencia', 'danger')
+
                     return redirect(url_for('dashboard', section='payments'))
 
             except Exception as e:
-                print(f'ocurrio un error aceptando la transferencia: {e}')
+                print(f"Ocurrió un error aceptando la transferencia: {e}")
+                flash('Error inesperado al aceptar la transferencia', 'danger')
                 return redirect(url_for('dashboard', section='payments'))
+
+
             
         @self.app.route('/admin/reject_transfer_request', methods=['POST'])
         def reject_transfer():
@@ -915,10 +920,14 @@ class App:
                     evidence = request.files.get('evidence')
                     description = request.form.get('description')
                     user_id = request.form.get('user_id')
+                    selected_debts = request.form.getlist('selected_debts')
+
                     print(f"user_id: {user_id}")
                     print(f"description: {description}")
                     print(f"evidence: {evidence}")
-                    if self.payments.send_transfer_request(user_id, evidence, description):
+                    print(f"selected_debts: {selected_debts}")  # ✅ Aquí se imprimen los IDs seleccionados
+
+                    if self.payments.send_transfer_request(user_id, evidence, description, selected_debts):
                         flash('Transferencia solicitada exitosamente', 'success')
                         return redirect(url_for('home'))
                     else:

@@ -557,25 +557,46 @@
               </button>
           </div>
           <!-- Modal body -->
-          <div class="p-4 md:p-5">
-            <form class="space-y-4" action="/resident/transfer_request" method="post" enctype="multipart/form-data">
-              <!-- Input de archivo simple -->
-              <div>
-                  <label for="evidence" class="block mb-2 text-md font-medium text-gray-900 ">Subir comprobante</label>
-                  <input id="evidence" name="evidence" type="file" required class="block w-full text-sm  border border-gray-300 rounded-lg cursor-pointer bg-gray-50 custom-file-input focus:outline-none" />
-              </div>
-          
-              <!-- Input de descripción -->
-              <div>
-                  <label for="description" class="block mb-2 text-md font-medium text-gray-900 ">Descripción (opcional)</label>
-                  <textarea id="description" name="description" rows="3" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500" placeholder="Escribe aquí detalles adicionales..."></textarea>
-                  <input type="hidden" name="user_id" value="{{ user.id }}">
-              </div>
-          
-              <!-- Botón de envío -->
-              <button type="submit" class="w-full bgverde text-white py-2.5 rounded-lg">Enviar Comprobante</button>
-          </form>
-          </div>
+          <!-- Modal body -->
+<div class="p-4 md:p-5">
+  <form class="space-y-4" action="/resident/transfer_request" method="post" enctype="multipart/form-data">
+    
+    <!-- Input de archivo -->
+    <div>
+        <label for="evidence" class="block mb-2 text-md font-medium text-gray-900">Subir comprobante</label>
+        <input id="evidence" name="evidence" type="file" required class="block w-full text-sm border border-gray-300 rounded-lg cursor-pointer bg-gray-50 custom-file-input focus:outline-none" />
+    </div>
+
+    <!-- Lista de deudas con checkbox -->
+<!-- Lista de deudas con checkbox -->
+<div>
+  <label class="block mb-1 text-md font-medium text-gray-900">Selecciona las deudas que estás pagando</label>
+  <div class="space-y-2  max-h-52 overflow-y-auto ">
+      {% for debt in debts %}
+      <div class="flex items-center gap-2 m-2  pb-1">
+          <input id="debt-{{ debt.id }}" type="checkbox" name="selected_debts" value="{{ debt.id }}"
+              class="w-5 h-5 text-green-600 pb-1 bg-gray-100 border-gray-300 rounded-sm focus:ring-green-500 focus:ring-2 shrink-0">
+          <label for="debt-{{ debt.id }}" class="text-sm text-gray-700 leading-tight">
+              {{ months[debt.month - 1] }} {{ debt.period }} - Monto: {{ debt.amount }}
+          </label>
+      </div>
+      {% endfor %}
+  </div>
+</div>
+
+
+    <!-- Descripción -->
+    <div>
+        <label for="description" class="block mb-2 text-md font-medium text-gray-900">Descripción (opcional)</label>
+        <textarea id="description" name="description" rows="3" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500" placeholder="Escribe aquí detalles adicionales..."></textarea>
+        <input type="hidden" name="user_id" value="{{ user.id }}">
+    </div>
+
+    <!-- Botón de envío -->
+    <button type="submit" class="w-full bgverde text-white py-2.5 rounded-lg">Enviar Comprobante</button>
+  </form>
+</div>
+
       </div>
   </div>
 </div>
