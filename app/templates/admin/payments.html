@@ -16,7 +16,7 @@
         </li>
         <!-- New History Tab -->
         <li role="presentation">
-            <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="history-tab" data-tabs-target="#history" type="button" role="tab" aria-controls="history" aria-selected="false">Historial de Pago</button>
+            <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="history-tab" data-tabs-target="#history" type="button" role="tab" aria-controls="history" aria-selected="false">Pagos pendientes</button>
         </li>
     </ul>
 </div>
@@ -57,6 +57,47 @@
                 </button>
             </div>
         </form>
+
+        {% if payments %}
+        <div class="mt-8">
+            <h1 class="text-3xl font-bold px-4 mb-8">Historial de pago</h1>
+
+            <div class="overflow-x-auto mt-4">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                            <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+                            <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Metodo</th>
+                            <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                            <th class="px-1 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                   </thead>
+                   <tbody class="bg-white divide-y divide-gray-200">
+                       <!-- Example row -->
+                       {% for p in payments %}
+                       <tr>
+                           <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{p.resident}}</td>
+                           <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{p.amount}}</td>
+                           <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{p.payment_method}}</td>
+                           <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{p.created_at.strftime('%d/%m/%Y')}}</td>
+                           <td class="px-6 py-4 whitespace-nowrap text-md font-medium">
+                               <button class="hover:underline" data-payment-id="{{p.id}}" onclick="downloadInvoice(this)">
+                                   <img src="{{url_for('static', filename='icons/download.svg')}}" class="h-9 w-9 bgverde p-1 rounded-md" alt="Descargar">
+                                </button>
+                            </td>
+                       </tr>
+                       
+                       <!-- Add more rows as needed -->
+                       {% endfor %}
+                    </tbody>
+                </table>
+           </div>
+           
+           {% endif %}
+        </div>
+    </div>
+
         
 
         
@@ -143,35 +184,41 @@
 
 
 
+    {% set months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'] %}
 
     <div class="hidden p-4 rounded-lg bg-gray-50 " id="history" role="tabpanel" aria-labelledby="history-tab">
         <!-- Table for payment history -->
-         {% if payments %}
+         {% if debtors %}
          
          <div class="overflow-x-auto mt-4">
              <table class="min-w-full divide-y divide-gray-200">
                  <thead class="bg-gray-50">
                      <tr>
-                         <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                         <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Residente</th>
                          <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Monto</th>
-                         <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Metodo</th>
-                         <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-                         <th class="px-1 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                         <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Periodo</th>
+                         <th class="px-1 py-3 text-right text-md font-medium text-gray-500 uppercase tracking-wider">Accion</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         <!-- Example row -->
-                        {% for p in payments %}
+                        {% for d in debtors %}
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{p.resident}}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{p.amount}}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{p.payment_method}}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{p.created_at.strftime('%d/%m/%Y')}}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-md font-medium">
-                                <button class="hover:underline" data-payment-id="{{p.id}}" onclick="downloadInvoice(this)">
-                                    <img src="{{url_for('static', filename='icons/download.svg')}}" class="h-9 w-9 bgverde p-1 rounded-md" alt="Descargar">
-                                </button>
-                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{d.resident}}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{d.debt_amount}}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{months[d.month]}} {{d.period}}</td>
+                            <td class="flex items-center justify-end mr-4 mt-2">
+                                <form action="/admin/payment-reminder" method="post">
+                                  <input type="hidden" name="debt_id" value="{{d.id}}">
+                    
+                                  <button class="bgverde w-10 h-10 rounded-full flex items-center justify-center text-white" data-tooltip-target="tooltip-default" data-tooltip-placement="top" data-tooltip-trigger="hover" data-modal-toggle="modal-default" data-modal-target="modal-default">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-6">
+                                      <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
+                                    </svg>
+                                    
+                                  </button>
+                                </form>
+                              </td>
                         </tr>
 
                         <!-- Add more rows as needed -->
@@ -189,50 +236,7 @@
 
 
 
-    <div id="transfer-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-        <div class="relative p-4 w-full max-w-2xl max-h-full">
-            <!-- Modal content -->
-            <div class="relative bg-white rounded-lg shadow-sm">
-                <!-- Modal header -->
-                <div class="flex items-center justify-between p-2 md:p-5 border-b rounded-t border-gray-200">
-                    <h3 class="text-xl font-semibold text-gray-900">
-                        Aceptar Transferencia
-                    </h3>
-                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="transfer-modal">
-                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                        </svg>
-                        <span class="sr-only">Cerrar</span>
-                    </button>
-                </div>
-    
-                <!-- Modal body -->
-                <div class="p-4 md:p-5 space-y-4">
-                    <!-- Formulario con acción dinámica -->
-                    <form id="debt-form" action="#" method="POST">
-                        <input type="text" name="user_id" id="user_id" value="" hidden>
-                        <input type="text" name="transfer_id" id="transfer_id" value="" hidden>
-
-                        
-                        <!-- Contenedor donde se insertarán las deudas dinámicamente -->
-                        <div id="debt-container"></div>
-    
-                        <!-- Botones de acción -->
-                        <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b">
-                            <button id="submitButton" type="submit" class="text-white bgverde focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                                Aceptar Transferencia
-                            </button>
-                            <button data-modal-hide="transfer-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700">
-                                Cancelar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-
+   
 
 
     <div
