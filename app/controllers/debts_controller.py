@@ -1,4 +1,5 @@
 from config.database import connection_db
+import datetime
 
 class Debts:
     def __init__(self):
@@ -84,4 +85,23 @@ class Debts:
         
         except Exception as e:
             print(f"error actualizando el debt amount",e)
+            return False
+        
+    def generate_debt(self, user_id):
+        try:
+            cursor = self.db.cursor(dictionary=True)
+            cursor.execute("""
+            select amount from debt_amount;
+            """)
+            amount = cursor.fetchone()
+            amount = amount['amount']
+            now = datetime.datetime.now()
+            month = now.month
+            year = now.year
+            cursor.execute("""
+                INSERT INTO debts (id_usuario, amount, period, month) VALUES (%s, %s, %s, %s);
+            """,(user_id, amount, year, month))
+            return True
+        except Exception as e:
+            print(f"error generando la deuda",e)
             return False

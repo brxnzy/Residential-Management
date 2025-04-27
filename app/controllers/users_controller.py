@@ -2,6 +2,7 @@ from flask import session, flash, redirect, url_for
 from config.database import connection_db
 from auth.login import Auth
 from controllers.email_controller import EmailSender
+from controllers.debts_controller import Debts
 from werkzeug.utils import secure_filename
 import requests
 import os
@@ -14,6 +15,7 @@ class Users:
         self.db.autocommit = True
         self.auth = Auth()
         self.smtp = EmailSender()
+        self.debts = Debts()    
 
 
     def get_residents(self):
@@ -168,6 +170,8 @@ class Users:
                     VALUES (%s, 2)
                 """, (user_id,))
                 print("residente agregado")
+                self.debts.generate_debt(user_id)  # Generar deuda para el nuevo residente
+
 
                 if property_type == "apartamentos" and property_id:
                     cursor.execute("""
