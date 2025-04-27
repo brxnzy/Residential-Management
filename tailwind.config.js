@@ -15,8 +15,8 @@ module.exports = {
       screens: {
         'custom-lg': '800px',            // Nuevo breakpoint personalizado
       },
-      colors: {
-       'verde': '#157F3D',             // Nuevo color personalizado
+      colors: {             
+       'verde': '#157F3D',             // Nuevo color personalizado1
        'gris': '#212529',
       },
     },

@@ -29,8 +29,9 @@ class Auth:
                 flash("Usuario o contraseña incorrectos.", 'error')
                 return redirect(url_for('login'))
 
+
             print(f"Usuario encontrado: {user}")
-            print(f"Contraseña ingresada: {plain_password}")
+            print(f"foto del usuario: {user['photo']}")
 
             # Verificar si la contraseña es correcta
             if not self.check_password(plain_password, user['password']):

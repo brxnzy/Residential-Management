@@ -1,5 +1,351 @@
-hola {{user.name}} {{user.last_name}}
+<div class="px-6 py-6 bg-gray-50 rounded-lg">
+  <!-- Título principal -->
+  <div class="mb-6">
+    <h1 class="text-4xl font-bold text-black">Bienvenido, {{user.name}} {{user.last_name}}</h1>
+    <p class="text-gray-700 mt-2 text-lg">Panel de administración del condominio</p>
+  </div>
+  
+  <!-- Balance + Rating -->
+  <div class="py-2 ">
+    <!-- Cards Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Balance Total Card -->
+        <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 card-hover border-l-4 border-green-500">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-sm text-gray-500 mb-1">Balance Total</p>
+                    <h3 class="text-2xl font-bold">{{balance}}</h3>
+
+                </div>
+                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                    <i class="fas fa-dollar-sign text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Reclamos Pendientes Card -->
+        <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 card-hover border-l-4 border-yellow-500">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-sm text-gray-500 mb-1">Reclamos Pendientes</p>
+                    <h3 class="text-2xl font-bold">{{claims  | selectattr('status', 'equalto', 'pendiente') | list | length }}</h3>
+
+                </div>
+                <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600">
+                    <i class="fas fa-bell text-xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Solicitudes de Transferencias Card -->
+        <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 card-hover border-l-4 border-blue-500">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-sm text-gray-500 mb-1">Solicitudes de Transferencias</p>
+                    <h3 class="text-2xl font-bold">{{transfer_requests | selectattr('status', 'equalto', 'pending') | list | length }}</h3>
+
+                </div>
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                    <i class="fas fa-exchange-alt text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 
+  
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 mt-4">
+  <!-- Ingresos vs Egresos Chart -->
+  <div id="chart-data"
+       data-incomes='{{ incomes | tojson }}'
+       data-expenses='{{ expenses | tojson }}'>
+
+    <div class="bg-white rounded-lg py-4 px-6 shadow-md">
+      <h3 class="text-xl font-semibold mb-2">Ingresos vs Egresos (2025)</h3>
+      <div id="ingresos-egresos-chart" class="w-full h-64"></div>
+
+      <!-- Estado Financiero de la Comunidad -->
+      <div class="mt-2">
+        <p class="text-sm text-gray-600 mb-1">
+          Ingresos totales:
+          <span class="font-semibold text-green-600">${{ '{:,.2f}'.format(community_status.incomes) }}</span>
+        </p>
+        <p class="text-sm text-gray-600 mb-1">
+          Egresos totales:
+          <span class="font-semibold text-red-600">${{ '{:,.2f}'.format(community_status.expenses) }}</span>
+        </p>
+
+        {% if community_status.percentage >= 0 %}
+          <p class="mt-2 text-sm font-semibold text-green-700">
+            Superávit del {{ community_status.percentage }}%
+          </p>
+        {% else %}
+          <p class="mt-2 text-sm font-semibold text-red-700">
+            Déficit del {{ community_status.percentage | abs }}%
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Pie Chart Métodos de Pago -->
+  <div id="payment-chart"
+       data-labels='{{ payment_methods | map(attribute="label") | list | tojson }}'
+       data-values='{{ payment_methods | map(attribute="value") | list | tojson }}'>
+
+    <div class="bg-white rounded-lg py-4 px-6 shadow-md">
+      <h3 class="text-xl font-semibold mb-2">Métodos de Pago Más Usados</h3>
+      <div id="payment-methods-chart" class="w-full h-64"></div>
+    </div>
+  </div>
+</div>
+
+<div class="flex items-center justify-between mt-12">
+  <h1 class="text-4xl font-bold text-gray-800 mb-4">
+    Historial de Egresos 
+  </h1>
+
+  <button class="bgverde px-5 py-2.5 rounded-md text-white" data-modal-toggle="expense-modal" data-modal-target="expense-modal">Retirar</button>
+</div>
+
+
+
+{% if egresos %}
+         
+<div class="overflow-x-auto mt-4">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Administrador</th>
+                <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+                <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Motivo</th>
+                <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+               </tr>
+           </thead>
+           <tbody class="bg-white divide-y divide-gray-200">
+               <!-- Example row -->
+               {% for e in egresos %}
+               <tr>
+                   <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500 hover:text-green-700 hover:underline"><a href="/admin/user_info/{{e.admin_id}}">{{e.admin}} </a></td>
+                   <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{e.amount}}</td>
+                   <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{e.reason}}</td>
+                   <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{e.created_at}}</td>
+               </tr>
+
+               <!-- Add more rows as needed -->
+               {% endfor %}
+           </tbody>
+       </table>
+   </div>
+   
+   {% endif %}
+
+</div>
+
+
+
+
+
+<div
+id="expense-modal"
+tabindex="-1"
+aria-hidden="true"
+class="hidden z-50 fixed inset-0 w-full h-full bg-black/20"
+>
+<div
+  class="relative p-4 w-full max-w-xl max-h-full flex items-center justify-center"
+>
+  <div class="relative bg-white rounded-lg shadow w-full">
+    <div
+      class="flex items-center justify-between p-4 md:p-5 border-b rounded-t"
+    >
+      <h3 class="text-xl font-semibold text-gray-900">Registrar Egreso</h3>
+      <button
+        type="button"
+        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+        data-modal-hide="expense-modal"
+      >
+        <svg
+          class="w-3 h-3"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 14 14"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+          />
+        </svg>
+        <span class="sr-only">Cerrar modal</span>
+      </button>
+    </div>
+    <div class="p-4 md:p-5 space-y-4">
+      <form
+        id="expense-form"
+        class="space-y-4"
+        action="/admin/register_expense"
+        method="POST"
+      >
+
+      <h2 class="text-lg font-bold" data-balance="{{balance}}" id="balance">Balance: <span class="verde">{{balance}}</span></h2>
+        <div>
+          <label for="amount ">Monto:</label>
+          <input type="number" autocomplete="off" placeholder="Ponga el monto a sacar..." class="focus:outline-none focus:ring-green-500 focus:border-green-500 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-full p-2.5 mt-1 mb-4" name="amount" id="amount">
+          <p id="amount-error" class="text-red-600 text-sm hidden mb-3">El monto excede el balance disponible.</p>
+          
+          <label
+            for="expense-reason"
+            class="block mb-2 text-md font-medium text-gray-900"
+            >Motivo del egreso:</label
+          >
+          <textarea
+            id="expense-reason"
+            name="reason"
+            required
+            rows="3"
+            class="bg-gray-50 border border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 text-gray-900 text-sm rounded-lg  block w-full p-2.5 resize-none"
+            placeholder="Ingrese el motivo del rechazo..."
+          ></textarea>
+        </div>
+        <div
+          class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b"
+        >
+          <button
+          id="submit-button"
+            type="submit"
+            class="text-white disabled:cursor-not-allowed bgverde font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+          >
+            Retirar
+          </button>
+          <button
+            data-modal-hide="expense-modal"
+            type="button"
+            class="ms-3 text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+
+{% set months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'] %}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-2 mb-6 mt-4">
+
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <h3 class="text-xl font-semibold mb-8">Satisfacción de Reclamos</h3>
+    <div class="flex flex-col space-y-4">
+      
+      <!-- Donut Chart con data de distribución -->
+      <div id="donut-chart" class="w-full h-48" data-distribution='{{ rating_distribution | tojson }}'></div>
+      
+      <!-- Estrellas según promedio -->
+      {% set promedio = rating_info.promedio %}
+      {% set full_stars = promedio | int %}
+      {% set decimal = promedio - full_stars %}
+      {% set half_star = 1 if decimal >= 0.5 else 0 %}
+      {% set empty_stars = 5 - full_stars - half_star %}
+      
+      <div class="flex justify-center mt-2">
+        <div class="star-rating text-2xl text-yellow-500">
+          {% for _ in range(full_stars) %}
+          <i class="fas fa-star"></i>
+          {% endfor %}
+          {% if half_star %}
+          <i class="fas fa-star-half-alt"></i>
+          {% endif %}
+          {% for _ in range(empty_stars) %}
+          <i class="far fa-star"></i>
+          {% endfor %}
+        </div>
+      </div>
+      
+      <!-- Promedio -->
+      <p class="text-center text-gray-600">
+        Calificación promedio: <span class="font-semibold">{{ promedio }}/5</span>
+      </p>
+    </div>
+  </div>
+  <div class="p-4 bg-white rounded-lg shadow-md">
+    <h2 class="text-xl font-bold mb-4">Pagos Pendientes</h2>
+  {% if debtors %}
+  
+  <div class="overflow-x-auto bg-white rounded-xl shadow-md">
+    <table class="table table-zebra w-full">
+      <thead>
+        <tr class="text-left text-sm text-gray-600">
+          <th>Residente</th>
+          <th>Monto Adeudado</th>
+          <th>Periodo</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in debtors %}
+        
+        <tr>
+          <td>{{d.resident}}</td>
+          <td class="text-red-600 font-semibold">{{d.debt_amount}}</td>
+          <td>{{months[d.month]}} {{d.period}} </td>
+          <td>
+            <form action="/admin/payment-reminder" method="post">
+              <input type="hidden" name="debt_id" value="{{d.id}}">
+
+              <button class="bgverde w-10 h-10 rounded-full flex items-center justify-center text-white" data-tooltip-target="tooltip-default" data-tooltip-placement="top" data-tooltip-trigger="hover" data-modal-toggle="modal-default" data-modal-target="modal-default">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
+                </svg>
+                
+              </button>
+            </form>
+          </td>
+        </tr>
+        <tr>
+          {% endfor %}
+          
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div class="flex flex-col items-center justify-center h-full">
+      <img src="{{url_for('static', filename='icons/debtors.svg')}}" class="h-auto w-2/3" alt="">
+      <h2 class="text-xl font-bold mt-4 mb-2 textg-gray-700">No hay residentes con deudas...</h2>
+    </div>
+    {% endif %}
+  </div>
+  
+
+</div>
+
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<script>
+
+</script>
+
+  
+
+
+
+<!-- Incluye ApexCharts en tu HTML (en <head> o antes de cerrar el body) -->
+  
+
+    
+<script src="{{url_for('static', filename='js/main.js')}}"></script>
+
+
+  
 

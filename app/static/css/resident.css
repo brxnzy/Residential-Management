@@ -1,0 +1,79 @@
+.tab-content {
+    display: none;
+  }
+  
+  .tab-content.active {
+    display: block;
+  }
+  
+  .tab-button.active {
+    background-color: #157f3d;
+    color: white;
+  }
+
+  .cursor-not-allowed {
+    cursor: not-allowed;
+  }
+
+  .disabled\:cursor-not-allowed:disabled {
+    cursor: not-allowed;
+}
+  :disabled.cursor-not-allowed{
+    cursor: not-allowed;
+  }
+
+
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.9); /* Dark overlay like Google Drive */
+    z-index: 1000; /* High z-index to ensure visibility */
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.3s ease;
+  }
+  .modal.show {
+    display: flex;
+    animation: fadeIn 0.3s forwards;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+  .fade-out {
+    animation: fadeOut 0.2s forwards;
+  }
+  .modal-content {
+    max-height: 90vh;
+    max-width: 90vw;
+    position: relative;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .modal-image {
+    max-height: 70vh;
+    max-width: 100%;
+    object-fit: contain;
+  }
+  .toolbar {
+    background: rgba(255, 255, 255, 0.95);
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .nav-arrow {
+    background: rgba(255, 255, 255, 0.9);
+    transition: opacity 0.2s;
+  }
+  .nav-arrow:hover {
+    opacity: 0.8;
+  }
+
+
+  .custom-file-input::-webkit-file-upload-button:hover {
+    background-color: #2563eb; /* Color más oscuro al pasar el mouse */
+}

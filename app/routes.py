@@ -1,13 +1,18 @@
-from flask import Flask, render_template, redirect, url_for, request, session, flash, make_response, abort
-import bcrypt
+from flask import Flask, render_template, redirect, url_for, request, session, flash, make_response, abort, send_file, jsonify
 from auth.login import Auth
 from controllers.users_controller import Users
 from controllers.residences_controller import  Residences
 from controllers.resident_controller import  Resident
 from controllers.claims_controller import Claims
 from controllers.notifications_controller import Notifications
+from controllers.debts_controller import Debts
+from controllers.payments_controllers import Payments
+from controllers.report_controller import Reports
+from controllers.transactions_controller import Transactions
+from controllers.settings_controller import Settings
 from functools import wraps
 import os
+
 
 
 class App:
@@ -25,13 +30,17 @@ class App:
         self.residences = Residences()
         self.claims = Claims(self.app)
         self.notification = Notifications()
+        self.debts = Debts()
+        self.payments = Payments(self.app)
+        self.report = Reports(self.app)
+        self.transactions = Transactions()
+        self.settings = Settings()
         self.app.config['SECRET_KEY'] = 'secretkey'
         UPLOAD_FOLDER = r'C:\Users\Crist\OneDrive\Documents\Desktop\Final Proyect\app\static\uploads'
         self.app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
     def error_handler(self):
-
-
+        
         @self.app.errorhandler(403)
         def forbidden_error(e):
             return render_template('errors/403.html'), 403 
@@ -133,7 +142,7 @@ class App:
 
 
 
-        """ Rutas para el Dashboard """
+        """ Rutas para el administracion """
                 
         @self.app.route('/admin', defaults={'section': 'main', 'sub_section': None})
         @self.app.route('/admin/<section>/', defaults={'sub_section': None})
@@ -142,49 +151,61 @@ class App:
         @self.nocache
         def dashboard(section, sub_section):
             sections = {
-            'main': 'admin/main.html',
-            'users': 'admin/users.html',
-            'my_info': 'admin/my_info.html',
-            'user_info': 'admin/user_info.html',
-            'residences': 'admin/residences.html',
-            'claims': 'admin/claims.html'
-        }
- 
+                'main': 'admin/main.html',
+                'users': 'admin/users.html',
+                'user_info': 'admin/user_info.html',
+                'residences': 'admin/residences.html',
+                'claims': 'admin/claims.html',
+                'payments': 'admin/payments.html',
+                'settings': 'admin/settings.html',
+            }
 
-            residents, admins, disabled, selected_user, houses, claims = {}, {}, {}, {},{},{}
+            residents, admins, disabled, selected_user, houses, claims, debts, payments, transfer_requests = {}, {}, {}, {}, {}, {}, {}, {},{}
             apartments = self.residences.get_apartments() 
             houses = self.residences.get_houses() 
             claims = self.claims.get_all_claims()
-
+            debts = {'debts': self.debts.get_debs()}
+            residents['residents'] = self.user.get_residents()
+            admins['admins'] = self.user.get_admins()
+            disabled['disabled'] = self.user.get_disabled_users()
+            payments = self.payments.get_payments()
+            transfer_requests = self.payments.get_all_transfer_requests()
+            balance = self.transactions.get_balance()
+            rating_info = self.claims.get_claims_rating()
+            rating_distribution = self.claims.get_rating_distribution()
+            incomes = self.transactions.get_monthly_incomes()
+            expenses = self.transactions.get_monthly_expenses()
+            community_status = self.transactions.get_community_status()
+            payment_methods = self.transactions.get_payment_method_stats()
+            historialEgresos = self.transactions.get_all_expenses()
+            debtors = self.debts.get_debtors()
+            debt_amount = self.debts.get_debt_amount()
             
+            
+            # Mostrar mensaje flash si hay un pago exitoso y el archivo está listo para ser descargado
+            payment_message = session.get('payment_message', None)
+            if payment_message:
+                flash(payment_message, 'success')
+                session.pop('payment_message', None)  # Limpiar el mensaje después de mostrarlo
 
-           
-         
-            # 📌 Si la sección es "users", obtenemos los datos de usuarios
-            if section == 'users':
-                residents['residents'] = self.user.get_residents()
-                admins['admins'] = self.user.get_admins()
-                disabled['disabled'] = self.user.get_disabled_users()
-
-            # 📌 Si la sección es "user_info" y se pasa un user_id, obtenemos la información del usuario
+            # Si la sección es 'user_info', buscar el usuario seleccionado
             user_id = request.args.get('user_id', type=int)
             if section == 'user_info' and user_id:
                 selected_user = self.user.get_user_by_id(user_id)
-                print(selected_user)
 
-            # 📌 Mapeo correcto de la plantilla según la sección y subsección
             key = f"{section}/{sub_section}" if sub_section else section
             if key not in sections:
                 return render_template('errors/404.html'), 404
-            template = sections[key]  
+            template = sections[key]
 
-            # Obtener el usuario de la sesión
-            session_user = session.get('user')
+            id = session.get('user_id')
+            user = self.user.get_user_by_id(id)
+
 
             return render_template(
                 'admin/dashboard.html',
                 content_template=template,
-                user=session_user,
+                user=user,
                 section=section,
                 sub_section=sub_section,
                 **residents,
@@ -193,8 +214,25 @@ class App:
                 houses=houses,
                 apartments=apartments,
                 usuario=selected_user,
-                claims=claims
+                claims=claims,
+                debts=debts,
+                payments=payments,
+                balance=balance,
+                transfer_requests=transfer_requests,
+                rating_info = rating_info,
+                rating_distribution = rating_distribution,
+                incomes=incomes,
+                expenses=expenses,
+                community_status=community_status,
+                payment_methods=payment_methods,
+                egresos=historialEgresos,
+                debtors=debtors,
+                debt_amount=debt_amount
+
             )
+
+
+        """ Rutas para el residente """
 
 
         """ Rutas de administracion """
@@ -224,7 +262,7 @@ class App:
                 except Exception as e:
                     flash(f"Error al agregar usuario: {e}", "danger")
                     return redirect(url_for('dashboard', section='users')) 
-
+ 
             return redirect(url_for('dashboard', section='users'))
 
 
@@ -306,13 +344,8 @@ class App:
 
             return redirect(url_for('dashboard', section='users'))
 
-
-
-
-
-
-
-
+    
+        
         @self.nocache 
         @self.app.route('/activate_account/<int:user_id>', methods=['GET', 'POST'])
         def activate_account(user_id):
@@ -339,7 +372,6 @@ class App:
 
                 try:
                     self.user.activate_account(user_id, photo, passw)
-                    # flash("Cuenta activada exitosamente. Ahora puedes iniciar sesión.", "success")
                     return redirect(url_for('login'))
                 except Exception as e:
                     flash(f"Error al habilitar usuario: {e}", "error")
@@ -369,7 +401,6 @@ class App:
             return redirect(url_for('dashboard', section='users'))
 
 
-        """ Rutas para el manejo de residencias """
 
 
         @self.app.route('/admin/residences/vacate_residence', methods=['POST'])
@@ -388,9 +419,317 @@ class App:
                 flash("Hubo un problema al desocupar la residencia", "danger")
 
             return redirect(url_for('dashboard', section='residences'))
+        
+
+        @self.app.route('/admin/attend_claim', methods=['POST'])
+        def attend_claim():
+            try:
+                if request.method == 'POST':
+                    claim_id = request.form.get('claim_id')
+                    schedule_date = request.form.get('schedule_date')
+                    start_time = request.form.get('start_time')
+                    description = request.form.get('description')
+
+                    print('Claim ID:', claim_id)
+                    print('Schedule Date:', schedule_date)
+                    print('Start Time:', start_time)
+                    print('Description:', description)
+ 
+                    # Llamar al método attend_claim en la instancia claims
+                    if self.claims.attend_claim(claim_id, schedule_date, start_time,  description):
+                        flash('Reclamo atendido correctamente', 'success')
+                        return redirect(url_for('dashboard', section='claims')) 
+
+                    flash('Ocurrió un error al atender el reclamo', 'error')
+                    return redirect(url_for('dashboard', section='claims'))
+
+            except Exception as e:
+                print(f'An exception occurred: {e}')
+                return redirect(url_for('dashboard', section='claims'))
+            
+
+                    
+        @self.app.route('/admin/finish_claim', methods=['POST'])
+        def finish_claim():
+            try:
+                claim_id = request.form.get('claim_id')
+                finish = self.claims.finish_claim(claim_id)
+                print(f"el id del claim es:" , claim_id)
+
+                if finish:
+                    flash("Reclamo finalizado exitosamente", "success")
+                    return redirect(url_for('dashboard', section='claims'))
+            except Exception as e:
+                print('Error finalizando el reclamo', e)
+                flash("Hubo un error al finalizar el reclamo", "error")
+                return redirect(url_for('dashboard', section='claims'))
+
+            return redirect(url_for('dashboard', section='claims'))
+        
+
+        @self.app.route('/admin/reject_claim', methods=['POST'])
+        def reject_claim():
+            try:
+                claim_id = request.form.get('claim_id')
+                reject_reason = request.form.get('reject_reason')  # Corrected line
+
+                reject = self.claims.reject_claim(claim_id, reject_reason)  # 
+
+                if reject:
+                    flash("Reclamo rechazado exitosamente", "success")
+                    return redirect(url_for('dashboard', section='claims'))
+                else:
+                    flash("Hubo un error al rechazar el reclamo", "error")
+                    return redirect(url_for('dashboard', section='claims'))
+
+                return redirect(url_for('dashboard', section='claims'))
+            except Exception as e:
+                print('Error rechazando el reclamo', e)
 
 
+        @self.app.route('/admin/payments/cash_payment', methods=['POST'])
+        def cash_payment():
+            try:
+                user_id = request.form.get('user_id')
+                amount = request.form.get('amount')
+                notes = request.form.get('notes')
+                debts = request.form.getlist('deudas')
+                admin_id = session.get('user_id')
+                print('id del admin:', admin_id)
 
+                print('User ID:', user_id)
+                print('Amount:', amount)
+                print('Notes:', notes)
+                print('Debts:', debts)
+
+                payment_id, file_path = self.payments.cash_payment(user_id, amount, notes, debts, admin_id)
+
+                if payment_id and file_path and os.path.exists(file_path):
+                    print(f"Descargando archivo desde: {file_path}")
+                    
+                    # Guardar mensaje en la sesión para mostrarlo después de la descarga
+                    session['payment_message'] = 'Pago registrado correctamente'
+                    
+                    # Configurar la respuesta para descargar el archivo
+                    response = make_response(send_file(file_path, as_attachment=True, download_name="payment_report.pdf"))
+                    
+                    # Establecer una cookie para indicar que la descarga se completó
+                    response.set_cookie('payment_downloaded', 'true', max_age=30)
+                    
+                    return response
+                else:
+                    flash('Ocurrió un error al generar el reporte', 'error')
+
+            except Exception as e:
+                print(f'Error: {e}')
+                flash('Ocurrió un error inesperado', 'error')
+
+            return redirect(url_for('dashboard', section='payments'))
+
+        @self.app.route('/admin/payment_complete')
+        def payment_complete():
+            flash('Pago registrado correctamente', 'success')
+            return redirect(url_for('dashboard', section='payments'))
+                
+        @self.app.route('/admin/payments/user_debts/<int:user_id>', methods=['GET'])
+        def user_debts(user_id):
+            try:
+                debts = self.debts.get_users_debts(user_id) 
+                print(debts) 
+                return jsonify(debts) 
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500  
+            
+        @self.app.route('/admin//payments/accept_transfer_request', methods=['POST'])
+        def accept_transfer():
+            try:
+                if request.method == 'POST':
+                    transfer_request_id = request.form.get('transfer_id')
+                    debts = request.form.getlist('debts')
+                    admin_id = session.get('user_id')
+
+                    if self.payments.approve_transfer_request(transfer_request_id, debts, admin_id):
+                        flash('Transferencia aceptada correctamente', 'success')
+                    else:
+                        flash('Hubo un problema al procesar la transferencia', 'danger')
+
+                    return redirect(url_for('dashboard', section='payments'))
+
+            except Exception as e:
+                print(f"Ocurrió un error aceptando la transferencia: {e}")
+                flash('Error inesperado al aceptar la transferencia', 'danger')
+                return redirect(url_for('dashboard', section='payments'))
+
+
+            
+        @self.app.route('/admin/reject_transfer_request', methods=['POST'])
+        def reject_transfer():
+            try:
+                if request.method == 'POST':
+                    tr_id = request.form.get('tr_id')
+                    reason = request.form.get('reason')
+                    user_id = request.form.get('user_id')
+                    print('Transfer ID:', tr_id)
+                    print('Reason:', reason)
+                    print('User:', user_id)
+                    if self.payments.reject_transfer_request(tr_id, reason, user_id):
+                        flash('Transferencia rechazada correctamente', 'success')
+                        return redirect(url_for('dashboard', section='payments'))
+                    flash('Error al rechazar la transferencia', 'error')
+                    return redirect(url_for('dashboard', section='payments'))
+            except Exception as e:
+                print(f'ocurrio un error rechazando la transferencia: {e}')
+                return redirect(url_for('dashboard', section='payments'))
+            
+        @self.app.route('/admin/register_expense', methods=['POST'])
+        def register_expense():
+            try:
+                if request.method == 'POST':
+                    amount = request.form.get('amount')
+                    reason = request.form.get('reason')
+                    admin_id = session.get('user_id')
+
+                    if self.transactions.register_expense(amount, reason, admin_id):
+                        flash('Gasto registrado correctamente', 'success')
+                        return redirect(url_for('dashboard'))
+                    flash('Error al registrar el gasto', 'error')
+                    return redirect(url_for('dashboard'))
+
+            except Exception as e:
+                print(f'ocurrio un error registrando el gasto: {e}')
+                return redirect(url_for('dashboard'))
+
+
+        @self.app.route('/admin/payment-reminder', methods=['POST'])    
+        def payment_reminder():
+            try:
+                if request.method == 'POST':
+                    debt_id = request.form.get('debt_id')
+                    print('Debt ID:', debt_id)
+                    if self.notification.send_payment_reminder(debt_id):
+                        flash('Recordatorio de pago enviado correctamente', 'success')
+                        return redirect(url_for('dashboard'))
+                    flash('Error al enviar el recordatorio de pago', 'error')
+                    return redirect(url_for('dashboard'))
+            except Exception as e:
+                print(f'ocurrio un error enviando el recordatorio de pago: {e}')
+                return redirect(url_for('dashboard'))
+            
+        @self.app.route('/admin/update_logo', methods=['POST'])
+        def update_logo():
+            try:
+                if request.method == 'POST':
+                    file = request.files.get('logo')
+                    if self.settings.update_logo(file):
+                        flash('Logo actualizado correctamente', 'success')
+                        return redirect(url_for('dashboard', section='settings'))
+                    flash('Error al actualizar el logo', 'error')
+                    return redirect(url_for('dashboard', section='settings'))
+            except Exception as e:
+                print(f'ocurrio un error actualizando el logo: {e}')
+                return redirect(url_for('dashboard', section='settings'))
+            
+        @self.app.route('/admin/update_debt_amount', methods=['POST'])
+        def update_debt_amount():
+            try:
+                if request.method == 'POST':
+                    amount = request.form.get('debt_amount')
+                    if self.debts.update_debt_amount(amount):
+                        flash('Monto de deuda actualizado correctamente', 'success')
+                        return redirect(url_for('dashboard', section='settings'))
+                    flash('Error al actualizar el monto de deuda', 'error')
+                    return redirect(url_for('dashboard', section='settings'))
+            except Exception as e:
+                print(f'ocurrio un error actualizando el monto de deuda: {e}')
+                return redirect(url_for('dashboard', section='settings'))
+            
+        @self.app.route('/admin/update_photo', methods=['POST'])
+        def update_pfp():
+            try:
+                photo = request.files.get('photo')
+                user_id = request.form.get('user_id')
+                
+                if not photo or photo.filename == '':
+                    flash('No se seleccionó ninguna foto', 'error')
+                    print('[ERROR] No se seleccionó ninguna foto')
+                    return redirect(request.referrer)
+
+                if self.resident.update_photo(user_id, photo):
+                    flash('Foto actualizada correctamente', 'success')
+                    print(f'[INFO] Foto actualizada para el usuario {user_id}')
+                else:
+                    flash('Error al actualizar la foto', 'error')
+                    print(f'[ERROR] No se pudo actualizar la foto para el usuario {user_id}')
+
+                return redirect(url_for('dashboard', section='settings'))
+            
+            except Exception as e:
+                print(f'[EXCEPTION] Error en update_photo: {e}')
+                flash('Ocurrió un error inesperado', 'error')
+                return redirect(request.referrer)
+            
+        @self.app.route('/admin/delete_photo', methods=['POST'])
+        def delete_photo2():
+            try:
+                user_id = request.form.get('user_id')
+                print(f"user id:", user_id)
+                if self.resident.delete_photo(user_id):
+                    flash('Foto eliminada correctamente', 'success')
+                    print('foto eliminada correctamente')
+                return redirect(url_for('dashboard', section='settings'))  
+            except Exception as e:
+                print('Error', e)
+                flash('Error al eliminar la foto', 'danger')
+                return redirect(url_for('dashboard', section='settings'))
+            
+
+        @self.app.route('/admin/update_profile', methods=['POST'])
+        def update_profile():
+            try:
+                if request.method == 'POST':
+                    user_id = request.form.get('user_id')
+                    email = request.form.get('email')
+                    phone = request.form.get('phone')
+                    print('User ID:', user_id)
+                    print('Email:', email)
+                    print('Phone:', phone)
+                    if self.resident.update_info(user_id, email, phone):
+                        flash("Credenciales editadas correctamente!", "success")
+                        return redirect(url_for('dashboard', section='settings'))
+                    else:
+                        flash("Error al actualizar la información.", "error")
+                        return redirect(url_for('dashboard', section='settings'))
+
+            except Exception as e:
+                print(f"Error en la ruta update_info: {e}")
+                flash("Ocurrió un error al procesar la solicitud.", "error")
+
+            return redirect(url_for('dashboard', section='settings'))
+        
+
+        @self.app.route('/admin/update_password', methods=['POST'])
+        def update_password2():
+            try:
+                user_id = request.form.get('user_id')
+                current_password = request.form.get('current_password')
+                new_password = request.form.get('new_password')
+                confirm_password = request.form.get('confirm_password')
+
+                if self.resident.update_password(user_id, current_password, new_password, confirm_password):
+                    flash("Contraseña actualizada correctamente", "success")
+                    return redirect(url_for('logout', flash_message='Cambiaste tu contraseña'))
+                else:
+                    flash("Error al actualizar la contraseña. Verifica tu información.", "error")
+                    print("[DEBUG] Error en la actualización de la contraseña")
+
+                return redirect(url_for('dashboard', section='settings')) 
+
+            except Exception as e:
+                flash("Error interno del servidor", "error")
+                print(f"[DEBUG] Error en update_password: {e}")
+                return redirect(url_for('dashboard', section='settings'))
+                
+            
 
 
         """ Rutas para el manejo del residente """
@@ -403,8 +742,10 @@ class App:
             user = self.user.get_user_by_id(id)
             claims = self.claims.get_my_claims(id)
             notifications = self.notification.user_notifications(id)
-          
-            return render_template('resident/home.html', user=user, claims=claims, notifications=notifications)
+            debts = self.debts.get_users_debts(id)
+            transfer_requests = self.payments.get_my_transfer_requests(id)
+            payments = self.payments.get_user_payments(id)
+            return render_template('resident/home.html', user=user, claims=claims, notifications=notifications, debts=debts, transfer_requests=transfer_requests,payments=payments)
 
 
         @self.app.route('/resident/update_photo/<int:user_id>', methods=['POST'])
@@ -506,7 +847,7 @@ class App:
                     user_id = session.get('user_id')
                     print('id del usuario', user_id)
                     
-                    # Obtén los datos del formulario
+                    
                     category = request.form.get('category')
                     description = request.form.get('description')
                     evidences = request.files.getlist('evidences')
@@ -531,55 +872,30 @@ class App:
             except Exception as e:
                 print(f'An exception occurred: {e}')
                 return redirect(url_for('home'))
+            
 
-
-        @self.app.route('/admin/attend_claim', methods=['POST'])
-        def attend_claim():
+        @self.app.route('/resident/rate_claim', methods=['POST'])
+        def rate_claim():
             try:
                 if request.method == 'POST':
                     claim_id = request.form.get('claim_id')
-                    schedule_date = request.form.get('schedule_date')
-                    start_time = request.form.get('start_time')
-                    description = request.form.get('description')
+                    rating = request.form.get('rating')
+
 
                     print('Claim ID:', claim_id)
-                    print('Schedule Date:', schedule_date)
-                    print('Start Time:', start_time)
-                    print('Description:', description)
- 
-                    # Llamar al método attend_claim en la instancia claims
-                    if self.claims.attend_claim(claim_id, schedule_date, start_time,  description):
-                        flash('Reclamo atendido correctamente', 'success')
-                        return redirect(url_for('dashboard', section='claims')) 
+                    print('Rating:', rating)
 
-                    flash('Ocurrió un error al atender el reclamo', 'error')
-                    return redirect(url_for('dashboard', section='claims'))
+                    if self.claims.rate_claim(claim_id, rating):
+                        flash('Reclamo calificado correctamente', 'success')
+                        return redirect(url_for('home')) 
+                    flash('Ocurrió un error al calificar el reclamo', 'error')
+                    return redirect(url_for('home'))
 
             except Exception as e:
                 print(f'An exception occurred: {e}')
-                return redirect(url_for('dashboard', section='claims'))
+                return redirect(url_for('home'))
+            
 
-
-        @self.app.route('/admin/reject_claim', methods=['POST'])
-        def reject_claim():
-            try:
-                claim_id = request.form.get('claim_id')
-                reject_reason = request.form.get('reject_reason')  # Corrected line
-
-                reject = self.claims.reject_claim(claim_id, reject_reason)  # 
-
-                if reject:
-                    flash("Reclamo rechazado exitosamente", "success")
-                    return redirect(url_for('dashboard', section='claims'))
-                else:
-                    flash("Hubo un error al rechazar el reclamo", "error")
-                    return redirect(url_for('dashboard', section='claims'))
-
-                return redirect(url_for('dashboard', section='claims'))
-            except Exception as e:
-                print('Error rechazando el reclamo', e)
-
-        
         @self.app.route('/resident/mark_as_read', methods=['POST'])
         def mark_as_read():
             try:
@@ -596,36 +912,40 @@ class App:
             except:
               print('An exception occurred')
 
-        
-        @self.app.route('/admin/finish_claim', methods=['POST'])
-        def finish_claim():
+
+        @self.app.route('/resident/transfer_request', methods=['POST'])
+        def transfer_request():
             try:
-                claim_id = request.form.get('claim_id')
-                finish = self.claims.finish_claim(claim_id)
-                print(f"el id del claim es:" , claim_id)
+                if request.method == 'POST':
+                    evidence = request.files.get('evidence')
+                    description = request.form.get('description')
+                    user_id = request.form.get('user_id')
+                    selected_debts = request.form.getlist('selected_debts')
 
-                if finish:
-                    flash("Reclamo finalizado exitosamente", "success")
-                    return redirect(url_for('dashboard', section='claims'))
+                    print(f"user_id: {user_id}")
+                    print(f"description: {description}")
+                    print(f"evidence: {evidence}")
+                    print(f"selected_debts: {selected_debts}")  # ✅ Aquí se imprimen los IDs seleccionados
+
+                    if self.payments.send_transfer_request(user_id, evidence, description, selected_debts):
+                        flash('Transferencia solicitada exitosamente', 'success')
+                        return redirect(url_for('home'))
+                    else:
+                        flash('Error al enviar la transferencia', 'error')
+                        return redirect(url_for('home'))
             except Exception as e:
-                print('Error finalizando el reclamo', e)
-                flash("Hubo un error al finalizar el reclamo", "error")
-                return redirect(url_for('dashboard', section='claims'))
-
-            return redirect(url_for('dashboard', section='claims'))
+                print(f'An exception occurred: {e}')
+                return redirect(url_for('home'))
 
 
-
-
-
-
-            
 
         @self.app.route('/')
         def redirect_to_dashboard():
-            return redirect(url_for('dashboard', section='main'))
+            return redirect(url_for('login'))
 
 
     def run(self):
         self.app.run(debug=True, port=5000)
+
+
 

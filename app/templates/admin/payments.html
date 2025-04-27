@@ -1,0 +1,328 @@
+<div class="flex px-4 items-center mt-2 justify-between mb-8">
+    <h1
+      class="text-3xl font-bold sm:text-2xl md:text-4xl lg:text-4xl text-left"
+    >
+        Pagos
+    </h1>
+</div>
+
+<div class="mb-4 border-b border-gray-200 ">
+    <ul class="flex flex-wrap -mb-px text-md  font-medium text-center" id="default-styled-tab" data-tabs-toggle="#default-styled-tab-content" data-tabs-active-classes="verde border-green-600 dark:border-green-500" data-tabs-inactive-classes="dark:border-transparent text-gray-500 hover:text-gray-600 dark:text-gray-400 border-gray-100 hover:border-gray-300 dark:border-gray-700 dark:hover:text-gray-300" role="tablist">
+        <li class="me-2" role="presentation">
+            <button class="inline-block p-4 border-b-2 rounded-t-lg" id="cash-payment-tab" data-tabs-target="#cash-payment" type="button" role="tab" aria-controls="cash-payment" aria-selected="true">Registrar Pago en Efectivo</button>
+        </li>
+        <li class="me-2" role="presentation">
+            <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="transfer-approval-tab" data-tabs-target="#transfer-approval" type="button" role="tab" aria-controls="transfer-approval" aria-selected="false">Solicitudes de Transferencias</button>
+        </li>
+        <!-- New History Tab -->
+        <li role="presentation">
+            <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="history-tab" data-tabs-target="#history" type="button" role="tab" aria-controls="history" aria-selected="false">Pagos pendientes</button>
+        </li>
+    </ul>
+</div>
+<div id="default-styled-tab-content">
+    <div class="p-4 rounded-lg bg-gray-50 " id="cash-payment" role="tabpanel" aria-labelledby="cash-payment-tab">
+
+        <!-- Form for cash payment registration -->
+        <form class="mt-4" id="paymentForm" data-debts='{{ debts["debts"] | tojson | e }}' method="post" action="/admin/payments/cash_payment">
+            <div class="mb-4">
+                <label for="resident" class="block text-sm font-medium text-gray-700">Seleccionar Residente</label>
+                <select id="resident" required name="user_id"
+                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md" 
+                    onchange="filterDebts()">
+                    <option value="" selected disabled>--Seleccionar Residente--</option>
+                    {% for resident in residents %}
+                        {% if resident.id != user.id %}
+                            <option value="{{ resident.id }}">{{ resident.name }} {{ resident.last_name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        
+            <!-- Contenedor para las deudas -->
+            <div class="mb-4" id="debtsContainer"></div>
+        
+            <div class="mb-4">
+                <label for="amount"  class="block text-sm font-medium text-gray-700">Monto</label>
+                <input type="text" name="amount" value="0.0" id="amount" required  readonly class="mt-1 focus:outline-none focus:ring-green-500 focus:border-green-500 block w-full pl-4 pr-12 sm:text-sm border-gray-300 rounded-md">
+            </div>
+
+            <div class="mb-4">
+                <label for="notes" class="block text-sm font-medium text-gray-700">Notas (Opcional)</label>
+                <textarea id="notes" name="notes" rows="3" class="focus:outline-none focus:ring-green-500 focus:border-green-500 shadow-sm mt-1 block p-2 w-full sm:text-sm border border-gray-300 rounded-md" placeholder="Detalles adicionales sobre el pago..."></textarea>
+            </div>
+            <div class="flex justify-end">
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bgverde focus:outline-none focus:ring-2 focus:ring-offset-2">
+                    Registrar Pago
+                </button>
+            </div>
+        </form>
+
+        {% if payments %}
+        <div class="mt-8">
+            <h1 class="text-3xl font-bold px-4 mb-8">Historial de pago</h1>
+
+            <div class="overflow-x-auto mt-4">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                            <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+                            <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Metodo</th>
+                            <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                            <th class="px-1 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                   </thead>
+                   <tbody class="bg-white divide-y divide-gray-200">
+                       <!-- Example row -->
+                       {% for p in payments %}
+                       <tr>
+                           <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{p.resident}}</td>
+                           <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{p.amount}}</td>
+                           <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{p.payment_method}}</td>
+                           <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{p.created_at.strftime('%d/%m/%Y')}}</td>
+                           <td class="px-6 py-4 whitespace-nowrap text-md font-medium">
+                               <button class="hover:underline" data-payment-id="{{p.id}}" onclick="downloadInvoice(this)">
+                                   <img src="{{url_for('static', filename='icons/download.svg')}}" class="h-9 w-9 bgverde p-1 rounded-md" alt="Descargar">
+                                </button>
+                            </td>
+                       </tr>
+                       
+                       <!-- Add more rows as needed -->
+                       {% endfor %}
+                    </tbody>
+                </table>
+           </div>
+           
+           {% endif %}
+        </div>
+    </div>
+
+        
+
+        
+        
+    </div>
+    <div class="hidden p-4 rounded-lg bg-gray-50 " id="transfer-approval" role="tabpanel" aria-labelledby="transfer-approval-tab">
+        {% for tr in transfer_requests %}
+        <div class="mt-4 space-y-4">
+            <div class="bg-white shadow-md rounded-lg p-4 flex flex-col">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center flex-1">
+                    <div class="mb-4 md:mb-0 flex-1">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-medium text-gray-900">{{ tr.resident }}</h3>
+                            {% if tr.status == 'pending' %}
+                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">pendiente</span>
+                            {% elif tr.status == 'approved' %}
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">aprobado</span>
+                            {% elif tr.status == 'rejected' %}
+                            <span class="bg-red-800 text-white px-2 py-1 rounded text-xs">rechazada</span>
+                            {% endif %}
+
+                        </div>
+                        <p class="text-sm text-gray-500">{{ tr.residence }}</p>
+                        <p class="text-sm text-gray-500">{{ tr.description }}</p>
+                        <!-- Deudas asociadas -->
+                        {% if tr.debts %}
+                        <div class="mt-2">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-1">Deudas pagadas:</h4>
+                            <ul class="text-sm text-gray-600 list-disc list-inside space-y-1">
+                                {% for debt in tr.debts %}
+                                    <li>
+                                        Periodo: {{ debt.period }} — Monto: RD$ {{ "{:,.2f}".format(debt.amount) }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <div class="image-container">
+                            <img src="{{ url_for('static', filename='uploads/transfer_requests/' + tr.evidence) }}" 
+                                 alt="map" 
+                                 class="my-2 w-16 h-16 rounded overflow-hidden cursor-pointer object-cover hover:opacity-80 transition preview-img">
+                        </div>
+                    </div>
+                </div>
+        
+                <!-- Contenedor inferior con la fecha a la izquierda y los botones a la derecha -->
+                <div class="flex justify-between items-end mt-4">
+                    <!-- Fecha alineada a la izquierda -->
+                    <p class="text-sm text-gray-500">{{ tr.created_at.strftime('%d/%m/%Y') }}</p>
+        
+                    {% if tr.status == 'pending' %}
+                    <div class="flex space-x-2">
+                        <form method="post" action="/admin/payments/accept_transfer_request" class="accept-tr-form">
+                            <input type="hidden" name="transfer_id" value="{{ tr.id }}">
+                        
+                            {% if tr.debts %}
+                                {% for debt in tr.debts %}
+                                    <input type="hidden" name="debts" value="{{ debt.id }}">
+                                {% endfor %}
+                            {% endif %}
+                        
+                            <button type="submit" class="bgverde px-3 py-2 rounded-lg text-white text-sm hover:bg-green-700 transition">
+                                Aceptar
+                            </button>
+                        </form>
+                        
+                        
+                        <button data-modal-target="reject-tr-modal" data-modal-toggle="reject-tr-modal" class="bg-red-700 px-3 py-2 rounded-lg text-white text-sm hover:bg-red-800 transition reject-tr-btn" data-user-id="{{tr.id_usuario}}" data-tr-id="{{tr.id}}">
+                            Rechazar
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+
+        
+    </div>
+
+
+
+
+
+    {% set months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'] %}
+
+    <div class="hidden p-4 rounded-lg bg-gray-50 " id="history" role="tabpanel" aria-labelledby="history-tab">
+        <!-- Table for payment history -->
+         {% if debtors %}
+         
+         <div class="overflow-x-auto mt-4">
+             <table class="min-w-full divide-y divide-gray-200">
+                 <thead class="bg-gray-50">
+                     <tr>
+                         <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Residente</th>
+                         <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+                         <th class="px-6 py-3 text-left text-md font-medium text-gray-500 uppercase tracking-wider">Periodo</th>
+                         <th class="px-1 py-3 text-right text-md font-medium text-gray-500 uppercase tracking-wider">Accion</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <!-- Example row -->
+                        {% for d in debtors %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{d.resident}}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{d.debt_amount}}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{months[d.month]}} {{d.period}}</td>
+                            <td class="flex items-center justify-end mr-4 mt-2">
+                                <form action="/admin/payment-reminder" method="post">
+                                  <input type="hidden" name="debt_id" value="{{d.id}}">
+                    
+                                  <button class="bgverde w-10 h-10 rounded-full flex items-center justify-center text-white" data-tooltip-target="tooltip-default" data-tooltip-placement="top" data-tooltip-trigger="hover" data-modal-toggle="modal-default" data-modal-target="modal-default">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-6">
+                                      <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
+                                    </svg>
+                                    
+                                  </button>
+                                </form>
+                              </td>
+                        </tr>
+
+                        <!-- Add more rows as needed -->
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% endif %}
+        </div>
+    </div>
+
+
+
+
+
+
+   
+
+
+    <div
+    id="reject-tr-modal"
+    tabindex="-1"
+    aria-hidden="true"
+    class="hidden z-50 fixed inset-0 w-full h-full bg-black/20"
+  >
+    <div
+      class="relative p-4 w-full max-w-xl max-h-full flex items-center justify-center"
+    >
+      <div class="relative bg-white rounded-lg shadow w-full">
+        <div
+          class="flex items-center justify-between p-4 md:p-5 border-b rounded-t"
+        >
+          <h3 class="text-xl font-semibold text-gray-900">Rechazar Solicitud de Transferencia</h3>
+          <button
+            type="button"
+            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+            data-modal-hide="reject-modal"
+          >
+            <svg
+              class="w-3 h-3"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 14 14"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+              />
+            </svg>
+            <span class="sr-only">Cerrar modal</span>
+          </button>
+        </div>
+        <div class="p-4 md:p-5 space-y-4">
+          <form
+            id="reject-claim-form"
+            class="space-y-4"
+            action="/admin/reject_transfer_request"
+            method="POST"
+          >
+            <input type="hidden" id="reject-tr-input" name="tr_id" />
+            <input type="hidden" id="user-id_input" name="user_id" />
+            <div>
+              <label
+                for="reject-reason"
+                class="block mb-2 text-sm font-medium text-gray-900"
+                >Motivo del rechazo:</label
+              >
+              <textarea
+                id="reject-reason"
+                name="reason"
+                required
+                rows="3"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 resize-none"
+                placeholder="Ingrese el motivo del rechazo..."
+              ></textarea>
+            </div>
+            <div
+              class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b"
+            >
+              <button
+                type="submit"
+                class="text-white bg-red-600 hover:bg-red-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+              >
+                Rechazar
+              </button>
+              <button
+                data-modal-hide="reject-tr-modal"
+                type="button"
+                class="ms-3 text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Agrega este script al final de tu archivo payments.html, justo antes del cierre del body -->
+<script src="{{url_for('static', filename='js/payments.js')}}"></script>
+

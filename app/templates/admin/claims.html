@@ -23,7 +23,7 @@
 </div>
 {% if claims %} {% for c in claims %}
 <div
-  class="space-y-4 mb-4 claim-card {{ 'hidden additional-claim' if loop.index0 > 2 }}"
+  class="space-y-4 mb-4 px-4 claim-card "
 >
   <div
     class="bg-white p-4 sm:p-6 rounded-lg border border-gray-200 hover:shadow-md transition"
@@ -31,7 +31,7 @@
     <!-- Contenido principal -->
     <div class="flex-1">
       <!-- Header con categoría y estado -->
-      <div class="flex justify-between items-center mb-2">
+      <div class="flex justify-between items-center mb-2 ">
         <h3 class="font-bold text-gray-800 text-base sm:text-lg">
           {{ c.category }}
         </h3>
@@ -90,6 +90,16 @@
         </h2>
         <span class="text-gray-500">Creado: {{ c.created_at }}</span>
       </div>
+      {% if c.rating %}
+  <div class="rating mt-2">
+
+    {% for i in range(1, 6) %}
+      <input type="radio" name="admin-rating-{{ c.id }}" class="mask mask-star-2 bgverde" disabled
+        {% if i == c.rating %} checked {% endif %} />
+    {% endfor %}
+  </div>
+{% endif %}
+
     </div>
 
     <!-- Botones (al final, alineados a la derecha) -->
@@ -128,16 +138,7 @@
     {% endif %}
   </div>
 </div>
-{% endfor %} {% if claims|length > 3 %}
-<div class="flex justify-center sm:justify-start">
-  <button
-    id="show-more-btn"
-    class="mt-4 verde text-sm hover:underline px-4 py-2"
-  >
-    Ver Historial
-  </button>
-</div>
-{% endif %} {% endif %}
+{% endfor %}  {% endif %}
 
 <!-- Modal para Atender Reclamo -->
 <div

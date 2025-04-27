@@ -1,11 +1,13 @@
 {% include 'includes/links.html' %}
 
 
-<nav class="fixed top-0 z-50 w-full dark:bg-gray-800 dark:border-gray-700 gris">
+
+
+<nav class="fixed top-0 z-40 w-full  gris">
     <div class="px-3 py lg:px-5 lg:pl-3">
         <div class="flex items-center justify-between">
             <div class="flex items-center justify-start rtl:justify-end">
-                <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar" aria-controls="logo-sidebar" type="button" class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
+                <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar" aria-controls="logo-sidebar" type="button" class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 ">
                     <span class="sr-only">Open sidebar</span>
                     <svg class="w-6 h-6" aria-hidden="true" fill="#157F3D" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                         <path clip-rule="evenodd" fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"></path>
@@ -13,7 +15,7 @@
                 </button>
                 <a href="" class="flex ms-2 md:me-24">
                     <img src="{{url_for('static', filename='img/logo.png')}}" class="h-16 pt-2 me-3" alt="FlowBite Logo" />
-                    <span class="hidden text-white self-center sm:block sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl bold whitespace-nowrap">
+                    <span class="hidden text-white self-center sm:block sm:text-2xl md:text-2xl lg:text-2xl xl:text-2xl bold whitespace-nowrap">
                         Pinares del Norte
                     </span>
                 </a>
@@ -21,30 +23,14 @@
             <div class="flex items-center space-x-2">
 
                 <!-- Notificaciones -->
-                <div x-data="{ open: false }" class="relative">
-                    <button @click="open = !open" class="relative p-1 rounded-full hover:bg-gray-700 focus:outline-none">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.17V10a6 6 0 10-12 0v4.17c0 .53-.21 1.04-.595 1.425L4 17h5m6 0a3 3 0 11-6 0"></path>
-                        </svg>
-                        <span class="absolute top-0 right-0 block h-4 w-4 text-xs bg-red-600 text-white rounded-full">3</span>
-                    </button>
-
-                    <!-- Dropdown -->
-                    <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2  w-56 bg-white rounded-lg shadow-lg dark:bg-gray-800 z-20">
-                        <div class="px-4 py-3 border-b  dark:border-gray-600 text-gray-800">Notificaciones</div>
-                        <ul class="py-2">
-                            <li class="px-4 py-2 text-sm text-gray-900 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">Pago recibido con éxito</li>
-                            <li class="px-4 py-2 text-sm text-gray-900 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">Mantenimiento programado para el lunes</li>
-                            <li class="px-4 py-2 text-sm text-gray-900 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">Nuevo mensaje de la administración</li>
-                        </ul>
-                    </div>
-                </div>
+               
 
                 <!-- Dropdown con foto del usuario -->
                 <div x-data="{ open: false }" class="relative">
                     <button @click="open = !open" class="h-16 w-16 mt-1 rounded-full overflow-hidden">
-                        {% if user.photo %}
+                        {% if user['photo'] %}
                         <img src="{{ url_for('static', filename='uploads/' + user.photo) }}" alt="Foto de usuario" class="w-14 h-14 rounded-full object-cover">
+                        
 
                         {% else %}
                             <img src="{{ url_for('static', filename='uploads/default.png') }}" alt="Foto de usuario" class="w-full h-full object-cover">
@@ -55,43 +41,29 @@
                     x-show="open" 
                     @click.away="open = false" 
                     x-transition 
-                    class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg dark:bg-gray-800 z-20">
+                    class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg  z-20">
                     <div class="px-4 py-3">
                         {% if user %}
-                            <span class="block text-sm text-gray-900 dark:text-white">
+                            <span class="block text-sm text-gray-900 ">
                                 {{ user['name'] }} {{ user['last_name'] }}
                             </span>
-                            <span class="block text-sm text-gray-500 truncate dark:text-gray-400">
+                            
+                            <span class="block text-sm text-gray-500 truncate ">
                                 {{ user['email'] }}
                             </span>
                         {% else %}
-                            <span class="block text-sm text-gray-900 dark:text-white">
+                            <span class="block text-sm text-gray-900 ">
                                 Invitado
                             </span>
-                            <span class="block text-sm text-gray-500 truncate dark:text-gray-400">
+                            <span class="block text-sm text-gray-500 truncate ">
                                 Sin correo electrónico
                             </span>
                         {% endif %}
                     </div>
-                    <ul class="py-2">
+                    <ul class="">
                         <li>
-                            <a href="/dashboard/my_info" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
-                                Personal info
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
-                                Settings
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
-                                Earnings
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/logout" class="block px-4 py-2 text-sm text-red-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
-                                Sign out
+                            <a href="/logout" class="block px-4 py-2 text-sm text-red-700 hover:bg-gray-100">
+                                Cerrar sesion
                             </a>
                         </li>
                     </ul>
@@ -102,8 +74,8 @@
     </div>
 </nav>
 
-      <aside id="logo-sidebar" class=" gris fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full  sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"  aria-label="Sidebar">
-         <div class=" gris h-full px-3 pb-4 overflow-y-auto  dark:bg-gray-800">
+      <aside id="logo-sidebar" class=" gris fixed top-0 left-0 z-30 w-64 h-screen pt-20 transition-transform -translate-x-full  sm:translate-x-0"  aria-label="Sidebar">
+         <div class=" gris h-full px-3 pb-4 overflow-y-auto  ">
             <ul class="space-y-2 font-medium">
                <li>
                   <a href="/admin" class="flex items-center p-1 text-gray-900 rounded-lg dark:text-white hover:bg-gray-700 dark:hover:bg-gray-700 group">
@@ -136,21 +108,15 @@
                   </a>
                </li>
                <li>
-                  <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-700 dark:hover:bg-gray-700 group">
-                     <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 16">
-                        <path stroke="#157F3D" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 8h11m0 0L8 4m4 4-4 4m4-11h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3"/>
-                     </svg>
-                     <span class="flex-1 text-white ms-3 whitespace-nowrap">Sign In</span>
+                  <a href="/admin/payments" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-700 dark:hover:bg-gray-700 group">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#157f3d"><path d="M560-440q-50 0-85-35t-35-85q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35ZM280-320q-33 0-56.5-23.5T200-400v-320q0-33 23.5-56.5T280-800h560q33 0 56.5 23.5T920-720v320q0 33-23.5 56.5T840-320H280Zm80-80h400q0-33 23.5-56.5T840-480v-160q-33 0-56.5-23.5T760-720H360q0 33-23.5 56.5T280-640v160q33 0 56.5 23.5T360-400Zm440 240H120q-33 0-56.5-23.5T40-240v-440h80v440h680v80ZM280-400v-320 320Z"/></svg>
+                     <span class="flex-1 text-white ms-3 whitespace-nowrap">Pagos</span>
                   </a>
                </li>
                <li>
-                  <a href="#" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-700 dark:hover:bg-gray-700 group">
-                     <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="#157F3D" viewBox="0 0 20 20">
-                        <path d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z"/>
-                        <path d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z"/>
-                        <path d="M8.961 16a.93.93 0 0 0 .189-.019l3.4-.679a.961.961 0 0 0 .49-.263l6.118-6.117a2.884 2.884 0 0 0-4.079-4.078l-6.117 6.117a.96.96 0 0 0-.263.491l-.679 3.4A.961.961 0 0 0 8.961 16Zm7.477-9.8a.958.958 0 0 1 .68-.281.961.961 0 0 1 .682 1.644l-.315.315-1.36-1.36.313-.318Zm-5.911 5.911 4.236-4.236 1.359 1.359-4.236 4.237-1.7.339.341-1.699Z"/>
-                     </svg>
-                     <span class="flex-1 text-white ms-3 whitespace-nowrap">Sign Up</span>
+                  <a href="/admin/settings" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-700 dark:hover:bg-gray-700 group">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="25px" viewBox="0 -960 960 960" width="25px" fill="#157f3d"><path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z"/></svg>
+                     <span class="flex-1 text-white ms-3 whitespace-nowrap">Configuracion</span>
                   </a>
                </li>
             </ul>
