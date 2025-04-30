@@ -222,17 +222,28 @@ class Users:
         try:
             cursor = self.db.cursor(dictionary=True)
 
-            # Obtener los roles actuales del usuario
             cursor.execute("SELECT role_id FROM user_roles WHERE user_id = %s", (user_id,))
-            current_roles = {row['role_id'] for row in cursor.fetchall()}  
+            current_roles = {row['role_id'] for row in cursor.fetchall()}
 
-            # Determinar los nuevos roles según los checkboxes seleccionados
             new_roles = {1} if is_admin else set()
-            new_roles.add(2) if is_resident else None
+            if is_resident:
+                new_roles.add(2)
 
-            # Roles a agregar y eliminar
             roles_to_add = new_roles - current_roles
             roles_to_remove = current_roles - new_roles
+
+            # ⚡ Validar si se puede remover el rol de residente
+            if 2 in roles_to_remove:
+                cursor.execute("SELECT * FROM debts WHERE id_usuario = %s", (user_id,))
+                debts = cursor.fetchall()
+
+                if debts:
+                    flash("No puedes eliminar el rol de residente porque este usuario tiene deudas pendientes.", "warning")
+                    return False
+
+            # ✅ Si el rol de residente se está agregando por primera vez, generar deuda
+            if 2 in roles_to_add:
+                self.debts.generate_debt(user_id)
 
             # Agregar nuevos roles
             if roles_to_add:
@@ -260,19 +271,20 @@ class Users:
                 elif property_type == "casas":
                     cursor.execute("UPDATE houses SET id_usuario = %s, occupied = 1 WHERE id = %s", (user_id, property_id))
 
-            # Guardar cambios solo si hubo modificaciones
+            # Guardar cambios si hubo modificaciones
             if roles_to_add or roles_to_remove or (is_resident and property_type and property_id):
                 self.db.commit()
 
-            return True  # Éxito
+            return True
 
         except Exception as e:
             print(f"Error editando los roles del usuario: {e}")
             self.db.rollback()
-            return False  # Fallo
+            return False
 
         finally:
             cursor.close()
+
 
 
 
@@ -350,23 +362,24 @@ class Users:
             if "resident" in roles:
                 print(f"Usuario {id} es residente, verificando vivienda...")
 
-                # Buscar si el usuario tiene una vivienda asignada
-                cursor.execute("""
-                    SELECT id FROM apartments WHERE id_usuario = %s
-                    UNION
-                    SELECT id FROM houses WHERE id_usuario = %s
-                """, (id, id))
-                property_data = cursor.fetchone()
+                # Verificar si vive en un apartamento
+                cursor.execute("SELECT id FROM apartments WHERE id_usuario = %s", (id,))
+                apartment = cursor.fetchone()
 
-                if property_data:
-                    property_id = property_data["id"]
-                    print(f"Usuario {id} vive en la propiedad {property_id}, liberándola...")
-
-                    # Actualizar la propiedad para dejarla libre
+                if apartment:
+                    property_id = apartment["id"]
+                    print(f"Usuario {id} vive en el apartamento {property_id}, liberándolo...")
                     cursor.execute("""
                         UPDATE apartments SET occupied = 0, id_usuario = NULL WHERE id = %s
                     """, (property_id,))
-                    
+
+                # Verificar si vive en una casa
+                cursor.execute("SELECT id FROM houses WHERE id_usuario = %s", (id,))
+                house = cursor.fetchone()
+
+                if house:
+                    property_id = house["id"]
+                    print(f"Usuario {id} vive en la casa {property_id}, liberándola...")
                     cursor.execute("""
                         UPDATE houses SET occupied = 0, id_usuario = NULL WHERE id = %s
                     """, (property_id,))
@@ -388,6 +401,7 @@ class Users:
 
 
 
+
     def enable_user(self,id):
         try:
             cursor = self.db.cursor(dictionary=True)
@@ -405,33 +419,44 @@ class Users:
     def delete_user(self, id):
         try:
             cursor = self.db.cursor(dictionary=True)
-            
-            # Liberar la propiedad en apartments si el usuario está asignado
+
+            # Verificar si el usuario tiene deudas (cualquier deuda)
+            cursor.execute("SELECT * FROM debts WHERE id_usuario = %s", (id,))
+            debts = cursor.fetchall()
+
+            if debts:
+                flash("No puedes eliminar este usuario porque tiene deudas registradas.", "warning")
+                cursor.close()
+                return False  # Tiene deudas, no eliminar
+
+            # Si no tiene deudas, procedemos a liberar propiedades y eliminar
+
+            # Liberar apartamento si está asignado
             cursor.execute("SELECT id FROM apartments WHERE id_usuario = %s", (id,))
             apartment = cursor.fetchone()
             if apartment:
                 cursor.execute("UPDATE apartments SET id_usuario = NULL, occupied = 0 WHERE id = %s", (apartment["id"],))
                 self.db.commit()
 
-            # Liberar la propiedad en houses si el usuario está asignado
+            # Liberar casa si está asignado
             cursor.execute("SELECT id FROM houses WHERE id_usuario = %s", (id,))
             house = cursor.fetchone()
             if house:
                 cursor.execute("UPDATE houses SET id_usuario = NULL, occupied = 0 WHERE id = %s", (house["id"],))
                 self.db.commit()
 
-            # Ahora eliminamos el usuario
+            # Eliminar el usuario
             cursor.execute("DELETE FROM users WHERE id = %s", (id,))
-            
-            
             self.db.commit()
             cursor.close()
             flash("Usuario eliminado permanentemente!", "success")
+            return True
 
         except Exception as e:
-            self.db.rollback()  # Revierte cambios en caso de error
+            self.db.rollback()
             print(f"Error eliminando usuario: {e}")
             flash(f"Error eliminando usuario: {e}", "danger")
+            return False
 
 
 

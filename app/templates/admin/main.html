@@ -295,7 +295,7 @@ class="hidden z-50 fixed inset-0 w-full h-full bg-black/20"
         <tr>
           <td>{{d.resident}}</td>
           <td class="text-red-600 font-semibold">{{d.debt_amount}}</td>
-          <td>{{months[d.month]}} {{d.period}} </td>
+          <td>{{months[d.month - 1]}} {{d.period}} </td>
           <td>
             <form action="/admin/payment-reminder" method="post">
               <input type="hidden" name="debt_id" value="{{d.id}}">

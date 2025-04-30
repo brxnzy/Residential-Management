@@ -100,6 +100,19 @@ class App:
         """
         Rutas principales de la app, incluidas las del dashboard.
         """
+
+        # @self.app.route('/routes')
+        # def list_routes():
+        #     routes = []
+        #     for rule in self.app.url_map.iter_rules():
+        #         routes.append({
+        #             'ruta': str(rule),
+        #             'métodos': sorted(list(rule.methods - {'HEAD', 'OPTIONS'})),
+        #             'endpoint': rule.endpoint
+        #         })
+        #     return jsonify({'rutas': routes}) 
+
+
         @self.app.route('/login', methods=['GET', 'POST'])
         @self.nocache 
         def login():
@@ -278,10 +291,14 @@ class App:
                 
 
 
-        @self.app.route('/admin/disable_user/<int:user_id>', methods=['POST'])
-        def disable_user(user_id):
+        @self.app.route('/admin/disable_user', methods=['POST'])
+        def disable_user():
             try:
-                self.user.disable_user(user_id)
+                if request.method == 'POST':
+                    user_id = request.form.get('user_id')
+                    self.user.disable_user(user_id)
+                else:
+                    flash("Método no permitido", "error")
             except Exception as e:
                 print(f"Error al deshabilitar usuario: {e}")
             return redirect(url_for('dashboard', section='users'))
@@ -310,8 +327,7 @@ class App:
 
                 if update:
                     flash("Roles actualizados correctamente", "success")
-                else:
-                    flash("No se realizaron cambios en los roles", "info")
+                
 
             except Exception as e:
                 print(f"Error al editar usuario: {e}")
@@ -540,7 +556,7 @@ class App:
             except Exception as e:
                 return jsonify({"error": str(e)}), 500  
             
-        @self.app.route('/admin//payments/accept_transfer_request', methods=['POST'])
+        @self.app.route('/admin/payments/accept_transfer_request', methods=['POST'])
         def accept_transfer():
             try:
                 if request.method == 'POST':
@@ -562,7 +578,7 @@ class App:
 
 
             
-        @self.app.route('/admin/reject_transfer_request', methods=['POST'])
+        @self.app.route('/admin/payments/reject_transfer_request', methods=['POST'])
         def reject_transfer():
             try:
                 if request.method == 'POST':
@@ -600,7 +616,7 @@ class App:
                 return redirect(url_for('dashboard'))
 
 
-        @self.app.route('/admin/payment-reminder', methods=['POST'])    
+        @self.app.route('/admin/payments/payment-reminder', methods=['POST'])    
         def payment_reminder():
             try:
                 if request.method == 'POST':
@@ -608,12 +624,12 @@ class App:
                     print('Debt ID:', debt_id)
                     if self.notification.send_payment_reminder(debt_id):
                         flash('Recordatorio de pago enviado correctamente', 'success')
-                        return redirect(url_for('dashboard'))
+                        return redirect(url_for('payments'))
                     flash('Error al enviar el recordatorio de pago', 'error')
-                    return redirect(url_for('dashboard'))
+                    return redirect(url_for('payments'))
             except Exception as e:
                 print(f'ocurrio un error enviando el recordatorio de pago: {e}')
-                return redirect(url_for('dashboard'))
+                return redirect(url_for('payments'))
             
         @self.app.route('/admin/update_logo', methods=['POST'])
         def update_logo():

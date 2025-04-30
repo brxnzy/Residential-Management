@@ -20,10 +20,32 @@
   <h1 class="text-4xl font-bold sm:text-2xl md:text-4xl lg:text-5xl text-left">
     Reclamos
   </h1>
+
+  
+
+
+  {% set pendiente = claims | selectattr('status', 'equalto', 'pendiente') | list | length %}
+  {% set atendido = claims | selectattr('status', 'equalto', 'atendido') | list | length %}
+  {% set resuelto = claims | selectattr('status', 'equalto', 'resuelto') | list | length %}
+  {% set rechazado = claims | selectattr('status', 'equalto', 'rechazado') | list | length %}
+  {% set total_count = claims | length %}
+  
+  <!-- Dropdown for filtering notifications -->
+  <select id="notification-filter" class="border border-gray-300 rounded py-2 px-2  text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500">
+    <option value="pendiente" >Pendiente ({{ pendiente }})</option>
+    <option value="atendido">Atendidos ({{ atendido }})</option>
+    <option value="resuelto">Resuelto({{ resuelto }})</option> 
+    <option value="rechazado">Rechazado({{ rechazado }})</option>
+    <option value="all" selected>Todos({{ total_count }})</option>
+  </select>
 </div>
+
+<div class="hidden" id="message"> 
+</div>
+
 {% if claims %} {% for c in claims %}
 <div
-  class="space-y-4 mb-4 px-4 claim-card "
+  class="space-y-4 mb-4 px-4 claim-card " data-status="{{ c.status }}"
 >
   <div
     class="bg-white p-4 sm:p-6 rounded-lg border border-gray-200 hover:shadow-md transition"
@@ -139,6 +161,58 @@
   </div>
 </div>
 {% endfor %}  {% endif %}
+
+
+
+<script>
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const filter = document.getElementById('notification-filter');
+    const claimCards = document.querySelectorAll('.claim-card');
+    const messageDiv = document.getElementById('message');
+  
+    // Crear el mensaje de "No hay reclamos"
+    const noClaimsMessage = document.createElement('h1');
+    noClaimsMessage.className = 'text-gray-500 mt-8 text-lg';
+    noClaimsMessage.textContent = 'No hay reclamos en este estado.';
+  
+    // Agregar el mensaje al div#message
+    messageDiv.appendChild(noClaimsMessage);
+  
+    function applyFilter() {
+      const selectedStatus = filter.value;
+      let anyVisible = false;
+  
+      claimCards.forEach(card => {
+        const status = card.getAttribute('data-status');
+        if (selectedStatus === 'all' || status === selectedStatus) {
+          card.style.display = 'block';
+          anyVisible = true;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+  
+      // Mostrar u ocultar el mensaje correctamente
+      if (anyVisible) {
+        messageDiv.classList.add('hidden'); // Ocultar
+      } else {
+        messageDiv.classList.remove('hidden');
+        messageDiv.classList.add('px-4') // Mostrar
+      }
+    }
+  
+    filter.addEventListener('change', applyFilter);
+  
+    // Aplica el filtro automáticamente cuando la página carga
+    applyFilter();
+  });
+  
+  
+  
+  </script>
+  
+
 
 <!-- Modal para Atender Reclamo -->
 <div

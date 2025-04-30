@@ -31,19 +31,25 @@ class EmailSender:
         enlace = f"http://127.0.0.1:5000/activate_account/{user_id}"
 
         contenido = f"""
-            <html>
-            <body>
-                <h1 style="color: blue;">¡Bienvenido, {name} {last_name}!</h1>
-                <p>Tu cédula registrada es <b>{cedula}</b>.</p>
-                <p>Para completar tu registro, haz clic en el botón de abajo y establece tu contraseña.</p>
-                <a href='{enlace}' style="display: inline-block; padding: 10px 20px; color: white; background-color: blue; text-decoration: none; border-radius: 5px;">
-                    Establecer Contraseña
-                </a>
-                <br>
-                <p>Si no solicitaste este acceso, ignora este mensaje.</p>
-            </body>
-            </html>
-        """
+        <html>
+        <body style="background-color: #f4f4f4; padding: 20px; font-family: Arial, sans-serif;">
+            <div style="max-width: 600px; margin: auto; background-color: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 30px;">
+                <h2 style="color: #2c3e50; text-align: center;">¡Bienvenido a Pinares del Norte!</h2>
+                <p style="font-size: 16px; color: #333;">Hola <b>{name} {last_name}</b>,</p>
+                <p style="font-size: 15px; color: #555;">Hemos registrado tu cédula: <b>{cedula}</b>.</p>
+                <p style="font-size: 15px; color: #555;">Para completar tu registro y comenzar a usar nuestra plataforma, por favor haz clic en el siguiente botón para establecer tu contraseña:</p>
+                <div style="text-align: center; margin: 20px 0;">
+                    <a href="{enlace}" style="background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 16px;">
+                        Establecer Contraseña
+                    </a>
+                </div>
+                <p style="font-size: 14px; color: #999;">Si no solicitaste este acceso, puedes ignorar este mensaje.</p>
+                <hr style="margin-top: 30px;">
+                <p style="text-align: center; font-size: 12px; color: #ccc;">Pinares del Norte &copy; 2025</p>
+            </div>
+        </body>
+        </html>
+    """
         try:
             self.yag.send(to=destinatario, subject=asunto, contents=contenido)
             print("Correo enviado exitosamente a:", destinatario)

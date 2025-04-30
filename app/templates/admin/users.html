@@ -140,9 +140,10 @@
           {% if resident.id != user.id %}
           <div class="flex gap-3 justify-end">
             <form
-              action="/admin/disable_user/{{resident.id}}"
+              action="/admin/disable_user"
               method="post"
             >
+            <input type="hidden" name="user_id" value="{{ resident.id }}">
               <button
                 class="bg-gray-100 text-gray-700 border normal text-md border-gray-300 px-5 py-2.5 rounded-lg hover:bg-gray-200"
               >
@@ -310,12 +311,12 @@
               <div class="flex justify-center gap-3">
                   <form action="/admin/dashboard/delete_user/" method="post" id="deleteForm">
                       <button data-modal-hide="popup-modal" type="submit" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300  font-font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center">
-                          Yes, I'm sure
+                          Si, estoy seguro
                       </button>
                   </form>
                   
                   <button data-modal-hide="popup-modal" type="button" class="py-2.5 px-5 text-sm font-font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-green-700 focus:z-10 focus:ring-4 focus:ring-gray-100 ">
-                      No, cancel
+                      No, cancelar
                   </button>
               </div>
           </div>
@@ -348,14 +349,14 @@
                   <div id="dropdownContainer" class="space-x-2 px-1.5 w-full my-3">
                       <div class="flex w-full space-x-2">
                           <!-- Primer Dropdown -->
-                          <select name="propertyType" id="propertyType" class="w-1/2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 appearance-none">
-                              <option value="" disabled selected>Seleccione tipo de propiedad</option>
+                          <select name="propertyType" required id="propertyType" class="w-1/2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 appearance-none">
+                              <option value="" disabled selected >Seleccione tipo de propiedad</option>
                               <option value="casas">Casas</option>
                               <option value="apartamentos">Apartamentos</option>
                           </select>
                           
                           <!-- Segundo Dropdown -->
-                          <select name="propertyList" id="propertyList" class="w-1/2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 appearance-none hidden">
+                          <select required name="propertyList" id="propertyList" class="w-1/2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 appearance-none hidden">
                               <option value="" disabled selected>Residencias Disponibles</option>
                               {% for a in apartments %}
                               {% if a.occupied == 0 %}

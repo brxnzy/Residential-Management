@@ -184,7 +184,7 @@
 
 
 
-    {% set months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'] %}
+    {% set months = ['','Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'] %}
 
     <div class="hidden p-4 rounded-lg bg-gray-50 " id="history" role="tabpanel" aria-labelledby="history-tab">
         <!-- Table for payment history -->
@@ -226,8 +226,13 @@
                     </tbody>
                 </table>
             </div>
-            
-            {% endif %}
+            {% else %}
+            <div class="flex flex-col items-center justify-center h-full">
+              <img src="{{url_for('static', filename='icons/debtors.svg')}}" class="h-auto  w-7/12" alt="">
+              <h2 class="text-xl font-bold mt-4 mb-2 textg-gray-700">No hay residentes con deudas...</h2>
+            </div>
+    {% endif %}
+
         </div>
     </div>
 
@@ -280,7 +285,7 @@
           <form
             id="reject-claim-form"
             class="space-y-4"
-            action="/admin/reject_transfer_request"
+            action="/admin/payments/reject_transfer_request"
             method="POST"
           >
             <input type="hidden" id="reject-tr-input" name="tr_id" />
