@@ -1,11 +1,17 @@
 from flask import session, flash, redirect, url_for
 from config.database import connection_db
 import bcrypt
+from itsdangerous import URLSafeTimedSerializer
 
 class Auth:
-    def __init__(self):
+    def __init__(self, app):
         self.db = connection_db()
+        self.serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
+    def generate_token(self, user_id):
+        token = self.serializer.dumps(user_id, salt='password-reset-salt')
+        return token
+    
     def hash_password(self, plain_password):
         """Hashea una contraseña usando bcrypt."""
         return bcrypt.hashpw(plain_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')

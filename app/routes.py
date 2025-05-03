@@ -1,5 +1,5 @@
 from flask import Flask, render_template, redirect, url_for, request, session, flash, make_response, abort, send_file, jsonify
-from auth.login import Auth
+from auth.auth import Auth
 from controllers.users_controller import Users
 from controllers.residences_controller import  Residences
 from controllers.resident_controller import  Resident
@@ -12,6 +12,8 @@ from controllers.transactions_controller import Transactions
 from controllers.settings_controller import Settings
 from functools import wraps
 import os
+from itsdangerous import SignatureExpired, BadSignature
+from werkzeug.security import check_password_hash, generate_password_hash
 
 
 
@@ -22,9 +24,10 @@ class App:
             static_folder=os.path.join(os.path.dirname(__file__), 'static'), 
             static_url_path='/static'
         )
+        self.app.config['SECRET_KEY'] = 'secretkey'
         self.principal_routes()
         self.error_handler()
-        self.auth = Auth()
+        self.auth = Auth(self.app)
         self.user = Users(self.app)
         self.resident = Resident(self.app)
         self.residences = Residences()
@@ -35,7 +38,6 @@ class App:
         self.report = Reports(self.app)
         self.transactions = Transactions()
         self.settings = Settings()
-        self.app.config['SECRET_KEY'] = 'secretkey'
         UPLOAD_FOLDER = r'C:\Users\Crist\OneDrive\Documents\Desktop\Final Proyect\app\static\uploads'
         self.app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -150,6 +152,69 @@ class App:
                 
             
             return redirect(url_for('login'))
+        
+
+        @self.nocache 
+        @self.app.route('/activate_account/<int:user_id>', methods=['GET', 'POST'])
+        def activate_account(user_id):
+            user = self.user.get_user_by_id(user_id)
+
+            if not user:
+                flash("Usuario no encontrado.", "error")
+                return redirect(url_for('login'))
+
+          
+            if user.get('password'):
+                flash("Tu cuenta ya está activada. Inicia sesión.", "info")
+                return redirect(url_for('login'))
+
+
+
+            if request.method == 'POST':
+                passw = request.form['password']
+                photo = request.files.get('photo')
+                
+                if not passw:
+                    flash("Debes proporcionar una contraseña.", "error")
+                    return render_template("activate_acc.html", user=user)
+
+                try:
+                    self.user.activate_account(user_id, photo, passw)
+                    return redirect(url_for('login'))
+                except Exception as e:
+                    flash(f"Error al habilitar usuario: {e}", "error")
+
+            return render_template("secure/activate_acc.html", user=user)
+        
+
+        @self.nocache
+        @self.app.route('/forgot_ur_password', methods=['GET', 'POST'])
+        def forgot_ur_password():
+            if request.method == "POST":
+                email = request.form.get("email")
+                result = self.user.forgot_ur_password(email)
+                
+                flash(result["message"], "success" if result["success"] else "error")
+                return redirect("/forgot_ur_password")
+
+            return render_template("secure/forgot_ur_password.html")
+
+
+
+        @self.nocache
+        @self.app.route('/reset_password/<token>', methods=['GET', 'POST'])
+        def reset_password(token):
+            if request.method == 'POST':
+                new_password = request.form.get('password')
+                result = self.user.reset_password(token, new_password)
+                
+                flash(result['message'], 'success' if result['success'] else 'error')
+                return redirect('/login' if result['success'] else f'/reset_password/{token}')
+
+            return render_template('secure/reset_password.html', token=token)
+
+
+
 
 
 
@@ -362,37 +427,7 @@ class App:
 
     
         
-        @self.nocache 
-        @self.app.route('/activate_account/<int:user_id>', methods=['GET', 'POST'])
-        def activate_account(user_id):
-            user = self.user.get_user_by_id(user_id)
 
-            if not user:
-                flash("Usuario no encontrado.", "error")
-                return redirect(url_for('login'))
-
-          
-            if user.get('password'):
-                flash("Tu cuenta ya está activada. Inicia sesión.", "info")
-                return redirect(url_for('login'))
-
-
-
-            if request.method == 'POST':
-                passw = request.form['password']
-                photo = request.files.get('photo')
-                
-                if not passw:
-                    flash("Debes proporcionar una contraseña.", "error")
-                    return render_template("activate_acc.html", user=user)
-
-                try:
-                    self.user.activate_account(user_id, photo, passw)
-                    return redirect(url_for('login'))
-                except Exception as e:
-                    flash(f"Error al habilitar usuario: {e}", "error")
-
-            return render_template("secure/activate_acc.html", user=user)
 
 
         @self.app.route('/admin/user_info/<int:user_id>')
@@ -624,12 +659,12 @@ class App:
                     print('Debt ID:', debt_id)
                     if self.notification.send_payment_reminder(debt_id):
                         flash('Recordatorio de pago enviado correctamente', 'success')
-                        return redirect(url_for('payments'))
+                        return redirect(url_for('dashboard', section='payments'))
                     flash('Error al enviar el recordatorio de pago', 'error')
-                    return redirect(url_for('payments'))
+                    return redirect(url_for('dashboard', section='payments'))
             except Exception as e:
                 print(f'ocurrio un error enviando el recordatorio de pago: {e}')
-                return redirect(url_for('payments'))
+                return redirect(url_for('dashboard','payments'))
             
         @self.app.route('/admin/update_logo', methods=['POST'])
         def update_logo():
@@ -952,7 +987,7 @@ class App:
             except Exception as e:
                 print(f'An exception occurred: {e}')
                 return redirect(url_for('home'))
-
+            
 
 
         @self.app.route('/')
@@ -962,6 +997,8 @@ class App:
 
     def run(self):
         self.app.run(debug=True, port=5000)
+
+
 
 
 

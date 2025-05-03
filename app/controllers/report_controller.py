@@ -34,6 +34,7 @@ class Reports:
                     u.email,
                     u.Phone,
                     a.apartment_number,
+                    a.building,
                     h.house_number
                 FROM payments p
                 JOIN users u ON p.id_usuario = u.id
@@ -78,10 +79,11 @@ class Reports:
             user_email = payment_info['email']
             user_phone = payment_info['Phone']
             apartment_number = payment_info["apartment_number"]
+            building = payment_info["building"]
             house_number = payment_info["house_number"]
 
             resident_name = f"{user_name} {user_last_name}"
-            housing = apartment_number if apartment_number else (house_number if house_number else "N/A")
+            housing = building + ' ' + apartment_number if apartment_number else ('Casa' + ' ' + house_number if house_number else "N/A")
             months = paid_period if paid_period else "N/A"
 
             # Define save path                        

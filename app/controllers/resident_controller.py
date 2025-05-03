@@ -1,7 +1,7 @@
 from config.database import connection_db
 from werkzeug.utils import secure_filename
 from controllers.email_controller import EmailSender
-from auth.login import Auth
+from auth.auth import Auth
 from flask import flash
 import os
 """
@@ -11,7 +11,7 @@ class Resident:
     def __init__(self,app):
         self.db = connection_db()
         self.email = EmailSender()
-        self.auth = Auth()
+        self.auth = Auth(app)
         self.db.autocommit = True
         self.app = app
 

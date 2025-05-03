@@ -6,6 +6,7 @@
   <div class="min-h-screen bg-gray-100 mt-8">
     <!-- Header -->
     
+    {% set months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"] %}
 
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-8 ">
@@ -14,9 +15,10 @@
         <h2 class="text-xl font-bold text-gray-800 mb-4">Resumen</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            {% set next_payment = debts[0] if debts else None %}
             <h3 class="font-medium text-blue-800">Próximo pago</h3>
-            <p class="text-2xl font-bold text-blue-600">$1500.00</p>
-            <p class="text-sm text-blue-500">Junio 2025</p>
+            <p class="text-2xl font-bold text-blue-600">{{next_payment.amount}}</p>
+            <p class="text-sm text-blue-500">{{months[next_payment.month - 1]}} {{next_payment.period}}</p>
           </div>
           <div class="bg-green-50 p-4 rounded-lg border border-green-200">
             <h3 class="font-medium text-green-800">Reclamos activos</h3>
@@ -34,16 +36,16 @@
       <!-- Tabs --> 
       <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
         <div class="flex border-b overflow-x-auto whitespace-nowrap" id="tabs">
-          <button class="tab-button flex-1 py-3 px-6 text-center font-medium hover:bg-gray-100" data-tab="reclamos">Reclamos</button>
-          <button class="tab-button flex-1 py-3 px-6 text-center font-medium hover:bg-gray-100" data-tab="pagos">Pagos</button>
-          <button class="tab-button flex-1 py-3 px-6 text-center font-medium hover:bg-gray-100 inline-flex items-center justify-center" data-tab="notificaciones">
+          <button class="tab-button flex-1 py-3 px-6 text-center font-medium " data-tab="reclamos">Reclamos</button>
+          <button class="tab-button flex-1 py-3 px-6 text-center font-medium " data-tab="pagos">Pagos</button>
+          <button class="tab-button flex-1 py-3 px-6 text-center font-medium  inline-flex items-center justify-center" data-tab="notificaciones">
               Notificaciones
               {% set unread_count = notifications | selectattr('status', 'equalto', 'unread') | list | length %}
               {% if unread_count > 0 %}
                   <span class="w-2 h-2 ms-2 bg-red-500 rounded-full"></span>
               {% endif %}
           </button>
-          <button class="tab-button flex-1 py-3 px-6 text-center font-medium hover:bg-gray-100" data-tab="perfil">Mi Perfil</button>
+          <button class="tab-button flex-1 py-3 px-6 text-center font-medium " data-tab="perfil">Mi Perfil</button>
       </div>
         
 <!-- Contenido de los tabs -->
@@ -87,7 +89,7 @@
                           </label>
                       </div>
                   </div>
-                  <div id="previewContainer" class="flex gap-2 mb-4"></div>
+                  <div id="previewContainer" class="flex items-center  gap-2 mb-4"></div>
                   <button type="submit" class="text-white bgverde px-2.5 rounded-lg py-3">Enviar Reclamo</button>
               </form>
           </div>
@@ -177,7 +179,6 @@
 
   <div id="pagos" class="tab-content p-6">
     <h2 class="text-xl font-bold text-gray-800 mb-6">Mis Pagos</h2>
-    {% set months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"] %}
 
     {% if debts %}
       {% set next_payment = debts[0] %}
@@ -520,7 +521,7 @@
               
                       <div class="flex justify-end mt-4">
                         <button type="submit"
-                        class="bgverde text-white px-4 py-2 disabled:opacity-50 cursor-not-allowed rounded-md transition"
+                        class="bgverde text-white px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition"
                         :disabled="!isValid">
                         Actualizar Contraseña
                     </button>
@@ -556,19 +557,15 @@
                   <span class="sr-only">Cerrar modal</span>
               </button>
           </div>
-          <!-- Modal body -->
-          <!-- Modal body -->
+
 <div class="p-4 md:p-5">
   <form class="space-y-4" action="/resident/transfer_request" method="post" enctype="multipart/form-data">
-    
-    <!-- Input de archivo -->
+
     <div>
         <label for="evidence" class="block mb-2 text-md font-medium text-gray-900">Subir comprobante</label>
-        <input id="evidence" name="evidence" type="file" required class="block w-full text-sm border border-gray-300 rounded-lg cursor-pointer bg-gray-50 custom-file-input focus:outline-none" />
+        <input id="evidence" name="evidence" type="file"  accept="image/*" required class="block w-full text-sm border border-gray-300 rounded-lg cursor-pointer bg-gray-50 custom-file-input focus:outline-none" />
     </div>
 
-    <!-- Lista de deudas con checkbox -->
-<!-- Lista de deudas con checkbox -->
 <div>
   <label class="block mb-1 text-md font-medium text-gray-900">Selecciona las deudas que estás pagando</label>
   <div class="space-y-2  max-h-52 overflow-y-auto ">
@@ -588,12 +585,12 @@
     <!-- Descripción -->
     <div>
         <label for="description" class="block mb-2 text-md font-medium text-gray-900">Descripción (opcional)</label>
-        <textarea id="description" name="description" rows="3" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500" placeholder="Escribe aquí detalles adicionales..."></textarea>
+        <textarea id="description" name="description" rows="3" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-green-500 focus:border-green-500" placeholder="Escribe aquí detalles adicionales..."></textarea>
         <input type="hidden" name="user_id" value="{{ user.id }}">
     </div>
 
     <!-- Botón de envío -->
-    <button type="submit" class="w-full bgverde text-white py-2.5 rounded-lg">Enviar Comprobante</button>
+    <button type="submit" id="trButton" class="w-full bgverde text-white py-2.5 rounded-lg">Enviar Comprobante</button>
   </form>
 </div>
 
@@ -601,6 +598,27 @@
   </div>
 </div>
 
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      const checkboxes = document.querySelectorAll('input[name="selected_debts"]');
+      const submitButton = document.querySelector('#trButton');
+  
+      function toggleButtonState() {
+          const isAnyChecked = Array.from(checkboxes).some(cb => cb.checked);
+          submitButton.disabled = !isAnyChecked;
+          submitButton.classList.toggle('opacity-50', !isAnyChecked); // opcional para estilo visual
+          submitButton.classList.toggle('cursor-not-allowed', !isAnyChecked); // opcional para estilo visual
+      }
+  
+      // Al cargar la página, el botón debe empezar deshabilitado
+      toggleButtonState();
+  
+      checkboxes.forEach(cb => {
+          cb.addEventListener('change', toggleButtonState);
+      });
+  });
+  </script>
+  
 
 
 

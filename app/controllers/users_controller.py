@@ -1,10 +1,13 @@
-from flask import session, flash, redirect, url_for
+from werkzeug.security import generate_password_hash
+from flask import  flash
 from config.database import connection_db
-from auth.login import Auth
+from auth.auth import Auth
 from controllers.email_controller import EmailSender
 from controllers.debts_controller import Debts
 from werkzeug.utils import secure_filename
-import requests
+from itsdangerous import SignatureExpired, BadSignature
+from werkzeug.security import generate_password_hash, check_password_hash
+
 import os
 
 
@@ -13,7 +16,7 @@ class Users:
         self.app =  app
         self.db = connection_db()
         self.db.autocommit = True
-        self.auth = Auth()
+        self.auth = Auth(app)
         self.smtp = EmailSender()
         self.debts = Debts()    
 
@@ -526,7 +529,63 @@ class Users:
 
         except Exception as e:
             flash(f"Error activando la cuenta: {e}", "error")
-            self.db.rollback()  # Rollback si ocurre un error
+            self.db.rollback()
+              # Rollback si ocurre un error
+
+
+    def forgot_ur_password(self, email):
+        cursor = None
+        try:
+            cursor = self.db.cursor(dictionary=True)
+            cursor.execute("SELECT id FROM users WHERE email = %s", (email,))
+            user = cursor.fetchone()
+
+            if user:
+                user_id = user['id']
+                token = self.auth.generate_token(user_id)
+                # Hashear el token con bcrypt
+                token_hash = self.auth.hash_password(token)
+                cursor.execute("UPDATE users SET reset_token = %s WHERE id = %s", (token_hash, user_id))
+                self.db.commit()
+                reset_link = f"http://localhost:5000/reset_password/{token}"
+                result = self.smtp.send_reset_email(email, reset_link)
+                return result
+            else:
+                return {"success": False, "message": f"El correo {email} no está registrado"}
+
+        except Exception as e:
+            print(f"Error al procesar restablecimiento para {email}: {e}")
+            return {"success": False, "message": f"Error al procesar: {e}"}
+
+
+    def reset_password(self, token, new_password):
+        cursor = None
+        try:
+            # Validar token con itsdangerous
+            user_id = self.auth.serializer.loads(token, salt='password-reset-salt', max_age=1800)
+            
+            # Verificar reset_token en la base de datos
+            cursor = self.db.cursor(dictionary=True)
+            cursor.execute("SELECT reset_token FROM users WHERE id = %s", (user_id,))
+            user = cursor.fetchone()
+
+            if not user or not user['reset_token'] or not self.auth.check_password(token, user['reset_token']):
+                return {"success": False, "message": "Enlace inválido o no es el más reciente"}
+
+            # Hashear la nueva contraseña con bcrypt
+            hashed_password = self.auth.hash_password(new_password)
+            cursor.execute('UPDATE users SET password = %s, reset_token = NULL WHERE id = %s', (hashed_password, user_id))
+            self.db.commit()
+            return {"success": True, "message": "Contraseña restablecida correctamente"}
+
+        except SignatureExpired:
+            return {"success": False, "message": "El enlace ha expirado"}
+        except BadSignature:
+            return {"success": False, "message": "El enlace es inválido"}
+        except Exception as e:
+            print(f"Error al restablecer contraseña para user_id {user_id}: {e}")
+            return {"success": False, "message": f"Error al restablecer: {e}"}
+
 
 
 

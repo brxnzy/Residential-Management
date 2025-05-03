@@ -297,7 +297,7 @@ class="hidden z-50 fixed inset-0 w-full h-full bg-black/20"
           <td class="text-red-600 font-semibold">{{d.debt_amount}}</td>
           <td>{{months[d.month - 1]}} {{d.period}} </td>
           <td>
-            <form action="/admin/payment-reminder" method="post">
+            <form action="/admin/payments/payment-reminder" method="post">
               <input type="hidden" name="debt_id" value="{{d.id}}">
 
               <button class="bgverde w-10 h-10 rounded-full flex items-center justify-center text-white" data-tooltip-target="tooltip-default" data-tooltip-placement="top" data-tooltip-trigger="hover" data-modal-toggle="modal-default" data-modal-target="modal-default">

@@ -13,10 +13,17 @@
         </li>
         <li class="me-2" role="presentation">
             <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="transfer-approval-tab" data-tabs-target="#transfer-approval" type="button" role="tab" aria-controls="transfer-approval" aria-selected="false">Solicitudes de Transferencias</button>
+
+
+            
         </li>
         <!-- New History Tab -->
         <li role="presentation">
             <button class="inline-block p-4 border-b-2 rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300" id="history-tab" data-tabs-target="#history" type="button" role="tab" aria-controls="history" aria-selected="false">Pagos pendientes</button>
+            {% if debtors %}
+            <span class="w-2 h-2 ms-6  rounded-full"></span>            
+            {% endif %}
+  
         </li>
     </ul>
 </div>
@@ -98,7 +105,8 @@
         </div>
     </div>
 
-        
+
+    {% set months =  ['','Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'] %}
 
         
         
@@ -129,7 +137,7 @@
                             <ul class="text-sm text-gray-600 list-disc list-inside space-y-1">
                                 {% for debt in tr.debts %}
                                     <li>
-                                        Periodo: {{ debt.period }} — Monto: RD$ {{ "{:,.2f}".format(debt.amount) }}
+                                        Periodo: {{ debt.period }} {{months[debt.month]}} — Monto: RD$ {{ "{:,.2f}".format(debt.amount) }}
                                     </li>
                                 {% endfor %}
                             </ul>

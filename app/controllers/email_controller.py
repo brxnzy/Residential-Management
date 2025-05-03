@@ -32,24 +32,24 @@ class EmailSender:
 
         contenido = f"""
         <html>
-        <body style="background-color: #f4f4f4; padding: 20px; font-family: Arial, sans-serif;">
-            <div style="max-width: 600px; margin: auto; background-color: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 30px;">
-                <h2 style="color: #2c3e50; text-align: center;">¡Bienvenido a Pinares del Norte!</h2>
-                <p style="font-size: 16px; color: #333;">Hola <b>{name} {last_name}</b>,</p>
-                <p style="font-size: 15px; color: #555;">Hemos registrado tu cédula: <b>{cedula}</b>.</p>
-                <p style="font-size: 15px; color: #555;">Para completar tu registro y comenzar a usar nuestra plataforma, por favor haz clic en el siguiente botón para establecer tu contraseña:</p>
-                <div style="text-align: center; margin: 20px 0;">
-                    <a href="{enlace}" style="background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-size: 16px;">
+        <body style="background-color: #f9fafb; padding: 20px; font-family: Arial, sans-serif;">
+            <div style="max-width: 600px; margin: auto; background-color: #fefefe; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 30px;">
+                <h2 style="color: #1e3a8a; font-size: 24px;">¡Bienvenido a Pinares del Norte!</h2>
+                <p style="font-size: 18px; color: #374151;">Hola <b>{name} {last_name}</b>,</p>
+                <p style="font-size: 16px; color: #6b7280;">Hemos registrado tu cédula: <b>{cedula}</b>.</p>
+                <p style="font-size: 16px; color: #6b7280;">Para completar tu registro y comenzar a usar nuestra plataforma, por favor haz clic en el siguiente botón para establecer tu contraseña:</p>
+                <div style="margin: 20px;">
+                    <a href="{enlace}" style="background-color: #15803d; color: white; padding: 25px; text-decoration: none; border-radius: 5px; font-size: 18px;">
                         Establecer Contraseña
                     </a>
                 </div>
-                <p style="font-size: 14px; color: #999;">Si no solicitaste este acceso, puedes ignorar este mensaje.</p>
+                <p style="font-size: 16px; color: #9ca3af;">Si no solicitaste este acceso, puedes ignorar este mensaje.</p>
                 <hr style="margin-top: 30px;">
-                <p style="text-align: center; font-size: 12px; color: #ccc;">Pinares del Norte &copy; 2025</p>
+                <p style="font-size: 14px; color: #d1d5db;">Pinares del Norte © 2025</p>
             </div>
         </body>
         </html>
-    """
+        """
         try:
             self.yag.send(to=destinatario, subject=asunto, contents=contenido)
             print("Correo enviado exitosamente a:", destinatario)
@@ -100,9 +100,50 @@ class EmailSender:
             except Exception as e:
                 print(f"Error al enviar el correo con evidencia: {e}")
 
-    # Prueba del método
+                        
+    def send_reset_email(self, to_email, reset_link):
+        try:
+            subject = "Restablecer tu contraseña"
 
+            body = f"""
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restablecer Contraseña</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f9fafb; margin: 0; padding: 0; margin-top: 0;">
+    <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; background-color: #fefefe; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <tr>
+            <td style="padding: 20px;">
+                
+                <h2 style="color: black; font-size: 28px; margin-bottom: 16px;">Restablecer tu contraseña</h2>
+                <p style="font-size: 20px; color: #374151; margin-bottom: 24px;">Recibimos una solicitud para restablecer tu contraseña.</p>
+                <p style="font-size: 18px; color: #6b7280; margin-bottom: 24px;">Haz clic en el botón de abajo para continuar.</p>
+                <div>
+                    <a href="{reset_link}" style="display: inline-block; background-color: #15803d; color: white; padding: 16px; border-radius: 6px; font-size: 20px; text-decoration: none;">
+                        Restablecer Contraseña
+                    </a>
+                </div>
+                <p style="font-size: 18px; color: #9ca3af; margin-top: 24px;">Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+        """
 
-
-
+            self.yag.send(to=to_email, subject=subject, contents=body)
+            return {
+                "success": True,
+                "message": f"Correo de restablecimiento enviado correctamente a {to_email}"
+            }
+        except Exception as e:
+            error_message = f"Error al enviar el correo a {to_email}: {str(e)}"
+            print(error_message)
+            return {
+                "success": False,
+                "message": error_message
+            }
 
