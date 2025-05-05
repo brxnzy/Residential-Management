@@ -1,4 +1,4 @@
-# 🏘️ Pinares del Norte – Residential Management System
+# Pinares del Norte – Residential Management System
 
 Pinares del norte es una aplicación de gestión residencial desarrollada con **Flask**, **MySQL**, y **TailwindCSS**. Permite administrar pagos, reportes, reclamos, residentes, roles y más desde un panel intuitivo para usuarios y administradores.
 
@@ -71,7 +71,6 @@ Reemplaza:
 * `tu_contraseña_de_aplicación` con la contraseña de aplicación generada en los pasos anteriores.
 
 > **Nota** : La contraseña de aplicación no es la misma que tu contraseña normal de Gmail. Es una contraseña única que se genera específicamente para su uso en aplicaciones externas.
->
 
 ## ▶️ Ejecutar la aplicación
 
@@ -84,7 +83,6 @@ python app/run.py
 ## 📱 Interfaz de usuario
 
 La aplicación utiliza **TailwindCSS** para una interfaz limpia y moderna. Las vistas están optimizadas para dispositivos móviles.
-
 
 ## Requerimientos Funcionales
 
@@ -102,7 +100,6 @@ La aplicación utiliza **TailwindCSS** para una interfaz limpia y moderna. Las v
 - **Algoritmo** para calcular cuotas mensuales y generar recibos automáticos.
 - **Sistema de estadística** para evaluar el estado financiero de la comunidad.
 - **Gestión de roles** (administrador, residente).
-
 
 ## Tecnologías implementadas en el Proyecto
 
