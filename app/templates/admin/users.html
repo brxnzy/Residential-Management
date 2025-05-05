@@ -59,9 +59,10 @@
           <div class="flex gap-3 justify-end">
             {% if admin.id != user.id %}
             <form
-              action="{{ url_for('disable_user', user_id=admin.id) }}"
+              action="/admin/disable_user"
               method="post"
             >
+            <input type="hidden" name="user_id" value="{{ admin.id }}">
             <button
             class="bg-gray-100 text-gray-700 border normal text-md border-gray-300 px-5 py-2.5 rounded-lg hover:bg-gray-200"
           >
@@ -151,18 +152,18 @@
               </button>
             </form>
 
-            {% endif %}
             <button
-              class="edit-user-btn bgverde w-11 h-11 flex items-center justify-center rounded-full hover:border-2 hover:border-gray-700 hover:shadow-lg transition-all duration-300"
+            class="edit-user-btn bgverde w-11 h-11 flex items-center justify-center rounded-full hover:border-2 hover:border-gray-700 hover:shadow-lg transition-all duration-300"
             >
-              <a href="/admin/user_info/{{resident.id}}">
-                <img
-                  src="{{ url_for('static', filename='icons/info.svg') }}"
-                  class="h-14 w-14"
-                  alt="Edit"
-                />
-              </a>
-            </button>
+            <a href="/admin/user_info/{{resident.id}}">
+              <img
+              src="{{ url_for('static', filename='icons/info.svg') }}"
+              class="h-14 w-14"
+              alt="Edit"
+              />
+            </a>
+          </button>
+          {% endif %}
           </div>
         </td>
       </tr>
@@ -394,7 +395,7 @@ class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 
   <div class="relative bg-white rounded-lg shadow-sm ">
     <!-- Modal header -->
     <div
-      class="flex items-center justify-between p-8 md:p-8 border-b rounded-t  border-gray-200"
+      class="flex items-center justify-between p-6 md:p-6 border-b rounded-t  border-gray-200"
     >
       <h3 class="text-2xl bold text-gray-900">
         Formulario para Crear Usuario
@@ -423,7 +424,7 @@ class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 
       </button>
     </div>
     <!-- Modal body -->
-    <div class="p-6 md:p-6">
+    <div class="p-8 md:p-8">
       <form
         action="/admin/add_user"
         method="post"

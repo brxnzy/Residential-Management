@@ -1,12 +1,18 @@
 import mysql.connector
+from dotenv import load_dotenv
+import os
+
+
 
 def connection_db():
     try:
+        path_env = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
+        load_dotenv(path_env)
         connection = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="Cristopher0812",
-            database="Pinares_del_norte"
+            host=os.getenv("DB_HOST"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            database=os.getenv("DB_NAME"),
         )
         # print("Conexión exitosa a la base de datos.")
         return connection

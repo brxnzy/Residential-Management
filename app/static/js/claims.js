@@ -278,3 +278,47 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const filter = document.getElementById('notification-filter');
+    const claimCards = document.querySelectorAll('.claim-card');
+    const messageDiv = document.getElementById('message');
+  
+    // Crear el mensaje de "No hay reclamos"
+    const noClaimsMessage = document.createElement('h1');
+    noClaimsMessage.className = 'text-gray-500 mt-8 text-lg';
+    noClaimsMessage.textContent = 'No hay reclamos en este estado.';
+  
+    // Agregar el mensaje al div#message
+    messageDiv.appendChild(noClaimsMessage);
+  
+    function applyFilter() {
+      const selectedStatus = filter.value;
+      let anyVisible = false;
+  
+      claimCards.forEach(card => {
+        const status = card.getAttribute('data-status');
+        if (selectedStatus === 'all' || status === selectedStatus) {
+          card.style.display = 'block';
+          anyVisible = true;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+  
+      // Mostrar u ocultar el mensaje correctamente
+      if (anyVisible) {
+        messageDiv.classList.add('hidden'); // Ocultar
+      } else {
+        messageDiv.classList.remove('hidden');
+        messageDiv.classList.add('px-4') // Mostrar
+      }
+    }
+  
+    filter.addEventListener('change', applyFilter);
+  
+    // Aplica el filtro automáticamente cuando la página carga
+    applyFilter();
+  });
+  

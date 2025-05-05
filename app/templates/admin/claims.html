@@ -17,7 +17,7 @@
 </style>
 
 <div class="flex items-center justify-between px-4 mt-2 mb-8">
-  <h1 class="text-4xl font-bold sm:text-2xl md:text-4xl lg:text-5xl text-left">
+  <h1 class="text-3xl font-bold sm:text-2xl md:text-4xl lg:text-4xl text-left">
     Reclamos
   </h1>
 
@@ -164,55 +164,6 @@
 
 
 
-<script>
-
-  document.addEventListener('DOMContentLoaded', function () {
-    const filter = document.getElementById('notification-filter');
-    const claimCards = document.querySelectorAll('.claim-card');
-    const messageDiv = document.getElementById('message');
-  
-    // Crear el mensaje de "No hay reclamos"
-    const noClaimsMessage = document.createElement('h1');
-    noClaimsMessage.className = 'text-gray-500 mt-8 text-lg';
-    noClaimsMessage.textContent = 'No hay reclamos en este estado.';
-  
-    // Agregar el mensaje al div#message
-    messageDiv.appendChild(noClaimsMessage);
-  
-    function applyFilter() {
-      const selectedStatus = filter.value;
-      let anyVisible = false;
-  
-      claimCards.forEach(card => {
-        const status = card.getAttribute('data-status');
-        if (selectedStatus === 'all' || status === selectedStatus) {
-          card.style.display = 'block';
-          anyVisible = true;
-        } else {
-          card.style.display = 'none';
-        }
-      });
-  
-      // Mostrar u ocultar el mensaje correctamente
-      if (anyVisible) {
-        messageDiv.classList.add('hidden'); // Ocultar
-      } else {
-        messageDiv.classList.remove('hidden');
-        messageDiv.classList.add('px-4') // Mostrar
-      }
-    }
-  
-    filter.addEventListener('change', applyFilter);
-  
-    // Aplica el filtro automáticamente cuando la página carga
-    applyFilter();
-  });
-  
-  
-  
-  </script>
-  
-
 
 <!-- Modal para Atender Reclamo -->
 <div
@@ -263,7 +214,7 @@
             <label
               for="claim-date"
               class="block mb-2 text-sm font-medium text-gray-900"
-              >Fecha de mantenimiento:</label
+              >Fecha de la solucion:</label
             >
             <div class="relative">
               <div
@@ -346,7 +297,7 @@
               required
               rows="3"
               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 resize-none"
-              placeholder="Detalles del mantenimiento..."
+              placeholder="Detalles de la solucion."
             ></textarea>
           </div>
           <div

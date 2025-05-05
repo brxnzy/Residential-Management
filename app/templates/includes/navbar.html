@@ -80,6 +80,14 @@
                                 Cerrar sesion
                             </a>
                         </li>
+                        {% if 'admin' in session['roles']  and 'resident' in session['roles'] %}
+                        <li>
+                            <a href="/admin" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                Panel de Admin
+                            </a>
+                        
+                        {% endif %}
+
                     </ul>
                 </div>
             </div>

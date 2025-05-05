@@ -17,8 +17,13 @@
           <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
             {% set next_payment = debts[0] if debts else None %}
             <h3 class="font-medium text-blue-800">Próximo pago</h3>
+            {% if next_payment %}
             <p class="text-2xl font-bold text-blue-600">{{next_payment.amount}}</p>
             <p class="text-sm text-blue-500">{{months[next_payment.month - 1]}} {{next_payment.period}}</p>
+            {% else %}
+            <p class="text-2xl font-bold text-blue-600">Estas al dia con los pagos!</p>
+            <p class="text-sm text-blue-500">Te llegara una notificacion cuando se genere tu proximo pago...</p>
+            {% endif %}
           </div>
           <div class="bg-green-50 p-4 rounded-lg border border-green-200">
             <h3 class="font-medium text-green-800">Reclamos activos</h3>

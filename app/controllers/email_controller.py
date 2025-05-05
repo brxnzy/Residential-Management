@@ -34,18 +34,13 @@ class EmailSender:
         <html>
         <body style="background-color: #f9fafb; padding: 20px; font-family: Arial, sans-serif;">
             <div style="max-width: 600px; margin: auto; background-color: #fefefe; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 30px;">
-                <h2 style="color: #1e3a8a; font-size: 24px;">¡Bienvenido a Pinares del Norte!</h2>
-                <p style="font-size: 18px; color: #374151;">Hola <b>{name} {last_name}</b>,</p>
-                <p style="font-size: 16px; color: #6b7280;">Hemos registrado tu cédula: <b>{cedula}</b>.</p>
-                <p style="font-size: 16px; color: #6b7280;">Para completar tu registro y comenzar a usar nuestra plataforma, por favor haz clic en el siguiente botón para establecer tu contraseña:</p>
-                <div style="margin: 20px;">
-                    <a href="{enlace}" style="background-color: #15803d; color: white; padding: 25px; text-decoration: none; border-radius: 5px; font-size: 18px;">
-                        Establecer Contraseña
-                    </a>
-                </div>
+                <h2 style="color: black; font-size: 35px;">¡Bienvenido a Pinares del Norte!</h2>
+                <p style="font-size: 24px; color: #374151;">Hola <b>{name} {last_name}</b>,</p>
+                <p style="font-size: 22px; color: #6b7280;">Hemos registrado tu cédula: <b>{cedula}</b>.</p>
+                <p style="font-size: 22px; color: #6b7280;">Para completar tu registro y comenzar a usar nuestra plataforma, por favor haz clic en el siguiente botón para establecer tu contraseña:</p>
+<a href="{enlace}" style="background-color: #15803d; color: white; padding: 12px; text-decoration: none; border-radius: 5px; font-size: 18px; display: inline-block;">Establecer Contraseña</a>
+
                 <p style="font-size: 16px; color: #9ca3af;">Si no solicitaste este acceso, puedes ignorar este mensaje.</p>
-                <hr style="margin-top: 30px;">
-                <p style="font-size: 14px; color: #d1d5db;">Pinares del Norte © 2025</p>
             </div>
         </body>
         </html>

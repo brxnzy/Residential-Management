@@ -1,6 +1,6 @@
 {% if usuario %}
 
-<div class="flex flex-col items-center justify-center">
+<div class="flex flex-col items-center justify-center ">
     {% if usuario.photo %}
     <img src="{{ url_for('static', filename='uploads/' + usuario.photo) }}" alt="Foto de perfil" class="rounded-full object-cover w-72 h-72 mb-7">
     {% else %}

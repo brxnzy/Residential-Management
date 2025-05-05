@@ -7,8 +7,8 @@ class Debts:
         self.db = connection_db()
         self.db.autocommit = True
         self.scheduler = BackgroundScheduler()
-        # self.scheduler.add_job(self.generate_monthly_debts, 'interval', minutes=1)
-        self.scheduler.add_job(self.generate_monthly_debts, 'cron', day=1, hour=0, minute=0)
+        self.scheduler.add_job(self.generate_monthly_debts, 'interval', minutes=1)
+        # self.scheduler.add_job(self.generate_monthly_debts, 'cron', day=1, hour=0, minute=0)
 
         self.scheduler.start()
 

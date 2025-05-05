@@ -3,6 +3,7 @@ from config.database import connection_db
 import bcrypt
 from itsdangerous import URLSafeTimedSerializer
 
+
 class Auth:
     def __init__(self, app):
         self.db = connection_db()
@@ -27,7 +28,8 @@ class Auth:
             cursor = db.cursor(dictionary=True)
 
             print(f"Buscando usuario con cédula: {cedula}") 
-            cursor.execute("SELECT * FROM users WHERE id_card = %s", (cedula,))
+            cursor.execute("SELECT * FROM users WHERE id_card = %s AND status != 'disabled'", (cedula,))
+
             user = cursor.fetchone()
 
             if not user:
