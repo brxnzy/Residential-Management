@@ -44,7 +44,11 @@ DB_NAME=pinares_del_norte
 
 Reemplaza `tu_usuario` y `tu_contraseña` con tus datos reales de conexión MySQL.
 
-## 3. Configuración de la API de Gmail y Contraseña de Aplicación
+### 3. Restaurar la base de datos.
+
+el archivo que se llama db.sql restauralo en MySQL Workbench ya que contiene la base de datos completa de la aplicacion.
+
+## 4. Configuración de la API de Gmail y Contraseña de Aplicación
 
 Si planeas utilizar la API de Gmail o enviar correos electrónicos desde tu cuenta de Gmail, necesitarás configurar una **contraseña de aplicación** para tu cuenta de Google. Aquí están los pasos para hacerlo:
 

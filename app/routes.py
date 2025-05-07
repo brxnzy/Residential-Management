@@ -103,16 +103,16 @@ class App:
         Rutas principales de la app, incluidas las del dashboard.
         """
 
-        # @self.app.route('/routes')
-        # def list_routes():
-        #     routes = []
-        #     for rule in self.app.url_map.iter_rules():
-        #         routes.append({
-        #             'ruta': str(rule),
-        #             'métodos': sorted(list(rule.methods - {'HEAD', 'OPTIONS'})),
-        #             'endpoint': rule.endpoint
-        #         })
-        #     return jsonify({'rutas': routes}) 
+        @self.app.route('/routes')
+        def list_routes():
+            routes = []
+            for rule in self.app.url_map.iter_rules():
+                routes.append({
+                    'ruta': str(rule),
+                    'métodos': sorted(list(rule.methods - {'HEAD', 'OPTIONS'})),
+                    'endpoint': rule.endpoint
+                })
+            return jsonify({'rutas': routes}) 
 
 
         @self.app.route('/login', methods=['GET', 'POST'])
@@ -122,8 +122,9 @@ class App:
                 cedula = request.form['id_card']
                 password = request.form['password']
                 authz = self.auth.Login(cedula, password)
-                status = session.get('status')
-                if status == 'disabled':
+                
+
+                if authz == 'disabled':
                     return redirect(url_for('disabled'))
 
                 if authz == 'admin':

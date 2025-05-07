@@ -28,7 +28,7 @@ class Auth:
             cursor = db.cursor(dictionary=True)
 
             print(f"Buscando usuario con cédula: {cedula}") 
-            cursor.execute("SELECT * FROM users WHERE id_card = %s AND status != 'disabled'", (cedula,))
+            cursor.execute("SELECT * FROM users WHERE id_card = %s", (cedula,))
 
             user = cursor.fetchone()
 
@@ -88,6 +88,9 @@ class Auth:
 
             cursor.close()
             db.close()
+
+            if user['status'] == 'disabled':
+                return 'disabled'
 
             # Redirección según el rol del usuario
             if 'admin' in role_names:

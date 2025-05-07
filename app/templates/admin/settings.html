@@ -54,10 +54,10 @@
               <!-- Profile image with responsive sizing -->
               <label for="dropzone-file" class="flex flex-col items-center justify-center w-48 h-48 sm:w-48 sm:h-48 md:w-48 md:h-48    rounded-full cursor-pointer relative group">
                 {% if user.photo %}
-                  <img id="user-photo" src="{{url_for('static', filename='uploads/' + user.photo)}}" alt="User Photo"
+                  <img id="user-photo" src="{{url_for('static', filename='uploads/profile_pics/' + user.photo)}}" alt="User Photo"
                     class="w-full h-full  rounded-full object-cover transition-opacity duration-300 group-hover:opacity-30" />
                 {% else %}
-                  <img id="user-photo" src="{{url_for('static', filename='uploads/default.png')}}" alt="User Photo"
+                  <img id="user-photo" src="{{url_for('static', filename='uploads/profile_pics/default.png')}}" alt="User Photo"
                     class="w-full   h-full rounded-full object-cover transition-opacity duration-300 group-hover:opacity-30" />
                 {% endif %}
   
