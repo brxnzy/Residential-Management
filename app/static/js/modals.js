@@ -278,7 +278,6 @@ document.addEventListener("DOMContentLoaded", function () {
         let residenceId = this.getAttribute("data-residence-id");
         let residentId = this.getAttribute("data-resident-id");
         let residenceType = this.getAttribute("data-residence-type");
-
         document.getElementById("residenceId").value = residenceId;
         document.getElementById("residentId").value = residentId;
         document.getElementById("residenceType").value = residenceType;

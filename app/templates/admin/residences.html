@@ -4,7 +4,13 @@
   >
     Apartamentos
   </h1>
-
+  <button
+    class="px-2 py-2 bgverde text-white rounded-full"
+    data-modal-target="add-apartment-modal"
+    data-modal-toggle="add-apartment-modal"
+  >
+    <img src="{{ url_for('static', filename='icons/plus.svg')}}" class="h-9 w-9" />
+  </button>
 </div>
 
 <div class="overflow-x-auto">
@@ -15,6 +21,7 @@
         <th class="verde text-xl">#</th>
         <th class="verde text-xl">Estado</th>
         <th class="verde text-xl">Residente</th>
+        <th class="verde text-xl">Descripcion</th>
       </tr>
     </thead>
     <tbody>
@@ -39,7 +46,11 @@
           Sin Residente
           {% endif %}
           </td>
-        <td class="text-md medium lg:text-lg"></td>
+        <td class="text-md medium lg:text-lg">
+          <span class="truncate block max-w-[200px]" title="{{a.description}}">
+            {{ a.description|truncate(50) }}
+          </span>
+        </td>
         <td class="">
           <div class="flex gap-3 justify-end">
             {% if a.resident%}
@@ -55,6 +66,19 @@
           </button>
 
             {% endif %}
+                <form action="/admin/residences/delete_apartment" method="POST">
+                <input type="hidden" name="apartment_id" value="{{a.id}}">
+                <button 
+                class="text-white bg-white  font-medium rounded-lg text-sm pt-1 text-center">
+                <img class="w-7 h-7 sm:w-8 sm:h-8" src="{{url_for('static', filename='icons/trash.svg')}}" alt="">
+              </button>
+            </form>
+
+              <button class="edittBtn bgverde w-10 h-10 rounded-full flex items-center justify-center text-white" data-tooltip-target="tooltip-default" data-tooltip-placement="top" data-tooltip-trigger="hover" data-modal-toggle="edit-apartment-modal" data-modal-target="edit-apartment-modal" data-apartment-number="{{a.apartment_number}}" data-building="{{a.building}}" data-description="{{a.description}}" data-apartment-id="{{a.id}}">
+                <!-- SVG icon for edit -->
+              <svg xmlns="http://www.w3.org/2000/svg" height="34px" viewBox="0 -960 960 960" width="25px" fill="#e8eaed"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
+                
+              </button>
           </div>
         </td>
       </tr>
@@ -67,11 +91,19 @@
 
 <div class="flex px-4 items-center mb-4 justify-between mt-6">
   <h1
-    class="text-4xl font-normal bold sm:text-2xl md:text-4xl lg:text-5xl text-left"
+    class="text-4xl font-normal bold sm:text-2xl md:text-4xl lg:text-4xl text-left"
   >
     Casas
     
   </h1>
+
+  <button
+  class="px-2 py-2 bgverde text-white rounded-full"
+  data-modal-target="add-house-modal"
+  data-modal-toggle="add-house-modal"
+>
+  <img src="{{ url_for('static', filename='icons/plus.svg')}}" class="h-9 w-9" />
+</button>
 </div>
 
 <div class="overflow-x-auto">
@@ -81,6 +113,7 @@
         <th class="verde text-xl">#</th>
         <th class="verde text-xl">Ocupado</th>
         <th class="verde text-xl">Residente</th>
+        <th class="verde text-xl">Descripcion</th>
       </tr>
     </thead>
     <tbody>
@@ -103,9 +136,17 @@
           Sin Residente
           {% endif %}
           </td>
-        <td class="text-md medium lg:text-lg"></td>
+        <td class="text-md medium lg:text-lg">
+          <span class="truncate block max-w-[200px]" title="{{h.description}}">
+            {{ h.description|truncate(50) }}
+          </span>
+        </td>
+
+
+
+
         <td class="">
-          <div class="flex gap-3 justify-end">
+          <div class="flex gap-3 h-full justify-end">
             {% if h.resident %}
 
               <button
@@ -121,18 +162,25 @@
 
 
           {% endif %}
+              <form action="/admin/residences/delete_house" method="POST">
+                <input type="hidden" name="house_id" value="{{h.id}}">
+                <button 
+                class="text-white bg-white  font-medium rounded-lg text-sm pt-1 text-center">
+                <img class="w-7 h-7 sm:w-8 sm:h-8" src="{{url_for('static', filename='icons/trash.svg')}}" alt="">
+              </button>
+            </form>
+
+              <button class="editBtn bgverde w-10 h-10 rounded-full flex items-center justify-center text-white" data-tooltip-target="tooltip-default" data-tooltip-placement="top" data-tooltip-trigger="hover" data-modal-toggle="edit-house-modal" data-modal-target="edit-house-modal" data-houseNumber="{{h.house_number}}" data-description="{{h.description}}" data-house-id="{{h.id}}">
+                <!-- SVG icon for edit -->
+<svg xmlns="http://www.w3.org/2000/svg" height="34px" viewBox="0 -960 960 960" width="25px" fill="#e8eaed"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
+                
+              </button>
         </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
-
-
-
-
-
-
 
 
 
@@ -175,3 +223,219 @@
 </div>
 
 
+
+<div id="add-apartment-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-xl max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow-sm">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-2 md:p-5 border-b rounded-t border-gray-200">
+                <h3 class="text-xl font-semibold text-gray-900">
+                    Agregar Apartamento
+                </h3>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="add-apartment-modal">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Cerrar modal</span>
+                </button>
+            </div>
+
+            <div class="p-4 md:p-5 space-y-4">
+                <form action="/admin/residences/add_apartment" method="POST">
+                    <div class="mb-4">
+                        <label for="building" class="block mb-2 text-sm font-medium text-gray-900">Edificio</label>
+                        <input type="text" id="building" name="building" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500" autocomplete="off">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="apartment_number" class="block mb-2 text-sm font-medium text-gray-900">Número de apartamento</label>
+                        <input type="text" id="apartment_number" name="apartment_number" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500" placeholder="Ej: A-4" autocomplete="off">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="description" class="block mb-2 text-sm font-medium text-gray-900">Descripción</label>
+                        <textarea id="description" name="description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500" autocomplete="off"></textarea>
+                    </div>
+
+                    <div class="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 rounded-b">
+                        <button type="submit" class="text-white bgverde focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Agregar Apartamento</button>
+                        <button data-modal-hide="add-apartment-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="add-house-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-xl max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow-sm">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-2 md:p-5 border-b rounded-t border-gray-200">
+                <h3 class="text-xl font-semibold text-gray-900">
+                    Agregar Casa
+                </h3>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="add-house-modal">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Cerrar modal</span>
+                </button>
+            </div>
+
+            <div class="p-4 md:p-5 space-y-4">
+                <form action="/admin/residences/add_house" method="POST">
+                    <div class="mb-4">
+                        <label for="house_number" class="block mb-2 text-sm font-medium text-gray-900">Numero de casa</label>
+                        <input type="text" id="house_number" name="house_number" placeholder="Ej: J-10" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500" autocomplete="off">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="description" class="block mb-2 text-sm font-medium text-gray-900">Descripción</label>
+                        <textarea id="description" placeholder="Contiene 3 habitaciones, 2 baños...." name="description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500"  autocomplete=""></textarea>
+                    </div>
+                    
+                    <div class="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 rounded-b">
+                        <button type="submit" class="text-white bgverde focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Agregar Casa</button>
+                        <button data-modal-hide="add-apartment-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div id="edit-house-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+  <div class="relative p-4 w-full max-w-xl max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow-sm">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-2 md:p-5 border-b rounded-t border-gray-200">
+                <h3 class="text-xl font-semibold text-gray-900">
+                  Editar Casa
+                </h3>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="edit-house-modal">
+                  <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Cerrar modal</span>
+                </button>
+            </div>
+            
+            <div class="p-4 md:p-5 space-y-4">
+              <form action="/admin/residences/update_house" method="POST">
+                  <input type="hidden" name="house_id" id="house_id" value="">
+                    <div class="mb-4">
+                      <label for="house_number" class="block mb-2 text-sm font-medium text-gray-900">Numero de casa</label>
+                        <input type="text" id="edit_house_number" name="house_number"  required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500" autocomplete="off">
+                    </div>
+                    
+                    <div class="mb-4">
+                      <label for="description" class="block mb-2 text-sm font-medium text-gray-900">Descripción</label>
+                        <textarea id="edit_description" name="description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500"  autocomplete=""></textarea>
+                      </div>
+                      
+                      <div class="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 rounded-b">
+                        <button type="submit" class="text-white bgverde focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Editar Casa</button>
+                        <button data-modal-hide="edit-house-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700">Cancelar</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+
+
+<div id="edit-apartment-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+  <div class="relative p-4 w-full max-w-xl max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow-sm">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-2 md:p-5 border-b rounded-t border-gray-200">
+                <h3 class="text-xl font-semibold text-gray-900">
+                  Editar Apartamento
+                </h3>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="edit-apartment-modal">
+                  <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Cerrar modal</span>
+                </button>
+            </div>
+            
+            <div class="p-4 md:p-5 space-y-4">
+              <form action="/admin/residences/update_apartment" method="POST">
+                  <input type="hidden" name="apartment_id" id="apartment_id" value="">
+
+                    <div class="mb-4">
+                      <label for="building" class="block mb-2 text-sm font-medium text-gray-900">Edificio</label>
+                        <input type="text" id="edit-building" name="building"  required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500" autocomplete="off">
+                    </div>
+                    <div class="mb-4">
+                      <label for="apartment_number" class="block mb-2 text-sm font-medium text-gray-900">Numero de Apartamento</label>
+                        <input type="text" id="edit_apartment_number" name="apartment_number"  required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500" autocomplete="off">
+                    </div>
+                    
+                    <div class="mb-4">
+                      <label for="description" class="block mb-2 text-sm font-medium text-gray-900">Descripción</label>
+                        <textarea id="apartment_description" name="description" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500"  autocomplete=""></textarea>
+                      </div>
+                      
+                      <div class="flex items-center justify-end p-4 md:p-5 border-t border-gray-200 rounded-b">
+                        <button type="submit" class="text-white bgverde focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Editar Casa</button>
+                        <button data-modal-hide="edit-house-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700">Cancelar</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <script>
+            
+              document.addEventListener("DOMContentLoaded", function () {
+                document.querySelectorAll(".editBtn").forEach(button => {
+                  button.addEventListener("click", function () {
+                    let house_number = this.getAttribute("data-houseNumber");
+                    let description = this.getAttribute("data-description");
+                    let house_id = this.getAttribute("data-house-id");
+                    document.getElementById("house_id").value = house_id;
+                    document.getElementById("edit_house_number").value = house_number;
+                    document.getElementById("edit_description").value = description
+                  });
+                });
+              });
+              
+            
+
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".edittBtn").forEach(button => {
+    button.addEventListener("click", function () {
+      let apartment_number = this.getAttribute("data-apartment-number");
+      let description = this.getAttribute("data-description");
+      let apartment_id = this.getAttribute("data-apartment-id");
+      let building = this.getAttribute("data-building");
+
+      document.getElementById("apartment_id").value = apartment_id;
+      document.getElementById("edit_apartment_number").value = apartment_number;
+      document.getElementById("apartment_description").value = description;
+      document.getElementById("edit-building").value = building;
+
+      console.log(apartment_id);
+      console.log(apartment_number);
+      console.log(description);
+      console.log(building);
+    });
+  });
+});
+</script>
+
+              

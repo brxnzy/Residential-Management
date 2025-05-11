@@ -102,5 +102,86 @@ class Residences:
             print(f"❌ Error desocupando residencia y deshabilitando usuario: {e}")
             self.db.rollback()
 
+    def add_apartment(self, building, apartment_number, description):
+        try:
+            with self.db.cursor() as cursor:
+                sql = """
+                    INSERT INTO apartments (building, apartment_number, description, occupied)
+                    VALUES (%s, %s, %s, %s)
+                """
+                cursor.execute(sql, (building, apartment_number, description, 0))
+            return True
+        except Exception as e:
+            print(f'Error adding apartment: {e}')
+            return False
+        
+
+    def add_house(self, house_number, description):
+        try:
+            with self.db.cursor() as cursor:
+                sql = """
+                    INSERT INTO houses (house_number, description, occupied)
+                    VALUES (%s, %s, %s)
+                """
+                cursor.execute(sql, (house_number, description, 0))
+            return True
+        except Exception as e:
+            print(f'Error adding house: {e}')
+            return False
+
+    def delete_apartment(self, apartment_id):
+        try:
+            with self.db.cursor() as cursor:
+                sql = "DELETE FROM apartments WHERE id = %s AND occupied = 0"
+                cursor.execute(sql, (apartment_id,))
+                if cursor.rowcount == 0:
+                    print('No apartment deleted, possibly occupied or not found.')
+                    return False
+            return True
+        except Exception as e:
+            print(f'Error deleting apartment: {e}')
+            return False
+
+            
+    def delete_house(self, house_id):
+        try:
+            with self.db.cursor() as cursor:
+                sql = "DELETE FROM houses WHERE id = %s AND occupied = 0"
+                cursor.execute(sql, (house_id,))
+                if cursor.rowcount == 0:
+                    print('No house deleted, possibly occupied or not found.')
+                    return False
+            return True
+        except Exception as e:
+            print(f'Error deleting house: {e}')
+            return False
 
 
+    def update_apartment(self, apartment_id,building, apartment_number, description):
+        try:
+            with self.db.cursor() as cursor:
+                sql = """
+                    UPDATE apartments
+                    SET building = %s, apartment_number = %s, description = %s 
+
+                    WHERE id = %s
+                """
+                cursor.execute(sql, (building,apartment_number, description, apartment_id))
+            return True
+        except Exception as e:
+            print(f'Error updating house: {e}')
+            return False
+        
+    def update_house(self, house_id, house_number, description):
+        try:
+            with self.db.cursor() as cursor:
+                sql = """
+                    UPDATE houses 
+                    SET house_number = %s, description = %s 
+                    WHERE id = %s
+                """
+                cursor.execute(sql, (house_number, description, house_id))
+            return True
+        except Exception as e:
+            print(f'Error updating house: {e}')
+            return False

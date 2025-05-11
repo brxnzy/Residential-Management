@@ -472,6 +472,117 @@ class App:
 
             return redirect(url_for('dashboard', section='residences'))
         
+        @self.app.route('/admin/residences/add_apartment', methods=['POST'])
+        def add_apartment():
+            try:
+                if request.method == 'POST':
+                    building = request.form.get('building')
+                    apartment_number = request.form.get('apartment_number')
+                    description = request.form.get('description')
+
+                    print('Apartment ID:', apartment_number)
+                    print('Residence ID:', building)
+                    print('Residence Type:', description)
+                    if self.residences.add_apartment(building, apartment_number, description):
+                        flash("Apartamento agregado correctamente", "success")
+                        return redirect(url_for('dashboard', section='residences'))
+                    flash("Error al agregar el apartamento", "error")
+                    return redirect(url_for('dashboard', section='residences'))
+
+            except Exception as e:
+                print(f'An exception occurred: {e}')
+                return redirect(url_for('dashboard', section='residences'))
+            
+        @self.app.route('/admin/residences/add_house', methods=['POST'])
+        def add_house():
+            try:
+                if request.method == 'POST':
+                    house_number = request.form.get('house_number')
+                    description = request.form.get('description')
+
+                    print('house', house_number) 
+                    print('Residence Type:', description)
+                    if self.residences.add_house(house_number, description):
+                        flash("Apartamento agregado correctamente", "success")
+                        return redirect(url_for('dashboard', section='residences'))
+                    flash("Error al agregar el apartamento", "error")
+                    return redirect(url_for('dashboard', section='residences'))
+
+            except Exception as e:
+                print(f'An exception occurred: {e}')
+                return redirect(url_for('dashboard', section='residences'))
+            
+
+        @self.app.route('/admin/residences/delete_apartment', methods=['POST'])
+        def delete_apartment():
+            try:
+                if request.method == 'POST':
+                    apartment_id = request.form.get('apartment_id')
+                    print('Apartment ID:', apartment_id)
+                    if self.residences.delete_apartment(apartment_id):
+                        flash("Apartamento eliminado correctamente", "success")
+                        return redirect(url_for('dashboard', section='residences'))
+                    flash("Error al eliminar el apartamento", "error")
+                    return redirect(url_for('dashboard', section='residences'))
+
+            except Exception as e:
+                print(f'An exception occurred: {e}')
+                return redirect(url_for('dashboard', section='residences'))
+            
+        @self.app.route('/admin/residences/delete_house', methods=['POST'])
+        def delete_house():
+            try:
+                if request.method == 'POST':
+                    house_id = request.form.get('house_id')
+                    print('House ID:', house_id)
+                    if self.residences.delete_house(house_id):
+                        flash("Casa eliminada correctamente", "success")
+                        return redirect(url_for('dashboard', section='residences'))
+                    flash("No se puede eliminar una casa con un residente", "warning")
+                    return redirect(url_for('dashboard', section='residences'))
+            except Exception as e:
+                print(f'Error borrando la casa: {e}')
+                return redirect(url_for('dashboard', section='residences'))
+            
+        @self.app.route('/admin/residences/update_apartment', methods=['POST'])
+        def update_apartment():
+            try:
+                if request.method == 'POST':
+                    apartment_id = request.form.get('apartment_id')
+                    apartment_number = request.form.get('apartment_number')
+                    description = request.form.get('description')
+                    building = request.form.get('building')
+                    if self.residences.update_apartment(apartment_id, building ,apartment_number,description):
+                        flash("Apartamento actualizado correctamente", "success")
+                        return redirect(url_for('dashboard', section='residences'))
+                    flash("Error al actualizar el Apartamento", "error")
+                    return redirect(url_for('dashboard', section='residences'))
+
+            except Exception as e:
+                print(f'Error actualizando el apartamento: {e}')
+                return redirect(url_for('dashboard', section='residences'))
+            
+        @self.app.route('/admin/residences/update_house', methods=['POST'])
+        def update_house():
+            try:
+                if request.method == 'POST':
+                    house_id = request.form.get('house_id')
+                    house_number = request.form.get('house_number')
+                    description = request.form.get('description')
+
+                    print('House ID:', house_id)
+                    print('Description:', description)
+                    if self.residences.update_house(house_id, house_number,description):
+                        flash("Casa actualizada correctamente", "success")
+                        return redirect(url_for('dashboard', section='residences'))
+                    flash("Error al actualizar la casa", "error")
+                    return redirect(url_for('dashboard', section='residences'))
+
+            except Exception as e:
+                print(f'Error actualizando la casa: {e}')
+                return redirect(url_for('dashboard', section='residences'))
+            
+        
 
         @self.app.route('/admin/attend_claim', methods=['POST'])
         def attend_claim():
