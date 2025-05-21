@@ -216,7 +216,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{d.debt_amount}}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-md text-gray-500">{{months[d.month]}} {{d.period}}</td>
                             <td class="flex items-center justify-end mr-4 mt-2">
-                                <form action="/admin/payment-reminder" method="post">
+                                <form action="/admin/payments/payment-reminder" method="post">
                                   <input type="hidden" name="debt_id" value="{{d.id}}">
                     
                                   <button class="bgverde w-10 h-10 rounded-full flex items-center justify-center text-white" data-tooltip-target="tooltip-default" data-tooltip-placement="top" data-tooltip-trigger="hover" data-modal-toggle="modal-default" data-modal-target="modal-default">

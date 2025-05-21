@@ -13,7 +13,7 @@
 
 <div class="flex min-h-full flex-col justify-center px-4 py lg:px-8">
     <div class="sm:mx-auto sm:w-full sm:max-w-xl">
-        <form class="py-8 px-5 rounded-lg shadow-xl bg-white" enctype="multipart/form-data" action="/activate_account/{{user.id}}" method="POST" x-data="passwordValidation()">
+        <form class="py-8 px-5 rounded-lg shadow-xl bg-white" enctype="multipart/form-data" action="/activate_account/{{user.id}}" method="POST" x-on:input="validate()" x-data="passwordValidation()">
             <!-- Imagen de usuario -->
             <div class="flex items-center justify-center w-full">  
                 <label for="dropzone-file" class="flex flex-col items-center justify-center w-56  h-56 rounded-full cursor-pointer relative group">
@@ -47,6 +47,24 @@
                     x-model="password" x-on:input="validate()"
                     class="block w-full rounded-md bg-white px-3 py-1.5 text-lg normal text-gray-900 border border-gray-200 outline-gray-300 placeholder:text-gray-400 focus:outline-green-600 sm:text-sm/6">
             </div>
+            <!-- Confirmar contraseña -->
+<!-- Confirmar contraseña -->
+<div class="mb-4">
+    <label for="confirm-password" class="block text-lg medium text-black">Confirmar Contraseña</label>
+    <input type="password" id="confirm-password" name="confirm_password" required
+        x-model="confirmPassword"
+        :class="passwordsMatch || confirmPassword.length === 0 
+                ? 'border-gray-200' 
+                : 'border-red-500'"
+        class="block w-full rounded-md bg-white px-3 py-1.5 text-lg normal text-gray-900 border outline-gray-300 placeholder:text-gray-400 focus:outline-green-600 sm:text-sm/6">
+    
+    <!-- Mensaje de error -->
+    <p x-show="!passwordsMatch && confirmPassword.length > 0" class="text-red-600 text-sm mt-1">
+        Las contraseñas no coinciden
+    </p>
+</div>
+
+
 
             <!-- Lista de requisitos -->
             <h2 class="mb-2 text-lg font-semibold text-gray-900">Requisitos de la contraseña:</h2>
@@ -80,7 +98,7 @@
             <!-- Botón de enviar -->
             <button type="submit" id="btn" :disabled="!isValid"
                 class="w-full rounded-md mt-4 px-3 py-1.5 text-white font-semibold shadow-xs 
-                       bgverde transition-colors   disabled:cursor-not-allowed">
+                       bgverde transition-colors disabled:opacity-50  disabled:cursor-not-allowed">
                 Guardar contraseña
             </button>
         </form>
@@ -90,6 +108,7 @@
 <div id="loading-container">
     <div class="spinner"></div>
 </div>
+
 
 <script src="{{url_for('static', filename='js/activate_acc.js')}}"></script>
 </body>

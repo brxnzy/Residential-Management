@@ -38,6 +38,16 @@
       </button>
     </li>
 
+    <li role="presentation">
+      <button id="claims-tab" data-tabs-target="#claims" type="button" role="tab" aria-controls="claims" aria-selected="false" class="inline-flex items-center px-4 py-3 rounded-lg w-full hover:text-white hover:bg-green-700">
+<svg xmlns="http://www.w3.org/2000/svg"   fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
+</svg>
+
+       Reclamos
+      </button>
+    </li>
+
   </ul>
   
   <!-- Tab Content -->
@@ -57,7 +67,7 @@
                   <img id="user-photo" src="{{url_for('static', filename='uploads/' + user.photo)}}" alt="User Photo"
                     class="w-full h-full  rounded-full object-cover transition-opacity duration-300 group-hover:opacity-30" />
                 {% else %}
-                  <img id="user-photo" src="{{url_for('static', filename='uploads  /default.png')}}" alt="User Photo"
+                  <img id="user-photo" src="{{url_for('static', filename='uploads/default.png')}}" alt="User Photo"
                     class="w-full   h-full rounded-full object-cover transition-opacity duration-300 group-hover:opacity-30" />
                 {% endif %}
   
@@ -223,12 +233,21 @@
 
     <div class="hidden" id="dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
       <h3 class="text-2xl text-gray-800">Precio de los Pagos</h3>
+      <div class="hidden">
+        <form action="/admin/update_debt_amount" class="hidden" method="POST">
+          <input id="amount" type="number" name="debt_amount" required value="{{debt_amount.amount}}" 
+          class="mt-1 focus:outline-none focus:ring-green-500 focus:border-green-500 block w-full max-w-md  text-lg text-gray-600 border-gray-300 rounded-md ">
+          <!-- <button type="submit" class="bgverde text-white mt-4 px-4 py-2 rounded-md w-max hover:opacity-90 transition">Actualizarr</button> -->
+          <button type="submit">Mandar</button>
+          <p class="text-md text-gray-600 mt-2">Atencion! al cambiar esto las deudas nuevas que se generaran tendran este monto.</p>
+          
+        </form>
+      </div>
       <form action="/admin/update_debt_amount" method="POST">
-
         <input id="amount" type="number" name="debt_amount" required value="{{debt_amount.amount}}" 
         class="mt-1 focus:outline-none focus:ring-green-500 focus:border-green-500 block w-full max-w-md  text-lg text-gray-600 border-gray-300 rounded-md ">
-
-        <button type="submit" class="bgverde text-white mt-4 px-4 py-2 rounded-md w-max hover:opacity-90 transition">Actualizar</button>
+        <!-- <button type="submit" class="bgverde text-white mt-4 px-4 py-2 rounded-md w-max hover:opacity-90 transition">Actualizarr</button> -->
+        <button type="submit" class="py-2.5 px-5 bgverde rounded-md text-white mt-3">Mandar</button>
         <p class="text-md text-gray-600 mt-2">Atencion! al cambiar esto las deudas nuevas que se generaran tendran este monto.</p>
         
       </form>
@@ -290,9 +309,136 @@
 
     
     
+    <div class="hidden" id="claims" role="tabpanel" aria-labelledby="claims-tab">
+      <div class="flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <h1 class="text-2xl text-gray-800">Posibles Motivos de Reclamos</h1>
+            <button
+  data-modal-target="add-category-modal" data-modal-toggle="add-category-modal"
+    class="px-2 py-2 bgverde text-white rounded-full"
+
+  >
+    <img src="{{ url_for('static', filename='icons/plus.svg')}}" class="h-7 w-7" />
+  </button>
+        </div>
+        <table>
+
+          <tbody>
+            {% for c in categories %}
+            <tr>
+              <td class="border px-4 py-2">{{ c.name }}</td>
+              <td class="border px-4 py-2">
+                <form action="/admin/delete_claim_category" method="POST">
+                  <input type="hidden" name="category_id" value="{{ c.id }}">
+                  <button type="submit" class="text-red-500 hover:text-red-700">Eliminar</button>
+                </form>
+                <button type="submit" data-modal-target="edit-category-modal" data-modal-toggle="edit-category-modal" data-categoryId="{{c.id}}" data-categoryName="{{c.name}}" class="text-blue-500 hover:text-blue-700">Editar</button>
+
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <script>
+
+        document.querySelectorAll('[data-modal-target="edit-category-modal"]').forEach(button => {
+          button.addEventListener('click', () => {
+            const categoryId = button.getAttribute('data-categoryId');
+            const categoryName = button.getAttribute('data-categoryName');
+            
+            document.getElementById('edit-category-id').value = categoryId;
+            document.getElementById('edit-motivo').value = categoryName;
+          });
+        });
+      </script>
+
+      
     
+<div id="edit-category-modal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full">
+  <div class="relative w-full max-w-md h-full md:h-auto">
+    <div class="relative bg-white rounded-lg shadow">
+      <!-- Encabezado -->
+      <div class="flex items-start justify-between p-4 border-b rounded-t">
+        <h3 class="text-xl font-semibold text-gray-900">
+          Editar motivo
+        </h3>
+        <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" data-modal-hide="edit-category-modal">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+        </button>
+      </div>
+
+      <!-- Cuerpo del modal -->
+      <div class="p-6 space-y-4">
+        <form action="/admin/edit_claim_category" method="post">
+          <!-- ID oculto -->
+          <input type="hidden" id="edit-category-id" name="id">
+          
+          <!-- Nombre del motivo -->
+          <label for="edit-motivo" class="block mb-2 text-sm font-medium text-gray-900">Nombre del motivo</label>
+          <input type="text" id="edit-motivo" name="new_category" class="bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 text-sm rounded-lg block w-full p-2.5" placeholder="Escribe el motivo..." required>
+      </div>
+
+      <!-- Footer del modal -->
+      <div class="flex items-center justify-end p-6 space-x-2 border-t border-gray-200 rounded-b">
+        <button type="submit" class="text-white bgverde font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+          Guardar cambios
+        </button>
+        <button data-modal-hide="edit-category-modal" type="button" class="text-gray-500 bg-white hover:bg-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 border border-gray-200">
+          Cancelar
+        </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Modal -->
+<div id="add-category-modal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full">
+  <div class="relative w-full max-w-md h-full md:h-auto">
+    <!-- Contenido del modal -->
+    <div class="relative bg-white rounded-lg shadow ">
+      <!-- Encabezado -->
+      <div class="flex items-start justify-between p-4 border-b rounded-t ">
+        <h3 class="text-xl font-semibold text-gray-900 ">
+          Nuevo motivo
+        </h3>
+        <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" data-modal-hide="add-category-modal">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+        </button>
+      </div>
+
+      <!-- Cuerpo del modal -->
+      <div class="p-6 space-y-4">
+        <form action="/admin/add_claim_category" method="post">
+          <label for="motivo" class="block mb-2 text-sm font-medium text-gray-900 ">Nombre del motivo</label>
+          <input type="text" id="motivo" name="motivo" class="bg-gray-50 border border-gray-300 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 text-sm rounded-lg block w-full p-2.5 " placeholder="Escribe el motivo..." required>
+        </div>
+        
+        <!-- Footer del modal -->
+        <div class="flex items-center justify-end p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+          <button  type="submit" class="text-white bgverde font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+            Guardar
+          </button>
+        </form>
+        <button data-modal-hide="add-category-modal" type="button" class="text-gray-500 bg-white hover:bg-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 border border-gray-200">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
 
   </div>
+
+
 </div>
 
 

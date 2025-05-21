@@ -4,7 +4,6 @@ from email_validator import validate_email, EmailNotValidError
 import os
 from dotenv import load_dotenv
 
-
 class EmailSender:
     def __init__(self):
         path_env = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
@@ -68,7 +67,7 @@ class EmailSender:
 
     def send_payment_evidence(self, destinatario, mensaje, ruta_archivo):
             """Envía un correo con un archivo adjunto como evidencia de pago."""
-            asunto = "Evidencia de Pago - Habitat Max"
+            asunto = "Evidencia de Pago - Pinares del Norte"
             print("Ruta del archivo:", ruta_archivo)
             print('DESTINATARIO:', destinatario)
             contenido_html = f"""

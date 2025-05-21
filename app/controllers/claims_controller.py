@@ -397,3 +397,59 @@ class Claims:
         except Exception as e:
             print("An exception occurred:", e)
             return [0, 0, 0, 0, 0]
+
+
+    def get_claims_category(self):
+        try:
+            cursor = self.db.cursor(dictionary=True)
+            cursor.execute("""
+               select * from claims_category
+            """)
+            categories = cursor.fetchall()
+            cursor.close()
+
+            return categories
+
+        except Exception as e:
+            print("error obteniendo las categorias de los reclamos:", e)
+            return False
+        
+    def add_claim_category(self, category):
+        try:
+            cursor = self.db.cursor(dictionary=True)
+            cursor.execute("""
+                INSERT INTO claims_category (name) VALUES (%s)
+            """, (category,))
+            self.db.commit()
+            cursor.close()
+            return True
+        except Exception as e:
+            print("error al agregar la categoria:", e)
+            return False
+        
+    def delete_claim_category(self, category_id):
+        try:
+            cursor = self.db.cursor(dictionary=True)
+            cursor.execute("""
+                DELETE FROM claims_category WHERE id = %s
+            """, (category_id,))
+            self.db.commit()
+            cursor.close()
+            return True
+        except Exception as e:
+            print("error al eliminar la categoria:", e)
+            return False
+        
+
+    def update_claim_category(self,category_id, new_category):
+        try:
+            cursor = self.db.cursor(dictionary=True)
+            cursor.execute("""
+                UPDATE claims_category SET name = %s WHERE id = %s
+            """, (new_category,category_id,))
+            self.db.commit()
+            cursor.close()
+            return True
+        except Exception as e:
+            print("error al actualizar la categoria:", e)
+            return False

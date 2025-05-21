@@ -197,7 +197,7 @@ class="hidden z-50 fixed inset-0 w-full h-full bg-black/20"
       <h2 class="text-lg font-bold" data-balance="{{balance}}" id="balance">Balance: <span class="verde">{{balance}}</span></h2>
         <div>
           <label for="amount ">Monto:</label>
-          <input type="number" autocomplete="off" placeholder="Ponga el monto a sacar..." class="focus:outline-none focus:ring-green-500 focus:border-green-500 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-full p-2.5 mt-1 mb-4" name="amount" id="amount">
+          <input type="number" required autocomplete="off" placeholder="Ponga el monto a sacar..." class="focus:outline-none focus:ring-green-500 focus:border-green-500 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-full p-2.5 mt-1 mb-4" name="amount" id="amount">
           <p id="amount-error" class="text-red-600 text-sm hidden mb-3">El monto excede el balance disponible.</p>
           
           <label
@@ -220,7 +220,7 @@ class="hidden z-50 fixed inset-0 w-full h-full bg-black/20"
           <button
           id="submit-button"
             type="submit"
-            class="text-white disabled:cursor-not-allowed bgverde font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+            class="text-white disabled:opacity-50 disabled:cursor-not-allowed bgverde font-medium rounded-lg text-sm px-5 py-2.5 text-center"
           >
             Retirar
           </button>

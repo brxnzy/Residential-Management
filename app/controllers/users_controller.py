@@ -501,7 +501,7 @@ class Users:
 
             if user:
                 current_password = user.get('password')
-                if not current_password:  # Si el usuario no tiene contraseña, procede con la activación
+                if not current_password: 
                     hashed_password = self.auth.hash_password(password)
                     photo_path = None
                     if file:
@@ -515,7 +515,7 @@ class Users:
 
                     self.db.commit() 
                     cursor.close()
-
+ 
                     self.db.close()
 
                     self.db = connection_db() 

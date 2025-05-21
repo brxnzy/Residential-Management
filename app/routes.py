@@ -259,6 +259,7 @@ class App:
             historialEgresos = self.transactions.get_all_expenses()
             debtors = self.debts.get_debtors()
             debt_amount = self.debts.get_debt_amount()
+            categories = self.claims.get_claims_category()
             
             
             # Mostrar mensaje flash si hay un pago exitoso y el archivo está listo para ser descargado
@@ -306,7 +307,8 @@ class App:
                 payment_methods=payment_methods,
                 egresos=historialEgresos,
                 debtors=debtors,
-                debt_amount=debt_amount
+                debt_amount=debt_amount,
+                categories=categories
 
             )
 
@@ -892,6 +894,56 @@ class App:
                 print(f"[DEBUG] Error en update_password: {e}")
                 return redirect(url_for('dashboard', section='settings'))
                 
+        
+        @self.app.route('/admin/add_claim_category', methods=['POST'])
+        def add_claim_category():
+            try:
+                if request.method == 'POST':
+                    category = request.form.get('motivo')
+                    print('Category:', category)
+                    if self.claims.add_claim_category(category):
+                        flash("Categoría de reclamo agregada correctamente", "success")
+                        return redirect(url_for('dashboard', section='settings'))
+                    flash("Error al agregar la categoría de reclamo", "error")
+                    return redirect(url_for('dashboard', section='settings'))
+
+            except Exception as e:
+                print(f'error agreando una categoria {e}')
+                return redirect(url_for('dashboard', section='settings'))
+            
+        @self.app.route('/admin/delete_claim_category', methods=['POST'])
+        def delete_claim_category():
+            try:
+                if request.method == 'POST':
+                    category_id = request.form.get('category_id')
+                    print('Category ID:', category_id)
+                    if self.claims.delete_claim_category(category_id):
+                        flash("Categoría de reclamo eliminada correctamente", "success")
+                        return redirect(url_for('dashboard', section='settings'))
+                    flash("Error al eliminar la categoría de reclamo", "error")
+                    return redirect(url_for('dashboard', section='settings'))
+
+            except Exception as e:
+                print(f'error eliminando una categoria {e}')
+                return redirect(url_for('dashboard', section='settings'))
+
+        @self.app.route('/admin/edit_claim_category', methods=['POST'])
+        def update_claim_category():
+            try:
+              if request.method == 'POST':
+                    category_id = request.form.get('id')
+                    new_category = request.form.get('new_category')
+                    print('Category ID:', category_id)
+                    print('New Category:', new_category)
+                    if self.claims.update_claim_category(category_id, new_category):
+                        flash("Categoría de reclamo actualizada correctamente", "success")
+                        return redirect(url_for('dashboard', section='settings'))
+                    flash("Error al actualizar la categoría de reclamo", "error")
+                    return redirect(url_for('dashboard', section='settings'))
+              
+            except Exception as e:
+                print(f'error actualizando una categoria {e}')
+                return redirect(url_for('dashboard', section='settings'))
             
 
 
@@ -902,13 +954,14 @@ class App:
         @self.nocache  
         def home():
             id = session.get('user_id')
+            categories = self.claims.get_claims_category()
             user = self.user.get_user_by_id(id)
             claims = self.claims.get_my_claims(id)
             notifications = self.notification.user_notifications(id)
             debts = self.debts.get_users_debts(id)
             transfer_requests = self.payments.get_my_transfer_requests(id)
             payments = self.payments.get_user_payments(id)
-            return render_template('resident/home.html', user=user, claims=claims, notifications=notifications, debts=debts, transfer_requests=transfer_requests,payments=payments)
+            return render_template('resident/home.html', user=user, claims=claims, notifications=notifications, debts=debts, transfer_requests=transfer_requests,payments=payments, categories=categories)
 
 
         @self.app.route('/resident/update_photo/<int:user_id>', methods=['POST'])
@@ -1012,6 +1065,10 @@ class App:
                     
                     
                     category = request.form.get('category')
+                    category = request.form.get('category')
+                    if category == 'Otro':
+                        category = request.form.get('custom_category')
+
                     description = request.form.get('description')
                     evidences = request.files.getlist('evidences')
                     

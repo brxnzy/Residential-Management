@@ -71,14 +71,23 @@
               <form id="uploadForm" action="/resident/send_claim" method="post" enctype="multipart/form-data">
                   <div class="mb-4">
                       <label class="block text-sm font-medium text-gray-700">Problemática</label>
-                      <select required name="category" class="border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500" id="complaint-type">
-                          <option value="Mantenimiento">Mantenimiento</option>
-                          <option value="Seguridad">Seguridad</option>
-                          <option value="Ruido">Ruido</option>
-                          <option value="Limpieza">Limpieza</option>
+                      <select required name="category" class="border border-gray-300 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-green-500 focus:border-green-500" id="complaint-type" onchange="checkCategory(this.value)">
+                          <option value="" disabled selected>Selecciona una opción</option>
+
+                        {% for c in categories %}
+                        <option value="{{ c.name }}">{{ c.name }}</option>
+                        {% endfor %}
+                        o
+
                           <option value="Otro">Otro</option>
                       </select>
+
                   </div>
+          <div id="custom-category-div" style="display:none" class="mb-4">
+                             <label class="block text-sm font-medium text-gray-700">Descripción</label>
+
+        <input type="text" name="custom_category" class="block w-full text-sm text-gray-900 p-2 border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500" id="custom-category" placeholder="Escribe la categoría" />
+    </div>
                   <div class="mb-4">
                       <label class="block text-sm font-medium text-gray-700">Descripción</label>
                       <textarea required class="block w-full text-sm text-gray-900 p-2 border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 resize-none" id="description" name="description" rows="4"></textarea>
@@ -99,7 +108,17 @@
               </form>
           </div>
       </div>
-
+<script>
+function checkCategory(value) {
+    const customDiv = document.getElementById('custom-category-div');
+    if (value === 'Otro') {
+        customDiv.style.display = 'block';
+    } else {
+        customDiv.style.display = 'none';
+        document.getElementById('custom-category').value = '';
+    }
+}
+</script>
       <!-- Complaints List -->
       {% if claims %}
           {% for c in claims %}
@@ -263,7 +282,7 @@
                   <td class="py-3 px-4 text-sm">
                     {% if tr.status == 'pending' %}
                       <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">Pendiente</span>
-                    {% elif tr.status == 'rechazado' %}
+                    {% elif tr.status == 'rejected' %}
                       <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">Rechazado</span>
                     {% elif tr.status == 'approved' %}
                       <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">Aprobado</span>

@@ -46,7 +46,7 @@ class Payments:
             
     def cash_payment(self, user_id, amount, notes, debts: list, admin_id):
         try:
-            cursor = self.db.cursor()
+            cursor = self.db.cursor(dictionary=True)
             print("Registrando pago en efectivo")
             print(f"Parámetros recibidos - user_id: {user_id}, amount: {amount}, notes: {notes}, debts: {debts}")
 
@@ -87,7 +87,17 @@ class Payments:
 
             file_path = None  # Inicializar variable para la ruta del reporte
             if payment_id:
-                file_path = self.report.generate_payment_report(payment_id, admin_id)  # Generar el reporte y obtener la ruta
+                file_path = self.report.generate_payment_report(payment_id, admin_id)
+                
+                if file_path:
+                    cursor.execute('SELECT email FROM users WHERE id = %s', (user_id,))
+                    user = cursor.fetchone()
+                    if user:
+                        email = user["email"]
+                        print(f"Enviando correo a {email} con archivo {file_path}")
+                        self.email.send_payment_evidence(email, "¡Tu transferencia ha sido aceptada!", file_path)
+
+                      # Generar el reporte y obtener la ruta
 
             if debt_ids:
                 print(f"Eliminando deudas con IDs: {debt_ids}")
